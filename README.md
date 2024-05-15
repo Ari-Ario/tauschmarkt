@@ -250,3 +250,7 @@ sudo chmod -R 777 storage
 -   [Example](https://github.com/garethredfern/laravel-vue/tree/main/src)
 -   [vue.js Documentation](https://vuejs.org/guide/introduction)
 -   [Pinia Documentation](https://pinia.vuejs.org/)
+
+
+showing all ports in docker
+sudo netstat -plnt
