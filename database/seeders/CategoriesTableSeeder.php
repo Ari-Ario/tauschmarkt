@@ -12,14 +12,25 @@ class CategoriesTableSeeder extends Seeder
      */
     public function run(): void
     {
-        $categories = [
+        \App\Models\Category::factory()->count(10)->create();
+/*         $categories = [
             ['name' => 'Electronics', 'description' => ''],
             ['name' => 'Clothing', 'description' => ''],
+            ['name' => 'Electronics', 'description' => ''],
+            ['name' => 'Clothing', 'description' => ''],
+            ['name' => 'Books', 'description' => ''],
+            ['name' => 'Home & Kitchen', 'description' => ''],
+            ['name' => 'Health & Beauty', 'description' => ''],
+            ['name' => 'Toys & Games', 'description' => ''],
+            ['name' => 'Sports & Outdoors', 'description' => ''],
+            ['name' => 'Automotive', 'description' => ''],
+            ['name' => 'Music', 'description' => ''],
+            ['name' => 'Food & Grocery', 'description' => ''],
             // Add more categories here
         ];
 
         foreach ($categories as $category) {
-            Category::create($category);
-        }
+            \App\Models\Category::create($category);
+        } */
     }
 }
