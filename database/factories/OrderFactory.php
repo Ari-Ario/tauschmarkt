@@ -17,6 +17,8 @@ class OrderFactory extends Factory
      */
 
      protected $model = \App\Models\Order::class;
+
+     
     public function definition(): array
     {
         return [
