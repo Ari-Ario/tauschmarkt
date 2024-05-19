@@ -31,6 +31,13 @@ export const routes = [
     },
 
     {
+        path: "/map",
+        name:"map",
+        component: () => import("./pages/Map.vue"),
+        meta: { showLogo: false, allBlogs: true, getStarted: true, home: false},
+    },
+
+    {
         path: "/dashboard",
         name:"dashboard",
         component: () => import("./pages/Dashboard.vue"),
@@ -38,6 +45,8 @@ export const routes = [
         showLogo: true, allBlogs:true , getStarted: false, home: true},
     
     },
+
+
 /*     {
         path:"/edit-profile",
         name:"editProfile", 

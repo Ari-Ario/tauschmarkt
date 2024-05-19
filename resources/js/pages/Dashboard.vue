@@ -1,6 +1,7 @@
 <script setup>
     import { useAuthStore } from '../stores/AuthStore';
     import LogoutButton from '@/components/LogoutButton.vue';
+    // import MapComponent from '@/components/MapComponent.vue';
 
     const store = useAuthStore();
 
@@ -13,4 +14,5 @@
     </header>
     <span>Dashboard</span>
     <h1>Hallo {{ store.authUser.lastname }}</h1>
+
 </template>
