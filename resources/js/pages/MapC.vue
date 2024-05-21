@@ -1,10 +1,14 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { GoogleMap, Marker, Circle } from 'vue3-google-map';
+import VueGoogleAutocomplete from 'vue-google-autocomplete';
 
-const center = ref({ lat: 34.0522, lng: -118.2437 });
-const radius = ref(20); // Default radius in km
+const userLocation = ref(null);
+
+const center = ref({ lat: 46.57518, lng: 7.261349 });
+const radius = ref(10); // Default radius in km
 const city = ref('');
+const mapRef = ref(null); // Reference to the Google Map instance
 
 const circleOptions = ref({
   center: center.value,
@@ -23,6 +27,7 @@ watch([center, radius], () => {
     center: center.value,
     radius: radius.value * 1000,
   };
+  fitMapToBounds();
 });
 
 const updateCircle = () => {
@@ -30,6 +35,7 @@ const updateCircle = () => {
     ...circleOptions.value,
     radius: radius.value * 1000,
   };
+  fitMapToBounds();
 };
 
 const useCurrentLocation = () => {
@@ -39,6 +45,7 @@ const useCurrentLocation = () => {
         lat: position.coords.latitude,
         lng: position.coords.longitude,
       };
+      console.log(center.value);
       updateCircle();
     });
   } else {
@@ -46,31 +53,54 @@ const useCurrentLocation = () => {
   }
 };
 
-const searchCity = async () => {
-  const response = await fetch(
-    `https://maps.googleapis.com/maps/api/geocode/json?address=${city.value}&key=YOUR_GOOGLE_MAPS_API_KEY`
-  );
-  const data = await response.json();
-  if (data.results.length > 0) {
-    center.value = data.results[0].geometry.location;
-    updateCircle();
-  } else {
-    alert('City not found');
-  }
+const searchCity = (place) => {
+  center.value = {
+    lat: place.geometry.location.lat(),
+    lng: place.geometry.location.lng(),
+  };
+  updateCircle();
 };
 
 const showResults = () => {
   alert('Show results within ' + radius.value + ' km');
 };
 
-onMounted(() => {
+const fitMapToBounds = () => {
+  if (mapRef.value) {
+    const bounds = new google.maps.LatLngBounds();
+    bounds.extend(new google.maps.LatLng(center.value.lat, center.value.lng));
+    const northEast = google.maps.geometry.spherical.computeOffset(
+      new google.maps.LatLng(center.value.lat, center.value.lng),
+      radius.value * 1000, // Convert km to meters
+      45
+    );
+    const southWest = google.maps.geometry.spherical.computeOffset(
+      new google.maps.LatLng(center.value.lat, center.value.lng),
+      radius.value * 1000,
+      225
+    );
+    bounds.extend(northEast);
+    bounds.extend(southWest);
+    mapRef.value.fitBounds(bounds);
+  }
+};
+
+const handleMapClick = (event) => {
+  center.value = {
+    lat: event.latLng.lat(),
+    lng: event.latLng.lng(),
+  };
+  updateCircle();
+};
+
+const myLocation = onMounted(() => {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition((position) => {
-      center.value = {
+      userLocation.value = {
         lat: position.coords.latitude,
         lng: position.coords.longitude,
       };
-      updateCircle();
+      center.value = userLocation.value;
     });
   } else {
     console.error('Geolocation is not supported by this browser.');
@@ -81,25 +111,32 @@ onMounted(() => {
 <template>
   <div class="map-container">
     <GoogleMap
-      api-key="YOUR_GOOGLE_MAPS_API_KEY"
+      api-key="AIzaSyDVsZaS67NSKA-13blSRq7X0vvfhdlKX2Y"
       :center="center"
       :zoom="10"
       style="width: 100%; height: 100%"
+      @load="mapRef.value = $event"
+      @click="handleMapClick"
     >
       <Circle :options="circleOptions"/>
       <Marker :options="{ position: center }" />
     </GoogleMap>
     
-    <form @submit.prevent="searchCity" class="location-form">
+    <form @submit.prevent="myLocation" class="location-form">
       <div class="controls">
-        <input type="text" v-model="city" placeholder="Search for a city" />
-        <button type="button" @click="useCurrentLocation">Use my current location</button>
-        <h4>Select Distance</h4>
+        <h4>Distanz wählen</h4>
         <div class="slider-container">
-          <input type="range" min="1" max="40" v-model="radius" @input="updateCircle" />
+          <input type="range" min="1" max="20" v-model="radius" @input="updateCircle" />
           <span>{{ radius }} km</span>
         </div>
-        <button type="button" @click="showResults">Show results</button>
+        <VueGoogleAutocomplete
+          id="autocomplete"
+          classname="form-control"
+          placeholder="Search for a city"
+          @placechanged="searchCity"
+        />
+        <button @click="useCurrentLocation">Use my current location</button>
+        <button @click="showResults">Show results</button>
       </div>
     </form>
   </div>
@@ -114,7 +151,11 @@ html, body, #app, .map-container {
 }
 
 .map-container {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .controls {
@@ -138,7 +179,7 @@ input[type="text"] {
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 3px;
-  width: 100%;
+  width: 96.5%;
 }
 
 button {
@@ -156,12 +197,15 @@ button:hover {
 
 .controls h4 {
   text-align: center;
+  padding-bottom: 0px;
+  margin-bottom: 0px;
 }
 
 .slider-container {
   display: flex;
   align-items: center;
   gap: 10px;
+  margin-bottom: 10px;
 }
 
 .slider-container input[type="range"] {
