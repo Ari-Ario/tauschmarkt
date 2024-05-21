@@ -18,13 +18,6 @@ onMounted(() => {
     loadenterprises();
 });
 
-// const truncate = (text, maxLength) => {
-//     if (text.length > maxLength) {
-//         return text.substring(0, maxLength) + "...";
-//     } else {
-//         return text;
-//     }
-// };
 
 </script>
 
@@ -39,12 +32,12 @@ onMounted(() => {
                 />
             </div>
             <div class="details">
-                <div class="title" v-if="enterprise">
+                <!-- <div class="title" v-if="enterprise">
                     {{ enterprise.id }}
                 </div>
                 <p v-if="enterprise" class="description">
-                    <!-- {{ truncate(enterprise.description, 200) }} -->
-                </p>
+                    {{ truncate(enterprise.description, 200) }}
+                </p> -->
                 <div class="user-details">
                     <div class="user-photo">
                         <img
@@ -88,13 +81,14 @@ onMounted(() => {
 }
 
 .Photo {
-    margin-left: 10px;
     width: 80%;
     height: 100%;
+    left: 0;
+    padding-top: 0;
 }
 
 .details {
-    height: 250px;
+    height: fit-content;
     display: flex;
     flex-direction: column;
     color: white;
@@ -167,12 +161,12 @@ p {
         display: flex;
         flex-direction: column;
         justify-content: space-around;
-        padding-left: 20px;
-        margin: 10px;
     }
 
     .Photo {
-        display: none; /* Hide the Photo class */
+        display: flex; /* Hide the Photo class */
+        width: 100%;
+        left: 0;
     }
 
     .details {
