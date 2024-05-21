@@ -1,3 +1,9 @@
+
+<script setup>
+import EnterpriseCard from "../components/EnterpriseCard.vue";
+// import Heroheader from '../components/Heroheader.vue';
+</script>
+
 <template>
     <div>
         <h1>Startseite</h1>
@@ -7,14 +13,21 @@
         <br>
         <router-link to="/registerSeller">Link zur RegisterSeller Seite</router-link>
         <br>
-        <g-map
-            :disableUI="false"
-            :zoom="12"
-            mapType="roadmap"
-            :center="{ lat: 38.8977859, lng: -77.0057621 }">
-        </g-map>
 
         <router-link to="/map">Map</router-link>
+    </div>
 
+    <div class="EnterpriseCardContainer">
+        <EnterpriseCard />
     </div>
 </template>
+
+<style scoped>
+
+    .EnterpriseCardContainer{
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    }
+
+</style>

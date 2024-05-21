@@ -9,9 +9,11 @@ use App\Http\Controllers\TokenController;
 
 use App\Http\Controllers\UserController;
 
+use App\Http\Controllers\EnterpriseController;
+
 Route::post('/sanctum/token', TokenController::class);
 
-
+Route::get('/enterprises/latest', [EnterpriseController::class, 'latestEnterprises']);
 /**
  * AUTH ROUTES
  */
