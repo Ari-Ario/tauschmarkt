@@ -13,6 +13,6 @@
         <LogoutButton/>
     </header>
     <span>Dashboard</span>
-    <h1>Hallo {{ store.authUser.lastname }}</h1>
+    <h1>Hallo {{ store.authUser.firstname }} {{ store.authUser.lastname }} {{ store.authUser.is_seller }}</h1>
 
 </template>

@@ -15,11 +15,11 @@ class UserResource extends JsonResource
     public function toArray(Request $request): array
     {
         $dateFormat = 'd. M Y';
-
             return [
                 'id' => $this->id,
                 'firstname' => $this->firstname,
                 'lastname' => $this->lastname,
+                'is_seller' => $this->is_seller,
                 'profile_picture' => $this->profile_picture
                     ? asset($this->profile_picture)
                     : asset('storage/profile_images/default.png'),
@@ -27,13 +27,17 @@ class UserResource extends JsonResource
                 'enterprise_picture' => $this->enterprise_picture
                     ? asset('storage/enterprise_images/' . $this->enterprise_images)
                     : asset('storage/enterprise_images/default.png'),
+                'street' => $this->street,
+                'house_number' => $this->house_number,
                 'city' => $this->city,
                 'zip_code' => $this->zip_code,
+                'latitude' => $this->latitude,
+                'longitude' => $this->longitude,
     
                 'created_at' => optional($this->created_at)->format($dateFormat),
                 'updated_at' => optional($this->updated_at)->format($dateFormat),
             ];
 
-
+        
     }
 }

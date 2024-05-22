@@ -1,7 +1,11 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
+import { useAuthStore } from '../stores/AuthStore';
+
 import { GoogleMap, Marker, Circle } from 'vue3-google-map';
 import VueGoogleAutocomplete from 'vue-google-autocomplete';
+
+const store = useAuthStore();
 
 const userLocation = ref(null);
 
@@ -111,8 +115,9 @@ const myLocation = onMounted(() => {
 
 <template>
   <div class="back">
-    <router-link to="/"><--Profil</router-link>
+    <router-link to="/dashboard"><--Profil</router-link>
   </div>
+
   <div class="map-container">
     <GoogleMap
       api-key="AIzaSyDVsZaS67NSKA-13blSRq7X0vvfhdlKX2Y"
@@ -131,7 +136,7 @@ const myLocation = onMounted(() => {
 
       <div class="controls">
         
-        <h4>Distanz wählen</h4>
+        <h4>Auf Ihren Hof klicken</h4>
         <div class="slider-container">
           <input type="range" min="1" max="20" v-model="radius" @input="updateCircle" />
           <span>{{ radius }} km</span>
@@ -143,6 +148,8 @@ const myLocation = onMounted(() => {
     </form>
 
   </div>
+
+
 </template>
 
 <style scoped>
