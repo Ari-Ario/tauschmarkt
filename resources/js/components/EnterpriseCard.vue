@@ -3,12 +3,14 @@ import { ref, onMounted } from "vue";
 import axios from "axios";
 
 const enterprises = ref([]);
+let filteredEnterprises = [];
 
 const loadenterprises = async () => {
     try {
         const response = await axios.get("/api/enterprises/latest");
         enterprises.value = response.data;
-        console.log(response.data);
+        filteredEnterprises = enterprises.value.data.filter(enterprise => enterprise.is_seller === 1);
+        // console.log(filteredEnterprises);
     } catch (error) {
         console.error("Error loading enterprises:", error);
     }
@@ -23,7 +25,7 @@ onMounted(() => {
 
 <template>
     <div>
-        <div class="card" v-for="enterprise in enterprises.data" :key="enterprise.id">
+        <div class="card" v-for="enterprise in filteredEnterprises" :key="filteredEnterprises.id">
             <div class="Photo">
                 <img
                     class="Photo"

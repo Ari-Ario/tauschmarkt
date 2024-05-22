@@ -1,11 +1,12 @@
 
 <script setup>
 import EnterpriseCard from "../components/EnterpriseCard.vue";
-// import Heroheader from '../components/Heroheader.vue';
+import Header from '../components/header/Header.vue';
 </script>
 
 <template>
-    <div>
+    <Header></Header>
+    <div class="menu">
         <h1>Startseite</h1>
         <router-link to="/login">Link zur Login Seite</router-link>
         <br>
