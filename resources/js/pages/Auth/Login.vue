@@ -1,6 +1,8 @@
 <script setup>
 import { useAuthStore } from '@/stores/AuthStore';
 import AuthService from "@/services/AuthService";
+import Header from '../../components/header/Header.vue';
+
 import {ref} from 'vue';
 import {useRouter} from 'vue-router';
 // import BlogHeader from '../components/BlogHeader.vue';  
@@ -38,12 +40,14 @@ const login = async() => {
 </script>
 
 <template>
-    <BlogHeader/>
+    <Header/>
     <!-- Form for login -->
     <div class="form-container">
         <form @submit.prevent="login" class="login-form">
             <div>
-                <router-link to="/"><--</router-link>
+                <router-link to="/">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z"/></svg>
+                </router-link>
             </div>
 
             <!-- Email and password inputs -->
@@ -61,6 +65,7 @@ const login = async() => {
 display: flex;
 justify-content: center;
 align-items: center;
+margin-top: 60px;
 }
 
 

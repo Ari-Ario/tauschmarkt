@@ -2,15 +2,15 @@
 import { ref, onMounted } from "vue";
 import axios from "axios";
 
-const enterprises = ref([]);
-let filteredEnterprises = [];
+const filteredEnterprises = ref([]);
+// const enterprises = ref([]);
 
 const loadenterprises = async () => {
     try {
         const response = await axios.get("/api/enterprises/latest");
-        enterprises.value = response.data;
-        filteredEnterprises = enterprises.value.data.filter(enterprise => enterprise.is_seller === 1);
-        // console.log(filteredEnterprises);
+        // enterprises.value = response.data;
+        filteredEnterprises.value = response.data.data.filter(enterprise => enterprise.is_seller === 1);
+        console.log(filteredEnterprises);
     } catch (error) {
         console.error("Error loading enterprises:", error);
     }
@@ -25,7 +25,12 @@ onMounted(() => {
 
 <template>
     <div>
+        <div>
+            {{ enterprises }}
+        </div>
+
         <div class="card" v-for="enterprise in filteredEnterprises" :key="filteredEnterprises.id">
+
             <div class="Photo">
                 <img
                     class="Photo"
@@ -33,13 +38,8 @@ onMounted(() => {
                     alt=""
                 />
             </div>
+
             <div class="details">
-                <!-- <div class="title" v-if="enterprise">
-                    {{ enterprise.id }}
-                </div>
-                <p v-if="enterprise" class="description">
-                    {{ truncate(enterprise.description, 200) }}
-                </p> -->
                 <div class="user-details">
                     <div class="user-photo">
                         <img
@@ -48,6 +48,7 @@ onMounted(() => {
                             :src="enterprise.profile_picture"
                         />
                     </div>
+
                     <p v-if="enterprise" class="user-name description">
                         {{ enterprise.firstname }}
                         {{ enterprise.lastname }} 
@@ -56,15 +57,8 @@ onMounted(() => {
                         {{ enterprise.updated_at }}
                     </p>
                 </div>
-               
-                <!-- <router-link class="details-link" :to="{ name: 'enterprisedetail', params: { id: enterprise.id } }">View Details</router-link>
-                <div class="buttons">
-                    <a class="button" href="">
-                        <router-link class="details-link" :to="{ name: 'editenterprise', params: { id: enterprise.id } }">Edit</router-link>
-                    </a>
-                    <a class="button" href=""> Delete</a>
-                </div> -->
             </div>
+
         </div>
     </div>
 </template>
@@ -114,22 +108,6 @@ onMounted(() => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.read-more {
-    text-decoration: none;
-}
-
-.title {
-    font-size: 24px;
-    font-weight: 400;
-    color: #000000;
-}
-
-.description {
-    font-size: 16px;
-    font-weight: 200;
-    color: #000000;
 }
 
 p {

@@ -115,7 +115,9 @@ const myLocation = onMounted(() => {
 
 <template>
   <div class="back">
-    <router-link to="/dashboard"><--Profil</router-link>
+    <router-link to="/dashboard">
+      <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z"/></svg>
+    </router-link>
   </div>
 
   <div class="map-container">
@@ -161,7 +163,7 @@ const myLocation = onMounted(() => {
   bottom: 0;
   z-index: 2;
   max-width: max-content;
-  background-color: #0088ff;
+  background-color: #ffffff7c;
 }
 html, body, #app, .map-container {
   margin: 0;

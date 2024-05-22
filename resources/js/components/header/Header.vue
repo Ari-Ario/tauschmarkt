@@ -14,14 +14,26 @@ const store = useAuthStore();
         <div id="header">
             <div class="left">
             <Logo></Logo>
-
+                Tauschmarkt
             </div>
             <div class="right">
                 <ul class="menu">
+
+                    <li v-if="!store?.authUser" id="login">
+
+                        <router-link :to="{ name: 'map' }" customv-slot="{ navigate }">
+                            <div class="link" @click="navigate" role="link">
+                                Karte
+                            </div>
+                        </router-link>
+                    </li>
+
                     <li v-if="!store?.authUser">
                         <router-link :to="{ name: 'home' }" customv-slot="{ navigate }">
                             <div class="link" @click="navigate" role="link">
-                                Startseite
+                                <p class="logo-name">
+                                    Startseite
+                                </p>
                             </div>
                         </router-link>
                     </li>
@@ -73,7 +85,7 @@ const store = useAuthStore();
 
             </div>
             <div class="menu-mobile" @click="toggleOverlay">
-                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46">
+                <svg xmlns="http://www.w3.org/2000/svg" height="33px" viewBox="0 -960 960 960" width="33px" fill="#298E46">
                     <path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z" />
                 </svg>
             </div>
@@ -89,14 +101,17 @@ const store = useAuthStore();
 </template>
 <style scoped>
 #header {
+    position: fixed;
+    top: 0;
+    left: 0;
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-items: center;
     height: 40px;
     width: 100vw;
-    /* background-image: linear-gradient(135DEG , rgb(222,7,241), rgb(5,5,5)); */
-    background-color: rgba(255, 255, 255, 0.371);
+    /* position: absolute; */
+    background-color: rgba(243, 243, 243, 0.842);
 
 }
 
@@ -104,7 +119,14 @@ const store = useAuthStore();
     margin-left: 10px;
     width: 50vw;
     height: auto;
+    color: #298E46;
+    font-size: large;
+    align-items: center;
 }
+/* .logo-name {
+    display:grid;
+    align-items: center;
+} */
 
 .right {
     width: 50vw;
@@ -127,11 +149,9 @@ const store = useAuthStore();
 }
 
 .link {
-    text-decoration: none; /* Remove underline */
+    text-decoration: none;
     cursor: pointer;
     color: #298E46;
-    font-family: Arial, sans-serif;
-
 }
 
 #logo {

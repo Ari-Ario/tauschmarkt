@@ -3,8 +3,8 @@ import { useAuthStore } from '@/stores/AuthStore';
 import AuthService from "@/services/AuthService";
 import {ref} from 'vue';
 import {useRouter} from 'vue-router';
-// import BlogHeader from '../components/BlogHeader.vue';  
-// import Navbar from '@/components/Navbar.vue';
+import Header from '../../components/header/Header.vue';
+
 // import { createStore } from 'vuex';
 
 import { Axios } from 'axios';
@@ -35,13 +35,15 @@ function registerUser(){
 </script>
 
 <template>
-    <Navbar><BlogHeader/></Navbar>
+    <Header />
     
     <!-- Form for registration -->
     <div class="form-container">
         <form @submit.prevent="registerUser" class="register-form">
             <div>
-            <router-link to="/"><--</router-link>
+            <router-link to="/">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z"/></svg>
+            </router-link>
             </div>
 
             <!-- Name, email, and password inputs -->
@@ -68,6 +70,7 @@ function registerUser(){
 display: flex;
 justify-content: center;
 align-items: center;
+margin-top: 60px;
 }
 
 
