@@ -10,7 +10,7 @@ const loadenterprises = async () => {
         const response = await axios.get("/api/enterprises/latest");
         // enterprises.value = response.data;
         filteredEnterprises.value = response.data.data.filter(enterprise => enterprise.is_seller === 1);
-        console.log(filteredEnterprises);
+        // console.log(filteredEnterprises.value);
     } catch (error) {
         console.error("Error loading enterprises:", error);
     }
@@ -25,11 +25,11 @@ onMounted(() => {
 
 <template>
     <div>
-        <div>
-            {{ enterprises }}
-        </div>
+        <!-- <div>
+            {{ filteredEnterprises }}
+        </div> -->
 
-        <div class="card" v-for="enterprise in filteredEnterprises" :key="filteredEnterprises.id">
+        <div class="card" v-for="enterprise in filteredEnterprises" :key="enterprise.id">
 
             <div class="Photo">
                 <img
@@ -49,11 +49,11 @@ onMounted(() => {
                         />
                     </div>
 
-                    <p v-if="enterprise" class="user-name description">
+                    <p class="user-name description">
                         {{ enterprise.firstname }}
                         {{ enterprise.lastname }} 
                     </p>
-                    <p v-if="enterprise" class="published-on description">
+                    <p  class="published-on description">
                         {{ enterprise.updated_at }}
                     </p>
                 </div>
@@ -87,7 +87,6 @@ onMounted(() => {
     height: fit-content;
     display: flex;
     flex-direction: column;
-    color: white;
     justify-content: space-between;
 }
 
