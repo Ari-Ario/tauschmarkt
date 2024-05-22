@@ -92,10 +92,29 @@ border: 1px solid #ccc;
 font-size: 16px;
 }
 
-
 .register-form button {
-background-color: #007BFF;
+background-color: #298E46;
 color: white;
 cursor: pointer;
+}
+
+@media only screen and (max-width: 600px) {
+    .register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    width: 300px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+
+    .register-form input, .register-form button {
+    padding: 8px 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+    }
 }
 </style>

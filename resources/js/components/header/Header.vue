@@ -1,11 +1,17 @@
 <script setup>
 import { useRoute } from 'vue-router';
+import { ref } from 'vue';
 import { useAuthStore } from "../../stores/AuthStore"
 import LogoutButton from '@/components/LogoutButton.vue';
 import Logo from './Logo.vue';
 
 const route = useRoute();
 const store = useAuthStore();
+const modalVisible = ref(false);
+
+const toggleModal = () => {
+    modalVisible.value = !modalVisible.value;
+};
 
 </script>
 <template>
@@ -14,7 +20,7 @@ const store = useAuthStore();
         <div id="header">
             <div class="left">
             <Logo></Logo>
-                Tauschmarkt
+                Tausch
             </div>
             <div class="right">
                 <ul class="menu">
@@ -69,7 +75,7 @@ const store = useAuthStore();
                         <router-link :to="{ name: 'registerSeller' }" customv-slot="{ navigate }">
                             <div class="link" @click="navigate" role="link">
                                 <div class="link" id="getStartedButton">
-                                    Betrieb Registerieren
+                                    Betrieb Register
                                 </div>
                             </div>
                         </router-link>
@@ -84,7 +90,7 @@ const store = useAuthStore();
                 </ul>
 
             </div>
-            <div class="menu-mobile" @click="toggleOverlay">
+            <div class="menu-mobile" @click="toggleModal">
                 <svg xmlns="http://www.w3.org/2000/svg" height="33px" viewBox="0 -960 960 960" width="33px" fill="#298E46">
                     <path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z" />
                 </svg>
@@ -93,9 +99,48 @@ const store = useAuthStore();
         </div>
     </header>
 
-    <div v-if="overlayVisible" class="overlay" @click="toggleOverlay">
-        <!-- Optional content inside the overlay -->
-        <p>HI there</p>
+    <div v-if="modalVisible" class="modal-overlay" @click="toggleModal">
+        <div class="modal-content" @click.stop>
+            <div class="modal-header">
+                <Logo></Logo>
+                <button @click="toggleModal" class="close-btn">&times;</button>
+            </div>
+            <!-- <img src="" alt="Food" class="modal-image"> -->
+
+            <router-link :to="{ name: 'login' }" customv-slot="{ navigate }">
+                <div class="link btn green" @click="navigate" role="link">
+                    <div class="link" style="color: white;" >
+                        Anmelden
+                    </div>
+                </div>
+            </router-link>
+
+            <router-link :to="{ name: 'register' }" customv-slot="{ navigate }">
+                <div class="link btn red" @click="navigate" role="link">
+                    <div class="link" style="color: white;">
+                        Mit Google Anmelden
+                    </div>
+                </div>
+            </router-link>
+            <p>Oder</p>
+
+            <router-link :to="{ name: 'register' }" customv-slot="{ navigate }">
+                <div class="link" @click="navigate" role="link">
+                    <div class="link" id="getStartedButton">
+                        Register
+                    </div>
+                </div>
+                </router-link>
+
+            <router-link :to="{ name: 'registerSeller' }" customv-slot="{ navigate }">
+                <div class="link" @click="navigate" role="link">
+                    <div class="link" id="getStartedButton">
+                        Betrieb Register
+                    </div>
+                </div>
+            </router-link>
+
+         </div>
     </div>
 
 </template>
@@ -117,7 +162,7 @@ const store = useAuthStore();
 
 .left {
     margin-left: 10px;
-    width: 50vw;
+    width: 40vw;
     height: auto;
     color: #298E46;
     font-size: large;
@@ -129,7 +174,7 @@ const store = useAuthStore();
 } */
 
 .right {
-    width: 50vw;
+    width: 60vw;
     height: 63px;
 }
 
@@ -162,28 +207,70 @@ const store = useAuthStore();
     display: none;
 }
 
-#getStartedButton {
+#getStartedButton, .btn {
     border: 2px solid white;
     border-radius: 30px;
-    background-color: black;
+    background-color:  #298E46;
+    color: white;
     padding: 10px;
     font-weight: bold;
 }
 
-.overlay {
+.modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
     display: flex;
     justify-content: center;
     align-items: center;
+    z-index: 1000;
 }
 
-@media only screen and (max-width: 600px) {
+.modal-content {
+    background: rgba(152, 152, 152, 0.695);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    max-width: 90%;
+    max-height: 90%;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 10px;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.modal-image {
+    width: 100%;
+    height: auto;
+    margin-bottom: 20px;
+}
+
+.green {
+    background-color: #298E46;
+}
+
+.red {
+    background-color: #C71610;
+}
+
+.blue {
+    background-color: #2196F3;
+}
+@media only screen and (max-width: 680px) {
 
     .menu {
         display: none;

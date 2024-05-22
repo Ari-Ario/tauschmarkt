@@ -161,6 +161,8 @@ const myLocation = onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
+  text-align: center;
+  align-items: center;
   z-index: 2;
   max-width: max-content;
   background-color: #ffffff7c;
