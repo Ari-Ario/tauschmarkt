@@ -7,7 +7,6 @@ import Header from '../components/header/Header.vue';
 <template>
     <Header></Header>
     <div class="menu">
-
     </div>
 
     <div class="EnterpriseCardContainer">

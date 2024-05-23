@@ -208,8 +208,7 @@ const toggleModal = () => {
 }
 
 #getStartedButton, .btn {
-    border: 2px solid white;
-    border-radius: 30px;
+    border-radius: 5px;
     background-color:  #298E46;
     color: white;
     padding: 10px;
@@ -253,11 +252,6 @@ const toggleModal = () => {
     cursor: pointer;
 }
 
-.modal-image {
-    width: 100%;
-    height: auto;
-    margin-bottom: 20px;
-}
 
 .green {
     background-color: #298E46;
@@ -283,6 +277,11 @@ const toggleModal = () => {
         font-weight: bold;
         font-size: smaller;
 
+    }
+
+    #getStartedButton, .btn {
+        border-radius: 5px;
+        margin-top: 10px;
     }
 
     .menu-mobile {
