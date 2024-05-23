@@ -2,6 +2,9 @@
 import { ref, onMounted } from "vue";
 import axios from "axios";
 
+import CategoryTags from "./CategoryTags.vue";
+import { RouterLink } from "vue-router";
+
 const filteredEnterprises = ref([]);
 // const enterprises = ref([]);
 
@@ -20,15 +23,11 @@ onMounted(() => {
     loadenterprises();
 });
 
-
 </script>
 
 <template>
-    <div>
-        <!-- <div>
-            {{ filteredEnterprises }}
-        </div> -->
 
+    <div>
         <div class="card" v-for="enterprise in filteredEnterprises" :key="enterprise.id">
 
             <div class="Photo">
@@ -37,57 +36,80 @@ onMounted(() => {
                     :src="enterprise.enterprise_picture || '../assets/Placeholder-enterprise.png'"
                     alt=""
                 />
-            </div>
 
-            <div class="details">
-                <div class="user-details">
-                    <div class="user-photo">
-                        <img
-                            class="user-photo"
-                            v-if="enterprise.profile_picture"
-                            :src="enterprise.profile_picture"
-                        />
+                <div class="details">
+                    <div class="user-details">
+                        <div class="user-photo">
+                            <img
+                                class="user-photo"
+                                v-if="enterprise.profile_picture"
+                                :src="enterprise.profile_picture"
+                            />
+                        </div>
+
+                        <p class="user-name description">
+                            {{ enterprise.firstname }}
+                            {{ enterprise.lastname }} 
+                        </p>
+                        <p  class="published-on description">
+                            {{ enterprise.updated_at }}
+                        </p>
                     </div>
 
-                    <p class="user-name description">
-                        {{ enterprise.firstname }}
-                        {{ enterprise.lastname }} 
-                    </p>
-                    <p  class="published-on description">
-                        {{ enterprise.updated_at }}
-                    </p>
                 </div>
+
+                <!-- <router-link
+                    class="details-link"
+                    :to="{ name: 'enterprisedetail', params: { id: enterprise.id } }"
+                    >View Details</router-link
+                >
+                <div class="buttons">
+                    <router-link
+                        class="button"
+                        :to="{ name: 'editenterprise', params: { id: enterprise.id } }"
+                        >Edit</router-link
+                    >
+                    <a class="button" @click="deleteenterprise(enterprise.id)"> Delete </a>
+                </div> -->
+
             </div>
+
+
 
         </div>
     </div>
 </template>
 
 <style scoped>
-/* Existing styles */
 .card {
     margin: 20px;
     border-radius: 10px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     background-color: #ffffff;
     max-width: 1200px;
-    min-height: 300px;
     border: 1px solid rgba(0, 0, 0, 0.523);
+    overflow: hidden; /* Ensure content doesn't overflow the card */
 }
 
 .Photo {
-    width: 80%;
-    height: 100%;
-    left: 0;
-    padding-top: 0;
+    width: 100%;
+    position: relative;
+    /* max-height: 600px; */
+}
+
+.Photo img {
+    width: 100%;
+    height: auto;
 }
 
 .details {
-    height: fit-content;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+    width: 100%;
+    padding: 10px;
+    position: absolute;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8); /* Optional: Add a background color for readability */
 }
 
 .user-photo {
@@ -113,39 +135,25 @@ p {
     margin: 0;
 }
 
+
 .button {
-    width: 100%;
-    height: 30px;
+    all: unset;
+    width: fit-content;
     background: black;
     border-radius: 50px;
-    padding: 8px;
     color: white;
     font-weight: bold;
     font-size: 14px;
-    text-align: center;
-    line-height: 30px;
     text-decoration: none;
     margin-left: 15px;
-    padding-left: 20px;
-    padding-right: 20px;
+    padding: 10px 20px;
 }
 
 /* Responsive styles */
 @media only screen and (max-width: 600px) {
     .card {
-        flex-direction: column; /* Change flex direction to column */
-        align-items: center;
         width: 90%;
         height: fit-content;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-around;
-    }
-
-    .Photo {
-        display: flex; /* Hide the Photo class */
-        width: 100%;
-        left: 0;
     }
 
     .details {
@@ -153,19 +161,9 @@ p {
         text-align: left;
     }
 
-    .user-details {
-        width: 90%;
-        align-items: center;
-    }
-
     .button {
         margin-top: 30px;
-        width: 50%; /* Adjust button width */
-    }
-    .read-more {
-        font-size: 15px;
-        text-align: right;
-        padding-right: 10px;
+        width: 50%;
     }
 }
 </style>
