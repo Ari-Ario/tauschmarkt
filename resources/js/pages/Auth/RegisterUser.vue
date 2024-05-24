@@ -21,7 +21,7 @@ const user = ref({
 function registerUser(){
     // console.log(user.value)
     AuthService.registerUser(user.value)
-        .then(() => router.push("/map"))
+        .then(() => router.push("/dashboard"))
         .catch((error) => (console.log(error)));
 }
 

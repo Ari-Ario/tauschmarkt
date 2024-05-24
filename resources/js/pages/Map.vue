@@ -114,11 +114,13 @@ const myLocation = onMounted(() => {
 </script>
 
 <template>
-  <div class="back">
+<!--   <div class="back">
     <router-link to="/dashboard">
       <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z"/></svg>
     </router-link>
-  </div>
+  </div> -->
+
+  <div>{{ store.authUser }}</div>
 
   <div class="map-container">
     <GoogleMap
@@ -130,7 +132,7 @@ const myLocation = onMounted(() => {
       @click="handleMapClick"
 
     >
-      <Circle :options="circleOptions"/>
+      <Circle :options="circleOptions" />
       <Marker :options="{ position: center }" />
     </GoogleMap>
     
@@ -155,7 +157,7 @@ const myLocation = onMounted(() => {
 </template>
 
 <style scoped>
-.back {
+/* .back {
   position: relative;
   top: 0;
   left: 0;
@@ -166,12 +168,13 @@ const myLocation = onMounted(() => {
   z-index: 2;
   max-width: max-content;
   background-color: #ffffff7c;
-}
+} */
 html, body, #app, .map-container {
   margin: 0;
   padding: 0;
   height: 100%;
   width: 100%;
+  z-index: 0;
 }
 
 .map-container {

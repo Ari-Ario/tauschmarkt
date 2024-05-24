@@ -1,6 +1,8 @@
 
 <script setup>
 import EnterpriseCard from "../components/EnterpriseCard.vue";
+import Dashboard from "./Dashboard.vue";
+
 import Header from '../components/header/Header.vue';
 </script>
 
@@ -10,7 +12,7 @@ import Header from '../components/header/Header.vue';
     </div>
 
     <div class="EnterpriseCardContainer">
-        <EnterpriseCard />
+        <EnterpriseCard/>
     </div>
 </template>
 
