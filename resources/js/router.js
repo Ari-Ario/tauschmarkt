@@ -55,7 +55,7 @@ export const routes = [
     {
         path:"/profile-information",
         name: "profileInformation", 
-        component: () => import("./components/SellerComponents/ProfileInformation.vue"),
+        component: () => import("./components/ProfileInformation.vue"),
     },
 
     {
