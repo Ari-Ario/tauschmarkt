@@ -4,7 +4,12 @@
     import { useAuthStore } from '../stores/AuthStore';
     import LogoutButton from '@/components/LogoutButton.vue';
     import FooterUser from '../components/footer/FooterUser.vue';
+    import FooterSeller from '../components/footer/FooterSeller.vue';
     import EnterpriseCard from "../components/EnterpriseCard.vue";
+    import SellerProfil from '../components/SellerComponents/SellerProfile.vue';
+    import SellerProducts from '../components/SellerComponents/SellerProducts.vue';
+    import SellerStatistics from '../components/SellerComponents/SellerStatistics.vue';
+
     import Map from "./Map.vue";
 
 
@@ -21,6 +26,8 @@
     <header>
         <LogoutButton />
     </header>
+
+    <!-- User Profile -->
     <div v-if="!store.authUser.is_seller" class="content">
         <div :class="{ active: currentPage !== 'Map' }, menu-container">
             <div class="search-container">
@@ -47,7 +54,7 @@
         </div>
         
         <div v-if="currentPage === 'Liste'" class="content">
-            <h4 v-if="store.authUser">Hallo {{ store.authUser.firstname }} {{ store.authUser.lastname }} {{ store.authUser.is_seller }}</h4>
+            <h4 v-if="store.authUser">User {{ store.authUser.firstname }} {{ store.authUser.lastname }}</h4>
             <div class="EnterpriseCardContainer">
                 <EnterpriseCard />
             </div>
@@ -56,7 +63,6 @@
         <div v-else-if="currentPage === 'Map'" class="content">
             <!-- Map page content here -->
             <Map />
-            <h4>Map Page Content</h4>
         </div>
         
         <div v-else-if="currentPage === 'Search'" class="content">
@@ -68,49 +74,38 @@
         </div>
     </div>
 
+
+    <!-- Seller Profile -->
     <div v-if="store.authUser.is_seller" class="content">
         <div :class="{ active: currentPage !== 'Map' }, menu-container">
-            <div class="search-container">
-                <input type="text" placeholder="Search" class="search-input" />
-                <button class="location-button"
-                    :class="{ active: currentPage === 'Search' }" 
-                    @click="switchPage('Search')">Los
-                </button>
+            <router-link :to="{ name: 'map'}" class="link">
+                <div class="switch-container">
 
-                <button class="filter-button">⚙️</button>
-
-            </div>
-            
-            <div class="switch-container">
-                <button 
-                    :class="{ active: currentPage === 'Liste' }" 
-                    @click="switchPage('Liste')">Liste
-                </button>
-                <button 
-                    :class="{ active: currentPage === 'Map' }" 
-                    @click="switchPage('Map')">Karte 📍
-                </button>
-            </div>
+                    <button>Karte 📍
+                    </button>
+                    
+                </div>
+            </router-link>
         </div>
         
         <div v-if="currentPage === 'Liste'" class="content">
-            <h4 v-if="store.authUser">Hallo {{ store.authUser.firstname }} {{ store.authUser.lastname }} {{ store.authUser.is_seller }}</h4>
             <div class="EnterpriseCardContainer">
-                <EnterpriseCard />
+                <SellerProfil />
+            </div>
+            <div class="EnterpriseCardContainer">
+                <SellerProducts />
+            </div>
+            <div class="EnterpriseCardContainer">
+                <SellerStatistics />
             </div>
         </div>
 
         <div v-else-if="currentPage === 'Map'" class="content">
             <!-- Map page content here -->
             <Map />
-            <h4>Map Page Content</h4>
-        </div>
-        
-        <div v-else-if="currentPage === 'Search'" class="content">
-            <h4>Search Page Content</h4>
         </div>
 
-        <div>
+        <div v-show="currentPage !== 'Map'">
             <FooterSeller />
         </div>
     </div>
@@ -142,17 +137,6 @@
     z-index: 1;
 }
 
-/* .search-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    max-width: 600px;
-    background-color: #fff;
-    border-radius: 25px;
-    overflow: hidden;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-} */
 
 .search-input {
     flex: 1;
@@ -222,6 +206,10 @@
     display: flex;
     justify-content: center;
     width: 100%;
+}
+
+.link {
+    text-decoration: none;
 }
 
 @media (max-width: 600px) {

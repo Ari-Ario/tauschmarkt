@@ -111,14 +111,18 @@ const myLocation = onMounted(() => {
     console.error('Geolocation is not supported by this browser.');
   }
 });
+
+const refreshPage = () => {
+  location.reload(); // Reloads the current page
+};
 </script>
 
 <template>
-<!--   <div class="back">
-    <router-link to="/dashboard">
-      <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z"/></svg>
+    <router-link :to="{ name: 'dashboard'}" class="link">
+      <div class="back">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z"/></svg>
+      </div>
     </router-link>
-  </div> -->
 
   <div>{{ store.authUser }}</div>
 
@@ -140,7 +144,8 @@ const myLocation = onMounted(() => {
 
       <div class="controls">
         
-        <h4>Auf Ihren Hof klicken</h4>
+        <h4 v-if="store.authUser.is_seller">Auf Ihren Hof klicken</h4>
+        <h4 v-else>Distanz wählen</h4>
         <div class="slider-container">
           <input type="range" min="1" max="20" v-model="radius" @input="updateCircle" />
           <span>{{ radius }} km</span>
@@ -157,18 +162,17 @@ const myLocation = onMounted(() => {
 </template>
 
 <style scoped>
-/* .back {
-  position: relative;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+.back {
+  position: fixed;
+  top: 2%;
+  left: 2%;
+  padding: 5px 0 0 5px;
   text-align: center;
   align-items: center;
   z-index: 2;
   max-width: max-content;
   background-color: #ffffff7c;
-} */
+}
 html, body, #app, .map-container {
   margin: 0;
   padding: 0;

@@ -1,11 +1,18 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
+import { useAuthStore } from '../stores/AuthStore';
+
 import { GoogleMap, Marker, Circle } from 'vue3-google-map';
 import VueGoogleAutocomplete from 'vue-google-autocomplete';
 
+import Dashboard from "./Dashboard.vue";
+
+
+const store = useAuthStore();
+
 const userLocation = ref(null);
 
-const center = ref({ lat: 46.57518, lng: 7.261349 });
+const center = ref({ lat: 46.938749674988486, lng: 7.459564360522899 });
 const radius = ref(10); // Default radius in km
 const city = ref('');
 const mapRef = ref(null); // Reference to the Google Map instance
@@ -90,6 +97,7 @@ const handleMapClick = (event) => {
     lat: event.latLng.lat(),
     lng: event.latLng.lng(),
   };
+  console.log(center.value)
   updateCircle();
 };
 
@@ -106,9 +114,25 @@ const myLocation = onMounted(() => {
     console.error('Geolocation is not supported by this browser.');
   }
 });
+
+const refreshPage = () => {
+  location.reload(); // Reloads the current page
+};
+const currentPage = ref('Map');
+    function switchPage(page) {
+        currentPage.value = page;
+    }
 </script>
 
 <template>
+  <router-link :to="{ name: 'dashboard'}" class="link">
+  <div class="back">
+      <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z"/></svg>
+      </div>
+    </router-link>
+
+  <div>{{ store.authUser }}</div>
+
   <div class="map-container">
     <GoogleMap
       api-key="AIzaSyDVsZaS67NSKA-13blSRq7X0vvfhdlKX2Y"
@@ -117,37 +141,50 @@ const myLocation = onMounted(() => {
       style="width: 100%; height: 100%"
       @load="mapRef.value = $event"
       @click="handleMapClick"
+
     >
-      <Circle :options="circleOptions"/>
+      <Circle :options="circleOptions" />
       <Marker :options="{ position: center }" />
     </GoogleMap>
     
     <form @submit.prevent="myLocation" class="location-form">
+
       <div class="controls">
-        <h4>Distanz wählen</h4>
+        
+        <h4>Auf Ihren Hof klicken</h4>
         <div class="slider-container">
           <input type="range" min="1" max="20" v-model="radius" @input="updateCircle" />
           <span>{{ radius }} km</span>
         </div>
-        <VueGoogleAutocomplete
-          id="autocomplete"
-          classname="form-control"
-          placeholder="Search for a city"
-          @placechanged="searchCity"
-        />
+        <input type="text" v-model="city" placeholder="Search for a city" @keypress.enter="searchCity" />
         <button @click="useCurrentLocation">Use my current location</button>
-        <button @click="showResults">Show results</button>
+        <button @click="searchCity">Show results</button>
       </div>
     </form>
+
   </div>
+
+
 </template>
 
-<style>
+<style scoped>
+.back {
+  position: fixed;
+  top: 2%;
+  left: 2%;
+  padding: 5px 0 0 5px;
+  text-align: center;
+  align-items: center;
+  z-index: 2;
+  max-width: max-content;
+  background-color: #ffffff7c;
+}
 html, body, #app, .map-container {
   margin: 0;
   padding: 0;
   height: 100%;
   width: 100%;
+  z-index: 0;
 }
 
 .map-container {

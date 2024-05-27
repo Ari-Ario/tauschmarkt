@@ -1,5 +1,6 @@
 
-
+import { createRouter, createWebHistory } from 'vue-router';
+import ChooseCategories from './components/SellerComponents/AddProduct.vue';
 
 export const routes = [
     {
@@ -38,28 +39,39 @@ export const routes = [
     },
 
     {
+        path: "/map-user",
+        name:"mapUser",
+        component: () => import("./pages/MapUser.vue"),
+        meta: { showLogo: false, allBlogs: true, getStarted: true, home: false},
+    },
+
+    {
         path: "/dashboard",
         name:"dashboard",
         component: () => import("./pages/Dashboard.vue"),
-        meta: { requiresAuth: true, 
-        showLogo: true, allBlogs:true , getStarted: false, home: true},
     
     },
 
+    {
+        path:"/profile-information",
+        name: "profileInformation", 
+        component: () => import("./components/SellerComponents/ProfileInformation.vue"),
+    },
+
+    {
+        path:"/add-product",
+        name: "addProduct", 
+        component: () => import("./components/SellerComponents/AddProduct.vue"),
+        props: route => ({ selectedCategories: route.query.selectedCategories || [] }),
+    },
+
+    {
+        path:"/orders-list",
+        name:"OrdersList", 
+        component: () => import("./components/SellerComponents/ListOfOrders.vue"),
+    },
 
 /*     {
-        path:"/edit-profile",
-        name:"editProfile", 
-        component: () => import("./pages/EditProfile.vue"),
-        meta: { showLogo: true, allBlogs:false, getStarted: false, home: true}
-    },
-    {
-        path:"/alle-blogs",
-        name: "allBlogs", 
-        component: () => import("./pages/AllBlog.vue"),
-        meta: { showLogo: true, allBlogs:false, getStarted: false, home: true}
-    },
-    {
         path: "/blogs/detail/:id",
         name: 'blogdetail',
         component: () => import("./pages/SingleBlog.vue"),
@@ -79,6 +91,13 @@ export const routes = [
     } */
 ];
 
+
+// const router = createRouter({
+//     history: createWebHistory(process.env.VUE_APP_BASE_URL),
+//     routes,
+//   });
+  
+//   export default router;
 
 
 

@@ -1,0 +1,290 @@
+<template>
+    <div class="orders-page">
+      <div class="orders-list">
+        <div
+          v-for="order in orders"
+          :key="order.id"
+          class="order-item"
+          @click="selectOrder(order)"
+        >
+          <img :src="order.image" alt="Order Image" />
+          <div>
+            <h3>{{ order.name }}</h3>
+            <p>{{ order.address }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="backdrop" v-if="selectedOrder" @click="closeDetails"></div>
+      <div class="order-details-popup" v-if="selectedOrder">
+        <div class="details-header">
+          <h2>{{ selectedOrder.name }}</h2>
+          <button @click="closeDetails">Close</button>
+        </div>
+        <img :src="selectedOrder.image" alt="Order Image" />
+        <p><strong>Address:</strong> {{ selectedOrder.address }}</p>
+        <p><strong>Pickup Time:</strong> {{ selectedOrder.pickupTime }}</p>
+        <p><strong>Order Date:</strong> {{ selectedOrder.orderDate }}</p>
+        <p><strong>Order ID:</strong> {{ selectedOrder.id }}</p>
+        <p><strong>Price:</strong> {{ selectedOrder.price }} EUR</p>
+        <div class="collect-section">
+          <h3>Order to be collected</h3>
+          <div class="collect-info">
+            <div class="quantity">
+              <div class="circle">1x</div>
+              <p>Surprise Bag</p>
+            </div>
+            <p>{{ selectedOrder.name }}</p>
+            <div class="order-code">{{ selectedOrder.orderCode }}</div>
+          </div>
+          <p>
+            Swipe below and show the order to the staff. Make sure to swipe only
+            when you're in the store ready to collect your meal.
+          </p>
+          <swipe-action @action="markAsCollected(selectedOrder)">
+            <template #content>
+              <button class="swipe-to-collect">
+                <span class="swipe-icon">➔</span>
+                Swipe to collect
+              </button>
+            </template>
+          </swipe-action>
+          <div v-if="selectedOrder.picked" class="success-message">
+            <p>Successfully collected!</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </template>
+  
+  <script setup>
+  import { ref } from 'vue';
+  import axios from 'axios';
+//   import { SwipeAction } from 'vue-swipe-actions';
+  
+  // Sample data for orders
+  const orders = ref([
+    {
+      id: '1',
+      name: 'Rote Harfe - Berlin',
+      address: 'Oranienstraße 13, 10999 Berlin',
+      pickupTime: '31-08-2016 16:00 - 16:30',
+      orderDate: '31-08-2016 14:34',
+      image: '/path/to/image1.jpg',
+      price: '3.00',
+      picked: false,
+      orderCode: 'EYM8FHTW8MXB0',
+    },
+    {
+      id: '2',
+      name: 'Café Kirsch & Karamell - Berlin',
+      address: 'Manteuffelstr 1, 12103 Berlin',
+      pickupTime: '31-08-2016 16:00 - 16:30',
+      orderDate: '31-08-2016 14:34',
+      image: '/path/to/image2.jpg',
+      price: '3.00',
+      picked: false,
+      orderCode: 'ABC123XYZ456',
+    },
+    // Add more orders as needed
+  ]);
+  
+  const selectedOrder = ref(null);
+  
+  const selectOrder = (order) => {
+    selectedOrder.value = order;
+  };
+  
+  const closeDetails = () => {
+    selectedOrder.value = null;
+  };
+  
+  const markAsCollected = async (order) => {
+    try {
+      // Update the status in the frontend
+      order.picked = true;
+  
+      // Send a request to update the status in the database
+      await axios.post('/api/orders/markAsCollected', {
+        orderId: order.id,
+      });
+  
+      // Optionally, close the details popup after marking as collected
+      // closeDetails();
+    } catch (error) {
+      console.error('Error marking order as collected:', error);
+    }
+  };
+  </script>
+  
+  <style scoped>
+  .orders-page {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .orders-list {
+    flex: 1;
+    min-width: 300px;
+    max-width: 400px;
+    border-right: 1px solid #ddd;
+  }
+  
+  .order-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+  }
+  
+  .order-item img {
+    width: 50px;
+    height: 50px;
+    margin-right: 10px;
+    border-radius: 50%;
+  }
+  
+  .order-item h3 {
+    margin: 0;
+    font-size: 1rem;
+  }
+  
+  .order-item p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: #666;
+  }
+  
+  .backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10;
+  }
+  
+  .order-details-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 20;
+    width: 80%;
+    max-width: 500px;
+    border-radius: 8px;
+  }
+  
+  .details-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+  }
+  
+  .details-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+  
+  .details-header button {
+    padding: 5px 10px;
+    background-color: #42b983;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .order-details-popup img {
+    width: 100px;
+    height: 100px;
+    margin: 10px 0;
+    border-radius: 50%;
+  }
+  
+  .order-details-popup p {
+    margin: 10px 0;
+    font-size: 1rem;
+  }
+  
+  .collect-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #ddd;
+    text-align: center;
+  }
+  
+  .collect-section h3 {
+    margin: 0 0 10px;
+    font-size: 1.2rem;
+  }
+  
+  .collect-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+  }
+  
+  .collect-info .quantity {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+  }
+  
+  .collect-info .circle {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: #42b983;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+  }
+  
+  .collect-info p {
+    margin: 0;
+  }
+  
+  .order-code {
+    background-color: #42b983;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+  }
+  
+  .swipe-to-collect {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #42b983;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+  
+  .swipe-icon {
+    margin-right: 10px;
+  }
+  
+  .success-message {
+    color: #42b983;
+    font-weight: bold;
+    margin-top: 20px;
+  }
+  </style>
+  

@@ -5,9 +5,6 @@ import Header from '../../components/header/Header.vue';
 
 import {ref} from 'vue';
 import {useRouter} from 'vue-router';
-// import BlogHeader from '../components/BlogHeader.vue';  
-// import Navbar from '@/components/Navbar.vue';
-// import { createStore } from 'vuex';
 
 const router = useRouter();
 const store = useAuthStore();
