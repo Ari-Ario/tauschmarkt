@@ -6,67 +6,76 @@ import CategoryTags from "./CategoryTags.vue";
 import { RouterLink } from "vue-router";
 
 const filteredEnterprises = ref([]);
+// const enterprises = ref([]);
 
-const loadEnterprises = async () => {
+const loadenterprises = async () => {
     try {
         const response = await axios.get("/api/enterprises/latest");
+        // enterprises.value = response.data;
         filteredEnterprises.value = response.data.data.filter(enterprise => enterprise.is_seller === 1);
+        // console.log(filteredEnterprises.value);
     } catch (error) {
         console.error("Error loading enterprises:", error);
     }
 };
 
-const addToFavorites = async (enterprise) => {
-    try {
-        // Toggle the favorite status locally
-        enterprise.is_favorite = !enterprise.is_favorite;
-
-        // Send a request to update the favorite status in the database
-        await axios.post("/api/enterprises/favorite", {
-            enterpriseId: enterprise.id,
-            isFavorite: enterprise.is_favorite
-        });
-    } catch (error) {
-        console.error("Error adding to favorites:", error);
-    }
-};
-
 onMounted(() => {
-    loadEnterprises();
+    loadenterprises();
 });
+
 </script>
 
 <template>
+
     <div>
         <div class="card" v-for="enterprise in filteredEnterprises" :key="enterprise.id">
+
             <div class="Photo">
                 <img
                     class="Photo"
                     :src="enterprise.enterprise_picture || '../assets/Placeholder-enterprise.png'"
                     alt=""
                 />
-                <div class="favorite" @click="addToFavorites(enterprise)">
-                    <svg v-if="enterprise.is_favorite" xmlns="http://www.w3.org/2000/svg" fill="red" viewBox="0 0 24 24" width="24px" height="24px"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                    <svg v-else xmlns="http://www.w3.org/2000/svg" fill="green" viewBox="0 0 24 24" width="24px" height="24px"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
-                </div>
-            </div>
-            <div class="details">
-                <div class="user-details">
-                    <div class="user-photo">
-                        <img
-                            class="user-photo"
-                            v-if="enterprise.profile_picture"
-                            :src="enterprise.profile_picture"
-                        />
+
+                <div class="details">
+                    <div class="user-details">
+                        <div class="user-photo">
+                            <img
+                                class="user-photo"
+                                v-if="enterprise.profile_picture"
+                                :src="enterprise.profile_picture"
+                            />
+                        </div>
+
+                        <p class="user-name description">
+                            {{ enterprise.firstname }}
+                            {{ enterprise.lastname }} 
+                        </p>
+                        <p  class="published-on description">
+                            {{ enterprise.updated_at }}
+                        </p>
                     </div>
-                    <p class="user-name description">
-                        {{ enterprise.firstname }} {{ enterprise.lastname }} 
-                    </p>
-                    <p class="published-on description">
-                        {{ enterprise.updated_at }}
-                    </p>
+
                 </div>
+
+                <!-- <router-link
+                    class="details-link"
+                    :to="{ name: 'enterprisedetail', params: { id: enterprise.id } }"
+                    >View Details</router-link
+                >
+                <div class="buttons">
+                    <router-link
+                        class="button"
+                        :to="{ name: 'editenterprise', params: { id: enterprise.id } }"
+                        >Edit</router-link
+                    >
+                    <a class="button" @click="deleteenterprise(enterprise.id)"> Delete </a>
+                </div> -->
+
             </div>
+
+
+
         </div>
     </div>
 </template>

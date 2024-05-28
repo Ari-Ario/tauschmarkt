@@ -54,7 +54,7 @@
         </div>
         
         <div v-if="currentPage === 'Liste'" class="content">
-            <h4 v-if="store.authUser">User {{ store.authUser.firstname }} {{ store.authUser.lastname }}</h4>
+            <h4 v-if="store.authUser">{{ store.authUser.firstname }} {{ store.authUser.lastname }}</h4>
             <div class="EnterpriseCardContainer">
                 <EnterpriseCard />
             </div>

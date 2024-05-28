@@ -19,9 +19,12 @@ Route::get('/enterprises/latest', [EnterpriseController::class, 'latestEnterpris
 
 Route::get('/products', [ProductController::class, 'index']);
 
+
 /**
  * AUTH ROUTES
  */
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/users/auth', [UserController::class, 'show']);
+    
+    Route::post('/enterprises/favorite', [EnterpriseController::class, 'updateFavorite']);
 });

@@ -45,5 +45,10 @@ class DatabaseSeeder extends Seeder
             OrderItemsTableSeeder::class,
             ProductReviewsTableSeeder::class,
         ]);
+
+        $this->call([
+            FavoritesSeeder::class,
+            // Add other seeders here
+        ]);
     }
 }
