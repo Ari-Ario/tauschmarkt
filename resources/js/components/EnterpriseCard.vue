@@ -18,10 +18,8 @@ const loadEnterprises = async () => {
 
 const addToFavorites = async (enterprise) => {
     try {
-        // Toggle the favorite status locally
         enterprise.is_favorite = !enterprise.is_favorite;
 
-        // Send a request to update the favorite status in the database
         await axios.post("/api/enterprises/favorite", {
             enterpriseId: enterprise.id,
             isFavorite: enterprise.is_favorite

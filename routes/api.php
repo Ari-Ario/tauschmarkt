@@ -11,6 +11,8 @@ use App\Http\Controllers\UserController;
 
 use App\Http\Controllers\EnterpriseController;
 
+use App\Http\Controllers\FavoritesController;
+
 use App\Http\Controllers\ProductController;
 
 Route::post('/sanctum/token', TokenController::class);
@@ -26,5 +28,5 @@ Route::get('/products', [ProductController::class, 'index']);
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/users/auth', [UserController::class, 'show']);
     
-    Route::post('/enterprises/favorite', [EnterpriseController::class, 'updateFavorite']);
+    Route::post('/enterprises/favorite', [FavoritesController::class, 'updateFavorite']);
 });
