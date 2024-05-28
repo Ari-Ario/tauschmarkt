@@ -67,6 +67,7 @@ export default {
   },
 
   updateUser(payload) {
+    console.log(payload)
     return authClient.put("/user/profile-information", payload);
   },
 };
