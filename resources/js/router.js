@@ -71,13 +71,14 @@ export const routes = [
         component: () => import("./components/SellerComponents/ListOfOrders.vue"),
     },
 
-/*     {
-        path: "/blogs/detail/:id",
-        name: 'blogdetail',
-        component: () => import("./pages/SingleBlog.vue"),
+    {
+        path: "/favorites",
+        name: 'Favorites',
+        component: () => import("./components/UserComponents/Favorites.vue"),
         //  meta: { requiresAuth: true },
     },
-    {
+
+/*     {
         path:"/create",
         name:"createPost",
         component: () => import("./pages/CreateBlog.vue"),

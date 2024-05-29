@@ -23,15 +23,22 @@ Route::get('/enterprises/latest', [EnterpriseController::class, 'latestEnterpris
 
 Route::get('/products', [ProductController::class, 'index']);
 
+// Favorites APIs
+Route::get('/favorites/{userId}', [FavoritesController::class, 'getUserFavorites']);
+Route::get('/users-with-favorites', [FavoritesController::class, 'getAllUsersWithFavorites']);
+Route::post('/enterprises/favorite', [FavoritesController::class, 'updateFavorite']); // `api/favorits/${userId}`    
 
 /**
  * AUTH ROUTES
  */
+
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/users/auth', [UserController::class, 'show']);
-
+    
     Route::get('/user/profile/{id}', [UserController::class, 'getUserProfile']);
     Route::put('/user/profile-information', [UpdateUserProfileInformation::class, 'update']);
     
-    Route::post('/enterprises/favorite', [FavoritesController::class, 'updateFavorite']);
+
+    Route::post('/favorites/add', [FavoritesController::class, 'addFavorite']);
+    Route::post('/favorites/remove', [FavoritesController::class, 'removeFavorite']);
 });
