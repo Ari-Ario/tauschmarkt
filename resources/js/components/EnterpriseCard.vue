@@ -40,7 +40,7 @@ onMounted(() => {
             <div class="Photo">
                 <img
                     class="Photo"
-                    :src="enterprise.enterprise_picture || '../assets/Placeholder-enterprise.png'"
+                    :src="enterprise.enterprise_picture"
                     alt=""
                 />
                 <div class="favorite" @click="addToFavorites(enterprise)">
@@ -93,10 +93,18 @@ onMounted(() => {
     height: auto;
 }
 
-.details {
+.favorite {
     width: 100%;
     padding: 10px;
     position: absolute;
+    top: 0;
+    background: rgba(255, 255, 255, 0.8); /* Optional: Add a background color for readability */
+}
+
+.details {
+    width: 100%;
+    padding: 10px;
+    position: sticky;
     bottom: 0;
     background: rgba(255, 255, 255, 0.8); /* Optional: Add a background color for readability */
 }

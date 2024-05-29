@@ -30,12 +30,14 @@ export const authClient = axios.create({
   AUTH METHODS
 */
 export default {
+  authClient,
   async login(payload) {
       await authClient.get("/sanctum/csrf-cookie");
       return authClient.post("/login", payload);
   },
 
   logout() {
+    localStorage.removeItem("user");
     return authClient.post("/logout");
   },
 
@@ -71,3 +73,5 @@ export default {
     return authClient.put("/user/profile-information", payload);
   },
 };
+
+// export default authClient;

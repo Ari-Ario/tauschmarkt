@@ -11,7 +11,7 @@ class EnterpriseController extends Controller
     //
     public function latestEnterprises()
     {
-        $enterprise = User::latest()->take(20)->get();
+        $enterprise = User::latest()->get();
         // dd($enterprise);
         return UserResource::collection($enterprise);
     }
