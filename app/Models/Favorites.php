@@ -16,4 +16,9 @@ class Favorites extends Model
         'is_favorite',
     ];
 
+    public function favorites()
+    {
+        return $this->hasMany(User::class, 'user_id', 'first_user_id', 'is_favorite');
+    }
+
 }

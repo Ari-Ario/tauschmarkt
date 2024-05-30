@@ -19,7 +19,7 @@ use App\Http\Controllers\ProductController;
 
 Route::post('/sanctum/token', TokenController::class);
 
-Route::get('/enterprises/latest', [EnterpriseController::class, 'latestEnterprises']);
+Route::get('/enterprises/{userId}', [EnterpriseController::class, 'latestEnterprises']);
 
 Route::get('/products', [ProductController::class, 'index']);
 

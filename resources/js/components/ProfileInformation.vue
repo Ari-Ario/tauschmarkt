@@ -1,5 +1,8 @@
 
 <script setup>
+import FooterUser from '../components/footer/FooterUser.vue';
+import FooterSeller from '../components/footer/FooterSeller.vue';
+
 import { useAuthStore } from '../stores/AuthStore';
 import AuthService from "@/services/AuthService";
 import { ref, onMounted } from 'vue';
@@ -92,6 +95,12 @@ const cancelEdit = () => {
           <span class="profile-value" >{{ item }}</span>
         </div>
         <!-- <div v-else style="display: none;"></div> -->
+        <div v-if="store?.authUser?.is_seller">
+            <FooterSeller />
+        </div>
+        <div v-else>
+            <FooterUser />
+        </div>
       </div>
 
       <div v-if="isEditing" class="edit-popup">

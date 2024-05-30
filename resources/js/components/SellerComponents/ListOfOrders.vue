@@ -47,10 +47,15 @@
         </button>
       </div>
     </div>
+    <div v-show="currentPage !== 'Map'">
+        <FooterSeller />
+    </div>
   </div>
 </template>
 
 <script setup>
+import FooterSeller from '../../components/footer/FooterSeller.vue';
+
 import { ref } from 'vue';
 import axios from 'axios';
 

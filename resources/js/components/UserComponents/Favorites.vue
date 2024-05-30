@@ -61,7 +61,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div>
+    <div class="container">
         <div class="card" v-for="enterprise in favorites" :key="favorites.id">
             <div class="Photo">
                 <img
@@ -92,10 +92,19 @@ onMounted(() => {
                 </div>
             </div>
         </div>
+        <div>
+            <FooterUser />
+        </div>
     </div>
 </template>
 
 <style scoped>
+.container{
+    display: flex;
+    flex-direction: column;
+    /* justify-content: center; */
+    align-items: center;
+}
 .card {
     margin: 20px;
     border-radius: 10px;
@@ -116,7 +125,7 @@ onMounted(() => {
 
 .Photo img {
     width: 100%;
-    height: auto;
+    height: 80%;
 }
 
 .favorite {

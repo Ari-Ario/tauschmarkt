@@ -1,6 +1,7 @@
 <script setup>
-import { reactive, ref } from 'vue';
+import FooterSeller from '../../components/footer/FooterSeller.vue';
 
+import { reactive, ref } from 'vue';
 import { useAuthStore } from '@/stores/AuthStore';
 import AuthService from "@/services/AuthService";
 
@@ -213,6 +214,9 @@ const saveNewCategory= ()=> {
                 Weiter
             </button> -->
         </div>
+      <div v-show="currentPage !== 'Map'">
+          <FooterSeller />
+      </div>
     </div>
 </template>
 

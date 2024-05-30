@@ -1,16 +1,22 @@
 <script setup>
+  import { useAuthStore } from '@/stores/AuthStore';
+import AuthService from "@/services/AuthService";
+
 import { ref, onMounted } from "vue";
 import axios from "axios";
 
 import CategoryTags from "./CategoryTags.vue";
 import { RouterLink } from "vue-router";
 
+const store = useAuthStore();
+const userId = store?.authUser?.id;
 const filteredEnterprises = ref([]);
 
 const loadEnterprises = async () => {
     try {
-        const response = await axios.get("/api/enterprises/latest");
-        filteredEnterprises.value = response.data.data.filter(enterprise => enterprise.is_seller === 1);
+        const response = await axios.get(`api/enterprises/${userId}`);
+        filteredEnterprises.value = response.data;
+        console.log(filteredEnterprises)
     } catch (error) {
         console.error("Error loading enterprises:", error);
     }
@@ -30,6 +36,7 @@ const addToFavorites = async (enterprise) => {
 };
 
 onMounted(() => {
+    axios.defaults.withCredentials = true;
     loadEnterprises();
 });
 </script>
@@ -40,7 +47,7 @@ onMounted(() => {
             <div class="Photo">
                 <img
                     class="Photo"
-                    :src="enterprise.enterprise_picture"
+                    :src="enterprise.enterprise_picture || 'storage/enterprise_images/default.png'"
                     alt=""
                 />
                 <div class="favorite" @click="addToFavorites(enterprise)">
@@ -53,8 +60,8 @@ onMounted(() => {
                     <div class="user-photo">
                         <img
                             class="user-photo"
-                            v-if="enterprise.profile_picture"
-                            :src="enterprise.profile_picture"
+
+                            :src="enterprise.profile_picture || 'storage/profile_images/default.png'"
                         />
                     </div>
                     <p class="user-name description">
