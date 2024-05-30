@@ -42,7 +42,8 @@ class FavoritesController extends Controller
                     'zip_code' => $user->zip_code,
                     'latitude' => $user->latitude,
                     'longitude' => $user->longitude,
-        
+                    'id' => $user->id,
+                    'is_favorite' => $favorite->is_favorite,
                     'created_at' => optional($user->created_at)->format($dateFormat),
                     'updated_at' => optional($user->updated_at)->format($dateFormat),
                 ];
