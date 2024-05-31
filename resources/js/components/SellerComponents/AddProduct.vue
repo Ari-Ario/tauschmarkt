@@ -17,7 +17,8 @@ const categories = [
   'Vollkornprodukte',
   'Getränke und Wein',
   'Fleisch & Geflügel',
-  'Blumen & Gärtnerei'
+  'Blumen & Gärtnerei',
+  'Andere Kategorien'
 ];
 
 // Reactive state for selected categories
@@ -141,78 +142,60 @@ const saveNewCategory= ()=> {
 <template>
     <div class="form-container">
         <div class="categories-selector">
-            <div class="back">
-                <router-link to="/dashboard">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z"/></svg>
-                </router-link>
-            </div>
+
             <h3>Welche Kategorien bieten Sie an?</h3>
 
-            <div v-for="category in categories" :key="category" class="category-button" :class="{ selected: selectedCategories.has(category) }" @click="openForm(category)">
+            <div v-for="category in categories" v-if="categories[-1] !== 'Andere Kategorien'" :key="category" class="category-button" :class="{ selected: selectedCategories.has(category) }" @click="openForm(category)">
                 {{ category }}
             </div>
-            <form class="" >
-                <fieldset style="display: flex;">
-                <legend for="">Oder neue Kategory</legend>
-                        <input type="text" name="newCategory" id="newCategory" required />                        
-                        <button type="button" @click="saveNewCategory()">Hinzufügen</button>
-                </fieldset>
-            </form>
-
-            <!-- <div v-for="category in categories" :key="category" class="category-button" :class="{ selected: selectedCategories.has(category) }" @click="toggleCategory(category)">
-            {{ category }}
-            </div> -->
 
             <div v-if="isFormOpen" class="form-popup">
-                <form @submit.prevent="saveProduct">
+              <form @submit.prevent="saveProduct">
+                <div class="form-group">
+                  <div class="category-button" :class="{ selected: selectedCategories.has(category) }" style="width: 90%;">
+                    {{ selectedCategory }}
+                  </div>
+                </div>
 
-                    <div class="form-group">
-                        <div class="category-button" :class="{ selected: selectedCategories.has(category) }" style="width: 90%;">
-                        {{ selectedCategory }}
-                        </div>                    
-                    </div>
+                <div class="form-group">
+                  <label for="name">Name</label>
+                  <input type="text" v-model="product.name" required />
+                </div>
 
-                    <div class="form-group">
-                        <label for="name">Name</label>
-                        <input type="text" v-model="product.name" required />
-                    </div>
+                <div class="form-group">
+                  <label for="description">Beschreibung</label>
+                  <textarea v-model="product.description" required></textarea>
+                </div>
 
-                    <div class="form-group">
-                        <label for="description">Description</label>
-                        <textarea v-model="product.description" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="photo">Photo</label>
-                        <input type="file" @change="handleFileUpload"  ref="backgroundImageInput" />
-                    </div>
-                    <div class="form-group">
-                        <label for="price-unit">Price Unit</label>
-                        <select v-model="priceUnit" @change="handlePriceUnitChange">
-                        <option value="perGram">Per Gram</option>
-                        <option value="perKilogram">Per Kilogram</option>
-                        <option value="perUnit">Per unit</option>
-                        </select>
-                    </div>
-                    <div class="form-group" v-if="priceUnit === 'perGram'">
-                        <label for="price-per-gram">Price (per gram)</label>
-                        <input type="number" v-model.number="product.pricePerGram" required />
-                    </div>
-                    <div class="form-group" v-if="priceUnit === 'perKilogram'">
-                        <label for="price-per-kilogram">Price (per kilogram)</label>
-                        <input type="number" v-model.number="product.pricePerKilogram" required />
-                    </div>
-                    <div class="form-group">
-                        <label for="unit-price">Unit Price</label>
-                        <input type="number" v-model.number="product.unitPrice" required />
-                    </div>
-                    <button type="submit" style="margin-bottom: 10px;">Save</button>
-                    <button type="button" @click="closeForm" style="background-color: #e0e0e0; color: #555;">Cancel</button>
-                </form>
+                <div class="form-group">
+                  <label for="photo">Foto von Ware</label>
+                  <input type="file" @change="handleFileUpload" ref="backgroundImageInput" accept="image/*" capture="environment" />
+                </div>
+
+                <div class="form-group">
+                  <label for="price-unit">Prise Einheit</label>
+                  <select v-model="priceUnit" @change="handlePriceUnitChange">
+                    <option value="perGram">Pro Gram</option>
+                    <option value="perKilogram">Pro Kilogram</option>
+                    <option value="perUnit">Pro Stuck</option>
+                  </select>
+                </div>
+
+                <div class="form-group" v-if="priceUnit === 'perGram'">
+                  <label for="price-per-gram">Wieviele Grams</label>
+                  <input type="number" v-model.number="product.pricePerGram" required />
+                </div>
+
+                <div class="form-group">
+                  <label for="unit-price">Prise (Franken)</label>
+                  <input type="number" v-model.number="product.unitPrice" required />
+                </div>
+
+                <button type="submit" style="margin-bottom: 10px;">Speichern</button>
+                <button type="button" @click="closeForm" style="background-color: #e0e0e0; color: #555;">Ablehnen</button>
+              </form>
             </div>
 
-            <!-- <button class="submit-button" @click="saveSelections">
-                Weiter
-            </button> -->
         </div>
       <div v-show="currentPage !== 'Map'">
           <FooterSeller />
@@ -229,33 +212,36 @@ const saveNewCategory= ()=> {
 }
 
 .form-container {
-display: flex;
-justify-content: center;
-align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .categories-selector {
-    display: flex;
-    text-align: center;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-    gap: 8px;
-    width: 300px;
-    padding: 20px;
-    border-radius: 5px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  width: 300px;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 .category-button {
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  cursor: pointer;
+  width: 100%;
   background-color: none;
   border: none;
   border-radius: 10px;
-  padding: 15px;
-  margin: 5px 0;
-  width: 80%;
   text-align: center;
   cursor: pointer;
-  font-size: 16px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 
 }
@@ -276,6 +262,10 @@ legend {
   
   .form-popup {
     position: fixed;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     top: 20%;
     left: 50%;
     transform: translate(-50%, -20%);
@@ -288,21 +278,15 @@ legend {
   }
   
   
-  .add-category {
+.add-category {
   max-width: 600px;
-  margin: 0 auto;
+  margin: 0;
   padding: 20px;
   border-radius: 8px;
   background-color: #f9f9f9;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-.add-category h1 {
-  text-align: center;
-  font-size: 2rem;
-  margin-bottom: 20px;
-  color: #333;
-}
 
 .selected-categories {
   margin-bottom: 20px;
@@ -354,6 +338,7 @@ form {
 }
 
 .form-group label {
+  text-align: center;
   display: block;
   margin-bottom: 8px;
   font-size: 1rem;
@@ -364,8 +349,9 @@ form {
 .form-group input,
 .form-group textarea,
 .form-group select {
-  width: 90%;
-  padding: 10px;
+  text-align: center;
+  width: 92%;
+  padding: 5px;
   font-size: 1rem;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -376,6 +362,8 @@ form {
 .form-group textarea:focus,
 .form-group select:focus {
   border-color: #42b983;
+  text-align: center;
+  width: 100%;
 }
 
 form button {
@@ -417,6 +405,8 @@ form button:hover {
     }
 
   .category-button{
+    display: flex;
+    justify-content: center;
     width: 90%;
     font-size: 14px;
   }

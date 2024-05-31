@@ -4,12 +4,12 @@ import { useAuthStore } from '../../stores/AuthStore';
 
 const store = useAuthStore();
 const seller = ref({
-  firstname: store.authUser.firstname,
-  lastname: store.authUser.lastname,
-  is_seller: store.authUser.is_seller,
-  profile_picture: 'path/to/profile_picture.jpg',
-  enterprise_picture: 'path/to/background-image.jpg',
-  bio: 'Experienced seller with a wide range of products.'
+  // firstname: store.authUser.firstname,
+  // lastname: store.authUser.lastname,
+  // is_seller: store.authUser.is_seller,
+  // profile_picture: 'path/to/profile_picture.jpg',
+  // enterprise_picture: 'path/to/background-image.jpg',
+  // bio: 'Experienced seller with a wide range of products.'
 });
 
 const profileImageInput = ref(null);

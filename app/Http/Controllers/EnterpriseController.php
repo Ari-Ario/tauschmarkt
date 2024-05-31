@@ -33,31 +33,6 @@ class EnterpriseController extends Controller
         });
     
         return response()->json($users);
-        // $user_id = auth()->id();
-
-        // $enterprises = User::latest()->where('is_seller', 1)->get();
-        //     // Map user data and merge favorite details
-        // $users = $enterprises->map(function ($user) {
-        //     // Default values for favorite details
-        //     $firstUserId = null;
-        //     $UserId = null;
-        //     $isFavorite = null;
-        //     // return($user->favorites);
-        //     // // If there are favorites, use the first one (or modify as per your logic)
-        //     if ($user->favorites->isNotEmpty()) {
-        //         $favorite = $user->favorites;
-        //         $firstUserId = $user->first_user_id;
-        //         $isFavorite = $user->is_favorite;
-        //     }
-
-        //     // Add favorite details to user data
-        //     return array_merge($user->toArray(), [
-        //         'first_user_id' => $firstUserId,
-        //         'user_id' => $firstUserId,
-        //         'is_favorite' => $isFavorite,
-        //     ]);
-        // });
-        // return response()->json($users);
 
     }
 

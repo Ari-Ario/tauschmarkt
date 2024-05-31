@@ -17,11 +17,11 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
      */
     public function update(User $user, array $input): void
     {
+        // dd($input);
         Validator::make($input, [
-            'name' => ['required', 'string', 'max:255'],
+            'firstname' => ['required', 'string', 'max:255'],
 
             'email' => [
-                'required',
                 'string',
                 'email',
                 'max:255',

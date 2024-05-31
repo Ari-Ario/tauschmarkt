@@ -13,14 +13,16 @@ const profileItems = ref([]);
 const isEditing = ref(false);
 const editingItem = ref('');
 const editingValue = ref('');
-const user = ref({
-  firstname: '',
-  lastname: '',
-  street: '',
-  house_number: '',
-  city: '',
-  zip_code: null,
-});
+const user = ref({});
+const frontendKeys = {
+  firstname: 'Vorname',
+  lastname: 'Nachname',
+  email: 'email',
+  street: 'Strasse',
+  house_number: 'Hausnummer',
+  city: 'Stadt',
+  zip_code: 'zip_code',
+};
 
 // Fetch user profile data on mount
 const store = useAuthStore();
@@ -30,12 +32,23 @@ const userId = store?.authUser?.id;
 const loadUser = async () => {
     try {
         const response = await axios.get(`api/user/profile/${userId}`);
-        user.value = await response.data;
+        const data = await response.data;
+        user.value = {
+          Vorname: data.firstname,
+          Nachname: data.lastname,
+          Email: data.email,
+          Strasse: data.street,
+          Hausnummer: data.house_number,
+          Stadt: data.city,
+          zip_code: data.zip_code,
+          // add more
+        };
         console.log(user);
     } catch (error) {
         console.error("Error loading blogs:", error);
     }
 };
+
 
 onMounted(() => {
     loadUser();
@@ -49,23 +62,31 @@ const editItem = (item, key) => {
 
 const saveChanges = async () => {
   if (editingItem.value !== null) {
-    user.value[editingItem.value] = editingValue.value;
-    // console.log({
-    //     [editingItem.value]: editingValue.value
-    //   })
+    // Find the backend key based on the frontend key
+    const backendKey = Object.keys(frontendKeys).find(
+      key => frontendKeys[key] === editingItem.value
+    );
+
+    if (backendKey) {
+      // Update the user value
+      user.value[editingItem.value] = editingValue.value;
+
+      // Prepare payload with all the fields mapped to backend keys
+      const payload = Object.fromEntries(
+        Object.entries(user.value).map(([key, value]) => [
+          Object.keys(frontendKeys).find(k => frontendKeys[k] === key),
+          value,
+        ])
+      );
+      // console.log(payload);
 
     // Save changes to the server using Laravel Fortify's API
     try {
-      const response = await AuthService.updateUser({
-        [editingItem.value]: editingValue.value
-      });
-
-      // const response = await axios.put('/api/user/profile-information', {
-      //   [editingItem.value]: editingValue.value
-      // });
-      console.log('Profile updated:', response.data);
-    } catch (error) {
-      console.error('Error updating profile:', error);
+        const response = await axios.put('/api/user/profile-information', payload);
+        console.log('Profile updated:', response.data);
+      } catch (error) {
+        console.error('Error updating profile:', error);
+      }
     }
   }
   cancelEdit();
@@ -82,17 +103,19 @@ const cancelEdit = () => {
 <template>
   <div class="container">
     <div class="profile-page">
-      <div class="back">
+      <!-- <div class="back">
           <router-link to="/dashboard">
               <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z"/></svg>
           </router-link>
+      </div> -->
+      <div class="account-details">
+        <h3>Meine Profil</h3>
       </div>
-      <h3>Account Details</h3>
 
-      <div class="profile-section" v-for="(item, key)  in user" v-if="user" :key="key">
-        <div class="profile-item"  @click="() => editItem(item, key)">
+      <div class="profile-section" v-for="(value, key) in user" v-if="user" :key="key">
+        <div class="profile-item" @click="() => editItem(value, key)">
           <span>{{ key }}</span>
-          <span class="profile-value" >{{ item }}</span>
+          <span class="profile-value" >{{ value }}</span>
         </div>
         <!-- <div v-else style="display: none;"></div> -->
         <div v-if="store?.authUser?.is_seller">
@@ -107,8 +130,8 @@ const cancelEdit = () => {
         <form @submit.prevent="saveChanges">
           <label :for="editingItem">{{ editingItem }}</label>
           <input type="text" v-model="editingValue" :id="editingItem.key" required />
-          <button type="submit" style="margin-bottom: 10px;">Save</button>
-          <button type="button" @click="cancelEdit">Cancel</button>
+          <button type="submit" style="margin-bottom: 10px;">Speichern</button>
+          <button type="button" @click="cancelEdit">Ablehnen</button>
         </form>
       </div>
     </div>
@@ -139,6 +162,10 @@ align-items: center;
 .profile-section {
   /* border-bottom: 1px solid #ddd; */
   margin-bottom: 10px;
+}
+
+.account-details {
+  text-align: center;
 }
 
 .profile-item {

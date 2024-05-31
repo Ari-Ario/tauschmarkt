@@ -11,14 +11,33 @@
     import SellerStatistics from '../components/SellerComponents/SellerStatistics.vue';
 
     import Map from "./Map.vue";
-
+    import axios from 'axios';
+    import { useRoute } from 'vue-router';
 
     const store = useAuthStore();
+    const userId = store?.authUser?.id;
 
     const currentPage = ref('Liste');
+    let route = useRoute();
+    const user = ref({});
     function switchPage(page) {
         currentPage.value = page;
     }
+
+    const loadUser = async () => {
+        try {
+
+            const response = await axios.get(`api/users/auth`); // or 1
+            user.value = await response.data;
+            console.log(response.data);
+        } catch (error) {
+            console.error("Error loading blogs:", error);
+        }
+    };
+
+    onMounted(() => {
+        loadUser();
+    });
 </script>
 
 
@@ -28,7 +47,7 @@
     </header>
 
     <!-- User Profile -->
-    <div v-if="!store.authUser.is_seller" class="content">
+    <div v-if="user.is_seller" class="content">
         <div :class="{ active: currentPage !== 'Map' }, menu-container">
             <div class="search-container">
                 <input type="text" placeholder="Search" class="search-input" />
@@ -76,7 +95,7 @@
 
 
     <!-- Seller Profile -->
-    <div v-if="store.authUser.is_seller" class="content">
+    <div v-else class="content">
         <div :class="{ active: currentPage !== 'Map' }, menu-container">
             <router-link :to="{ name: 'map'}" class="link">
                 <div class="switch-container">

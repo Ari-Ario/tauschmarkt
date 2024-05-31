@@ -29,6 +29,7 @@ class UserController extends Controller
             // 'id' => $user->id,
             'firstname' => $user->firstname,
             'lastname' => $user->lastname,
+            'email' => $user->email,
             // 'is_seller' => $user->is_seller,
             // 'profile_picture' => $user->profile_picture
             //     ? asset($user->profile_picture)

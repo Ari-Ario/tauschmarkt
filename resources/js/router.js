@@ -68,7 +68,7 @@ export const routes = [
     {
         path:"/orders-list",
         name:"OrdersList", 
-        component: () => import("./components/SellerComponents/ListOfOrders.vue"),
+        component: () => import("./components/ListOfOrders.vue"),
     },
 
     {

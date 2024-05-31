@@ -1,60 +1,5 @@
-<template>
-  <div class="orders-page">
-    <div class="orders-list">
-      <div 
-        v-for="order in orders" 
-        :key="order.id" 
-        class="order-item" 
-        @click="selectOrder(order)"
-      >
-        <img :src="order.image" alt="Order Image" />
-        <div>
-          <h3>{{ order.name }}</h3>
-          <p>{{ order.address }}</p>
-        </div>
-      </div>
-    </div>
-    <div class="backdrop" v-if="selectedOrder" @click="closeDetails"></div>
-    <div class="order-details-popup" v-if="selectedOrder">
-      <div class="details-header">
-        <h2>{{ selectedOrder.name }}</h2>
-        <button @click="closeDetails">Close</button>
-      </div>
-      <img :src="selectedOrder.image" alt="Order Image" />
-      <p><strong>Address:</strong> {{ selectedOrder.address }}</p>
-      <p><strong>Pickup Time:</strong> {{ selectedOrder.pickupTime }}</p>
-      <p><strong>Order Date:</strong> {{ selectedOrder.orderDate }}</p>
-      <p><strong>Order ID:</strong> {{ selectedOrder.id }}</p>
-      <p><strong>Price:</strong> {{ selectedOrder.price }} EUR</p>
-      <div>
-        <label for="picked">Picked Up:</label>
-        <input type="checkbox" id="picked" v-model="selectedOrder.picked" />
-      </div>
-      <div class="collect-section">
-        <h3>Order to be collected</h3>
-        <div class="collect-info">
-          <div class="quantity">
-            <div class="circle">1x</div>
-            <p>Surprise Bag</p>
-          </div>
-          <p>{{ selectedOrder.name }}</p>
-          <div class="order-code">{{ selectedOrder.orderCode }}</div>
-        </div>
-        <p>Swipe below and show the order to the staff. Make sure to swipe only when you're in the store ready to collect your meal.</p>
-        <button class="swipe-to-collect" @click="markAsCollected(selectedOrder)">
-          <span class="swipe-icon">➔</span>
-          Abholen
-        </button>
-      </div>
-    </div>
-    <div v-show="currentPage !== 'Map'">
-        <FooterSeller />
-    </div>
-  </div>
-</template>
-
 <script setup>
-import FooterSeller from '../../components/footer/FooterSeller.vue';
+import FooterSeller from '../components/footer/FooterSeller.vue';
 
 import { ref } from 'vue';
 import axios from 'axios';
@@ -115,27 +60,102 @@ const markAsCollected = async (order) => {
 
 </script>
 
+<template>
+  <div class="orders-page">
+    <div class="order-details">
+        <h3>Bestellungen</h3>
+      </div>
+    <div class="orders-list">
+      <div 
+        v-for="order in orders" 
+        :key="order.id" 
+        class="order-item" 
+        @click="selectOrder(order)"
+      >
+        <img :src="order.image" alt="Order Image" />
+        <div>
+          <h3>{{ order.name }}</h3>
+          <p>{{ order.address }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="backdrop" v-if="selectedOrder" @click="closeDetails"></div>
+    <div class="order-details-popup" v-if="selectedOrder">
+      <div class="details-header">
+        <h2>{{ selectedOrder.name }}</h2>
+        <button @click="closeDetails">Close</button>
+      </div>
+      <img :src="selectedOrder.image" alt="Order Image" />
+      <p><strong>Address:</strong> {{ selectedOrder.address }}</p>
+      <p><strong>Pickup Time:</strong> {{ selectedOrder.pickupTime }}</p>
+      <p><strong>Order Date:</strong> {{ selectedOrder.orderDate }}</p>
+      <p><strong>Order ID:</strong> {{ selectedOrder.id }}</p>
+      <p><strong>Price:</strong> {{ selectedOrder.price }} EUR</p>
+      <div>
+        <label for="picked">Picked Up:</label>
+        <input type="checkbox" id="picked" v-model="selectedOrder.picked" />
+      </div>
+      <div class="collect-section">
+        <h3>Order to be collected</h3>
+        <div class="collect-info">
+          <div class="quantity">
+            <div class="circle">1x</div>
+            <p>Surprise Bag</p>
+          </div>
+          <p>{{ selectedOrder.name }}</p>
+          <div class="order-code">{{ selectedOrder.orderCode }}</div>
+        </div>
+        <p>Swipe below and show the order to the staff. Make sure to swipe only when you're in the store ready to collect your meal.</p>
+        <button class="swipe-to-collect" @click="markAsCollected(selectedOrder)">
+          <span class="swipe-icon">➔</span>
+          Abholen
+        </button>
+      </div>
+    </div>
+    <div v-show="currentPage !== 'Map'">
+        <FooterSeller />
+    </div>
+  </div>
+</template>
+
 <style scoped>
 .orders-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 20px;
+  width: 300px;
+  /* padding: 20px; */
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.order-details {
+  text-align: center;
 }
 
 .orders-list {
   flex: 1;
-  min-width: 300px;
-  max-width: 400px;
+  width: 100%;
+  /* min-width: 300px;
+  max-width: 400px; */
   border-right: 1px solid #ddd;
 }
 
 .order-item {
   display: flex;
-  align-items: center;
+  justify-content: space-between;
   padding: 10px;
-  border-bottom: 1px solid #ddd;
   cursor: pointer;
+
+  background-color: none;
+  border: none;
+  border-radius: 10px;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
 .order-item img {
@@ -176,8 +196,8 @@ const markAsCollected = async (order) => {
   border: 1px solid #ddd;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   z-index: 20;
-  width: 80%;
-  max-width: 500px;
+  width: 300px;
+  /* max-width: 300px; */
   border-radius: 8px;
 }
 
@@ -289,5 +309,23 @@ const markAsCollected = async (order) => {
 
 .swipe-icon {
   margin-right: 10px;
+}
+
+@media (max-width: 600px) {
+
+.orders-page {
+  width: auto;
+  height: auto;
+
+  padding: auto;
+}
+.orders-list {
+  top: 0;
+  width: 100%;
+}
+.order-details-popup {
+  width: 90%;
+}
+
 }
 </style>
