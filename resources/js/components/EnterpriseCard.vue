@@ -1,6 +1,7 @@
 <script setup>
   import { useAuthStore } from '@/stores/AuthStore';
 import AuthService from "@/services/AuthService";
+import { authClient } from '../services/AuthService';
 
 import { ref, onMounted } from "vue";
 import axios from "axios";
@@ -22,14 +23,27 @@ const loadEnterprises = async () => {
     }
 };
 
-const addToFavorites = async (enterprise) => {
+const addOrRemoveFavorites = async ( enterprise) => {
+    
     try {
         enterprise.is_favorite = !enterprise.is_favorite;
+        if (enterprise.is_favorite === true) {
+            let response = await authClient.post("/favorites/add", {
+                enterpriseId: enterprise.id,
+                userId: store.authUser.id,
+                isFavorite: enterprise.is_favorite
+            });
+            console.log(response);
+        } else {
+            let response = await authClient.post("/favorites/remove", {
+                enterpriseId: enterprise.id,
+                userId: store.authUser.id,
+                isFavorite: enterprise.is_favorite
+            });
+            console.log(response);
+        }
 
-        await axios.post("/api/enterprises/favorite", {
-            enterpriseId: enterprise.id,
-            isFavorite: enterprise.is_favorite
-        });
+
     } catch (error) {
         console.error("Error adding to favorites:", error);
     }
@@ -50,7 +64,7 @@ onMounted(() => {
                     :src="enterprise.enterprise_picture || 'storage/enterprise_images/default.png'"
                     alt=""
                 />
-                <div class="favorite" @click="addToFavorites(enterprise)">
+                <div class="favorite" @click="addOrRemoveFavorites(enterprise)">
                     <svg v-if="enterprise.is_favorite" xmlns="http://www.w3.org/2000/svg" fill="red" viewBox="0 0 24 24" width="24px" height="24px"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                     <svg v-else xmlns="http://www.w3.org/2000/svg" fill="green" viewBox="0 0 24 24" width="24px" height="24px"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                 </div>

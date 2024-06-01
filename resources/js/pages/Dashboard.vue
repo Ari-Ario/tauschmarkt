@@ -28,8 +28,8 @@
         try {
 
             const response = await axios.get(`api/users/auth`); // or 1
-            user.value = await response.data;
-            // console.log(response.data);
+            user.value = await response.data.data;
+            // console.log(user.value);
         } catch (error) {
             console.error("Error loading blogs:", error);
         }
@@ -46,8 +46,44 @@
         <LogoutButton />
     </header>
 
-    <!-- User Profile -->
+
+    <!-- Seller Profile -->
     <div v-if="user.is_seller" class="content">
+        <div :class="{ active: currentPage !== 'Map' }, menu-container">
+            <router-link :to="{ name: 'map'}" class="link">
+                <div class="switch-container">
+
+                    <button>Karte 📍
+                    </button>
+                    
+                </div>
+            </router-link>
+        </div>
+        
+        <div v-if="currentPage === 'Liste'" class="content">
+            <div class="EnterpriseCardContainer">
+                <SellerProfil />
+            </div>
+            <div class="EnterpriseCardContainer">
+                <SellerProducts />
+            </div>
+            <div class="EnterpriseCardContainer">
+                <SellerStatistics />
+            </div>
+        </div>
+
+        <div v-else-if="currentPage === 'Map'" class="content">
+            <!-- Map page content here -->
+            <Map />
+        </div>
+
+        <div v-show="currentPage !== 'Map'">
+            <FooterSeller />
+        </div>
+    </div>
+
+    <!-- User Profile -->
+    <div v-else class="content">
         <div :class="{ active: currentPage !== 'Map' }, menu-container">
             <div class="search-container">
                 <input type="text" placeholder="Search" class="search-input" />
@@ -93,41 +129,6 @@
         </div>
     </div>
 
-
-    <!-- Seller Profile -->
-    <div v-else class="content">
-        <div :class="{ active: currentPage !== 'Map' }, menu-container">
-            <router-link :to="{ name: 'map'}" class="link">
-                <div class="switch-container">
-
-                    <button>Karte 📍
-                    </button>
-                    
-                </div>
-            </router-link>
-        </div>
-        
-        <div v-if="currentPage === 'Liste'" class="content">
-            <div class="EnterpriseCardContainer">
-                <SellerProfil />
-            </div>
-            <div class="EnterpriseCardContainer">
-                <SellerProducts />
-            </div>
-            <div class="EnterpriseCardContainer">
-                <SellerStatistics />
-            </div>
-        </div>
-
-        <div v-else-if="currentPage === 'Map'" class="content">
-            <!-- Map page content here -->
-            <Map />
-        </div>
-
-        <div v-show="currentPage !== 'Map'">
-            <FooterSeller />
-        </div>
-    </div>
 </template>
 
 <style scoped>

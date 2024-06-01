@@ -23,7 +23,7 @@ class OrderFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
-            'total_amount' => $this->faker->randomFloat(2, 50, 1000),
+            'total_price' => $this->faker->randomFloat(2, 50, 1000),
         ];
     }
 }

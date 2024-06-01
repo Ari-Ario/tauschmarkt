@@ -54,15 +54,37 @@ class FavoritesController extends Controller
         return response()->json($userFavorites->values());
     }
 
-    //Second Method
-    public function getFavoritesByUserId($userId)
+    ////////////////////////////////////////////////ADD and REMOVE Methods///////////////////////////////////////////////////////////
+
+    public function addFavorite(Request $request)
     {
-        $enterprise = User::with('favorites')->get($userId);
 
-        // $enterprise = Favorites::where('user_id' , $userId)->where('is_favorite', 1)->get();
+        $favorite = Favorites::create([
+            'first_user_id' => $request->enterpriseId,
+            'user_id' => $request->userId,
+            'is_favorite' => true,
+        ]);
 
-        return response()->json($favorites);
+        return response()->json(['message' => 'Favorite added successfully', 'favorite' => $favorite]);
     }
+
+
+    public function removeFavorite(Request $request)
+    {
+
+        $favorite = Favorites::where('first_user_id', $request->enterpriseId)
+                            ->where('user_id', $request->userId);
+                            // ->first();
+
+        if ($favorite) {
+            $favorite->delete();
+            return response()->json(['message' => 'Favorite removed successfully']);
+        }
+
+        return response()->json(['message' => 'Favorite not found'], 404);
+    }
+
+    ////////////////////////////////////////////////EXTRA Methods in case they are needed/////////////////////////////////////////////////
 
     public function updateFavorite(Request $request)
     {
@@ -72,42 +94,6 @@ class FavoritesController extends Controller
         $enterprise->save();
 
         return response()->json(['message' => 'Favorite status updated successfully']);
-    }
-    ////////////////////////////////////////////////Extra Methods///////////////////////////////////////////////////////////
-
-    public function addFavorite(Request $request)
-    {
-        pp($request);
-        $request->validate([
-            'first_user_id' => 'required|numeric',
-            'user_id' => 'required',
-        ]);
-
-        $favorite = Favorites::create([
-            'first_user_id' => $request->first_user_id,
-            'user_id' => $request->user_id,
-            'is_favorite' => true,
-        ]);
-
-        return response()->json(['message' => 'Favorite added successfully', 'favorite' => $favorite]);
-    }
-
-    public function removeFavorite(Request $request)
-    {
-        $request->validate([
-            'first_user_id' => 'required|numeric',
-        ]);
-
-        $favorite = Favorites::where('first_user_id', $request->first_user_id)
-                            ->where('user_id', Auth::id())
-                            ->first();
-
-        if ($favorite) {
-            $favorite->delete();
-            return response()->json(['message' => 'Favorite removed successfully']);
-        }
-
-        return response()->json(['message' => 'Favorite not found'], 404);
     }
 
         // public function getAllUsersWithFavorites()

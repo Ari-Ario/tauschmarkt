@@ -9,6 +9,7 @@ import axios from "axios";
 
 import { RouterLink, useRoute } from "vue-router";
 
+const authStore = useAuthStore()
 const store = useAuthStore();
 let route = useRoute();
 let favorites = ref([]);
@@ -28,22 +29,25 @@ const loadFavorites = async (userId) => {
 };
 
 
-const addOrRemoveFavorites = async (userId, enterprise) => {
+const addOrRemoveFavorites = async ( enterprise) => {
     
     try {
         enterprise.is_favorite = !enterprise.is_favorite;
-        // console.log({
-        //     enterpriseId: enterprise.id,
-        //     userId: store.authUser.id,
-        //     isFavorite: enterprise.is_favorite
-        // })
-
-        let response = await authClient.put("enterprises/favorite", {
-            enterpriseId: enterprise.id,
-            userId: store.authUser.id,
-            isFavorite: enterprise.is_favorite
-        });
-        console.log(response);
+        if (enterprise.is_favorite === true) {
+            let response = await authClient.post("/favorites/add", {
+                enterpriseId: enterprise.id,
+                userId: store.authUser.id,
+                isFavorite: enterprise.is_favorite
+            });
+            console.log(response);
+        } else {
+            let response = await authClient.post("/favorites/remove", {
+                enterpriseId: enterprise.id,
+                userId: store.authUser.id,
+                isFavorite: enterprise.is_favorite
+            });
+            console.log(response);
+        }
 
 
     } catch (error) {
@@ -51,7 +55,6 @@ const addOrRemoveFavorites = async (userId, enterprise) => {
     }
 };
 
-const authStore = useAuthStore()
 
 onMounted(() => {
     const userId = store.authUser.id;

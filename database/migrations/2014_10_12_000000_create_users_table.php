@@ -28,6 +28,8 @@ return new class extends Migration
             $table->decimal('longitude', 10, 7)->nullable();
             $table->string('profile_picture')->nullable();
             $table->string('enterprise_picture')->nullable();
+            $table->time('opening')->nullable(); // Adding the opening time column
+            $table->time('closing')->nullable(); // Adding the closing time column
             $table->rememberToken();
             $table->timestamps();
         });
