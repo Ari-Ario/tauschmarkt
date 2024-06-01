@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 
 use App\Http\Resources\UserResource;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -52,31 +53,32 @@ class UserController extends Controller
         // Update user profile data
         public function updateUserProfile(Request $request)
         {
-            $userId = $request->input('userId');
-            $key = $request->input('key');
-            $value = $request->input('value');
+            $user = Auth::user();
+
+            $request->validate([
+                'firstname' => 'required|string|max:255',
+                'lastname' => 'required|string|max:255',
+                'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+                'street' => 'string|max:255',
+                'house_number' => 'string|max:255',
+                'zip_code' => 'string|max:20',
+                'city' => 'string|max:255',
+            ]);
     
-            $user = User::find($userId);
+            $user->update($request->only([
+                'firstname',
+                'lastname',
+                'email',
+                'street',
+                'house_number',
+                'zip_code',
+                'city',
+            ]));
     
-            if (!$user) {
-                return response()->json(['error' => 'User not found'], 404);
-            }
-    
-            // Validate the key to ensure it's an allowed field
-            $allowedKeys = [
-                'firstname', 'lastname', 'is_seller', 'profile_picture', 
-                'enterprise_picture', 'street', 'house_number', 'city', 
-                'zip_code', 'latitude', 'longitude'
-            ];
-    
-            if (!in_array($key, $allowedKeys)) {
-                return response()->json(['error' => 'Invalid field'], 400);
-            }
-    
-            $user->$key = $value;
-            $user->save();
-    
-            return response()->json(['message' => 'Profile updated successfully']);
+            return response()->json([
+                'message' => 'User updated successfully',
+                'user' => $user,
+            ]);
         }
 
 

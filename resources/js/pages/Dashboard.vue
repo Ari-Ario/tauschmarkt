@@ -29,7 +29,7 @@
 
             const response = await axios.get(`api/users/auth`); // or 1
             user.value = await response.data;
-            console.log(response.data);
+            // console.log(response.data);
         } catch (error) {
             console.error("Error loading blogs:", error);
         }

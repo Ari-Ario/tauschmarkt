@@ -18,6 +18,7 @@ const categories = [
   'Getränke und Wein',
   'Fleisch & Geflügel',
   'Blumen & Gärtnerei',
+  'Überraschungspäkli',
   'Andere Kategorien'
 ];
 

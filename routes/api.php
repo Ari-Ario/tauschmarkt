@@ -8,7 +8,7 @@ use App\Models\User;
 use App\Http\Controllers\TokenController;
 
 use App\Http\Controllers\UserController;
-use App\Actions\Fortify\UpdatesUserProfileInformation;
+use App\Actions\Fortify\UpdateUserProfileInformation;
 
 
 use App\Http\Controllers\EnterpriseController;
@@ -36,7 +36,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/users/auth', [UserController::class, 'show']);
     
     Route::get('/user/profile/{id}', [UserController::class, 'getUserProfile']);
-    Route::put('/user/profile-information', [UpdatesUserProfileInformation::class, 'update']);
+    Route::put('/user/update-profile', [UserController::class, 'updateUserProfile']);
     
 
     // Route::post('/favorites/remove', [FavoritesController::class, 'removeFavorite']);

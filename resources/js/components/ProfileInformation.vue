@@ -4,11 +4,14 @@ import FooterUser from '../components/footer/FooterUser.vue';
 import FooterSeller from '../components/footer/FooterSeller.vue';
 
 import { useAuthStore } from '../stores/AuthStore';
-import AuthService from "@/services/AuthService";
+// import authClient from "@/services/AuthService";
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRoute } from "vue-router";
+import authClient  from '../services/AuthService';
+import {useRouter} from 'vue-router';
 
+const router = useRouter();
 const profileItems = ref([]);
 const isEditing = ref(false);
 const editingItem = ref('');
@@ -17,7 +20,7 @@ const user = ref({});
 const frontendKeys = {
   firstname: 'Vorname',
   lastname: 'Nachname',
-  email: 'email',
+  email: 'Email',
   street: 'Strasse',
   house_number: 'Hausnummer',
   city: 'Stadt',
@@ -43,7 +46,7 @@ const loadUser = async () => {
           zip_code: data.zip_code,
           // add more
         };
-        console.log(user);
+        // console.log(user);
     } catch (error) {
         console.error("Error loading blogs:", error);
     }
@@ -78,11 +81,11 @@ const saveChanges = async () => {
           value,
         ])
       );
-      // console.log(payload);
-
-    // Save changes to the server using Laravel Fortify's API
-    try {
-        const response = await axios.put('/api/user/profile-information', payload);
+      console.log(payload);
+      
+      // Save changes to the server using Laravel Fortify's API
+      try {
+        const response = await axios.put(`/api/user/update-profile`, payload);
         console.log('Profile updated:', response.data);
       } catch (error) {
         console.error('Error updating profile:', error);
@@ -103,11 +106,7 @@ const cancelEdit = () => {
 <template>
   <div class="container">
     <div class="profile-page">
-      <!-- <div class="back">
-          <router-link to="/dashboard">
-              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z"/></svg>
-          </router-link>
-      </div> -->
+
       <div class="account-details">
         <h3>Meine Profil</h3>
       </div>
