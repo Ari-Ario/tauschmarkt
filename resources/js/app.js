@@ -5,9 +5,20 @@ import { createPinia } from 'pinia'
 import { createApp } from "vue";
 import { useAuthStore } from "./stores/AuthStore";
 import App from "./App.vue";
+import axios from 'axios';
 
+// Get CSRF token from the meta tag
+const tokenElement = document.querySelector('meta[name="csrf-token"]');
+
+if (tokenElement) {
+  const token = tokenElement.getAttribute('content');
+  axios.defaults.headers.common['X-CSRF-TOKEN'] = token;
+} else {
+  console.error('CSRF token not found in meta tag');
+}
 
 const app = createApp(App);
+app.config.globalProperties.$axios = axios;
 app.use(createPinia());
 const store = useAuthStore();
 

@@ -17,7 +17,7 @@ const loadEnterprises = async () => {
     try {
         const response = await axios.get(`api/enterprises/${userId}`);
         filteredEnterprises.value = response.data;
-        console.log(filteredEnterprises)
+        // console.log(filteredEnterprises)
     } catch (error) {
         console.error("Error loading enterprises:", error);
     }

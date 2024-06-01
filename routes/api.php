@@ -6,15 +6,9 @@ use Illuminate\Support\Facades\Route;
 use App\Models\User;
 
 use App\Http\Controllers\TokenController;
-
 use App\Http\Controllers\UserController;
-use App\Actions\Fortify\UpdateUserProfileInformation;
-
-
 use App\Http\Controllers\EnterpriseController;
-
 use App\Http\Controllers\FavoritesController;
-
 use App\Http\Controllers\ProductController;
 
 Route::post('/sanctum/token', TokenController::class);
@@ -29,6 +23,7 @@ Route::post('/favorites/add', [FavoritesController::class, 'addFavorite']);
 Route::post('/favorites/remove', [FavoritesController::class, 'removeFavorite']);
 Route::put('/enterprises/favorite', [FavoritesController::class, 'updateFavorite']);   
 
+
 /**
  * AUTH ROUTES
  */
@@ -39,6 +34,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/user/profile/{id}', [UserController::class, 'getUserProfile']);
     Route::put('/user/update-profile', [UserController::class, 'updateUserProfile']);
     
-    
-    // Route::post('/favorites/remove', [FavoritesController::class, 'removeFavorite']);
+    //////////////////////////Uploading Profile and Background Images /////////////////////
+    Route::post('/bg-picture', [UserController::class, 'updateBackgroundImage']);
+    Route::post('/profile-picture', [UserController::class, 'updateProfileImage']);
+
+    Route::get('/user-information', [UserController::class, 'show']);
+
 });
