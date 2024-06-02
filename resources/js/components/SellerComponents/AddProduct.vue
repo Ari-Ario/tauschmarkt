@@ -1,56 +1,47 @@
 <script setup>
 import FooterSeller from '../../components/footer/FooterSeller.vue';
 
-import { reactive, ref } from 'vue';
-import { useAuthStore } from '@/stores/AuthStore';
+import { reactive, ref, onMounted } from 'vue';
 import AuthService from "@/services/AuthService";
+import { useAuthStore } from '@/stores/AuthStore';
+import axios from 'axios';
 
 import {useRouter} from 'vue-router';
 
 const router = useRouter();
-
+const store = useAuthStore();
+const sellerId = store?.authUser?.id;
 // Define the categories
-const categories = [
-  'Honigprodukte',
-  'Obst & Gemüse',
-  'Milchprodukte',
-  'Vollkornprodukte',
-  'Getränke und Wein',
-  'Fleisch & Geflügel',
-  'Blumen & Gärtnerei',
-  'Überraschungspäkli',
-  'Andere Kategorien'
-];
+const categories = ref([]);
 
 // Reactive state for selected categories
 const selectedCategories = ref(new Set());
 
-// Toggle category selection
-function toggleCategory(category) {
-  if (selectedCategories.value.has(category)) {
-    selectedCategories.value.delete(category);
-  } else {
-    selectedCategories.value.add(category);
-  }
-}
+const loadCategories = async () => {
+    try {
+        const response = await axios.get(`api/categories`);
+        categories.value = response.data;
+        console.log(categories)
+    } catch (error) {
+        console.error("Error loading enterprises:", error);
+    }
+};
 
-// Save selected values
-// function saveSelections() {
-//   const selectedArray = Array.from(selectedCategories.value);
-//   sessionStorage.setItem('myArray', selectedArray)
-
-//   router.push({ name: 'addProduct', params: { data: JSON.stringify(selectedArray.value) } });
-// }
+onMounted(() => {
+    axios.defaults.withCredentials = true;
+    loadCategories();
+});
 
 // Form state
 const isFormOpen = ref(false);
 const newCategory = ref('');
 const newCategoryInput = ref('');
 const product = ref({
+    CategoryId: null,
+    sellerId: sellerId,
     name: '',
     description: '',
-    pricePerGram: null,
-    pricePerKilogram: null,
+    Grams: null,
     unitPrice: null,
     photo: null,
 });
@@ -58,9 +49,10 @@ const priceUnit = ref('perGram');
 const selectedCategory = ref('');
 
 // Open form
-function openForm(category) {
+function openForm(category, CategoryId) {
     isFormOpen.value = true;
     selectedCategory.value = category;
+    product.value.CategoryId = CategoryId;
 }
 
 // Close form
@@ -75,68 +67,56 @@ function onFileChange(event) {
   product.value.photo = file;
 }
 
-// Save product details
-function saveProduct() {
-  console.log('Product saved:', product.value);
-  // Implement saving logic here (e.g., send to backend)
-  closeForm();
-}
-
-const handleFileUpload = (event) => {
-      const file = event.target.files[0];
-      product.value.photo = file;
-    };
-
-const handlePriceUnitChange = () => {
-      product.value.pricePerGram = null;
-      product.value.pricePerKilogram = null;
-    };
-
 const resetForm = () => {
       product.value = {
         name: '',
         description: '',
-        pricePerGram: null,
+        Grams: null,
         pricePerKilogram: null,
         unitPrice: null,
         photo: null,
       };
       priceUnit.value = 'perGram';
     };
-
-const submitForm = async () => {
-    const formData = new FormData();
-    formData.append('name', product.value.name);
-    formData.append('description', product.value.description);
-    formData.append('pricePerGram', product.value.pricePerGram);
-    formData.append('pricePerKilogram', product.value.pricePerKilogram);
-    formData.append('unitPrice', product.value.unitPrice);
-    formData.append('photo', product.value.photo);
-
-    try {
-    const response = await axios.post('/api/products', formData, {
-        headers: {
-        'Content-Type': 'multipart/form-data',
-        },
-    });
-    console.log('Product added successfully:', response.data);
-    selectedCategories.value.push(product.value.name);
-    closeForm();
-    } catch (error) {
-    console.error('Error adding product:', error);
-    }
+const handleFileUpload = (event) => {
+  product.value.photo = event.target.files[0];
 };
 
-const saveNewCategory= ()=> {
-    const newCategory = document.getElementById("newCategory").value;
-    // if (newCategory.value && !categories.value.includes(newCategory.value)) {
-    //     categories.value.push(newCategoryInput.value);
-    // }
-    // add the ctegory in database
-    openForm(newCategory)
-    newCategory.value = '';
-      
-}
+const handlePriceUnitChange = (event) => {
+  priceUnit.value = event.target.value;
+};
+
+const saveProduct = async () => {
+  try {
+    const formData = new FormData();
+    formData.append('category_id', product.value.CategoryId); // Ensure this is correct
+    formData.append('seller_id', product.value.sellerId);
+    formData.append('name', product.value.name);
+    formData.append('description', product.value.description);
+    if (priceUnit.value === 'perGram') {
+      formData.append('amount', product.value.Grams);
+    }
+    formData.append('price', product.value.unitPrice);
+    if (product.value.photo) {
+      formData.append('product_picture', product.value.photo);
+    }
+    if (!product.value.Grams) {
+      formData.append('amount', 1);
+    }
+
+    const response = await axios.post('/api/product/add', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    console.log('Product added successfully:', response.data);
+    selectedCategories.value.add(product.value.name);
+    closeForm();
+  } catch (error) {
+    console.error('Error adding product:', error);
+  }
+};
 
 </script>
 
@@ -146,12 +126,13 @@ const saveNewCategory= ()=> {
 
             <h3>Welche Kategorien bieten Sie an?</h3>
 
-            <div v-for="category in categories" v-if="categories[-1] !== 'Andere Kategorien'" :key="category" class="category-button" :class="{ selected: selectedCategories.has(category) }" @click="openForm(category)">
-                {{ category }}
+            <div v-for="category in categories" :key="category.id" class="category-button" :class="{ selected: selectedCategories.has(category) }" @click="openForm(category.name, category.id)">
+                {{ category.name }}
             </div>
 
             <div v-if="isFormOpen" class="form-popup">
-              <form @submit.prevent="saveProduct">
+              <form @submit.prevent="saveProduct()">
+                <input type="hidden" name="" :class="{ selected: selectedCategories.has(category) }" v-model="product.CategoryId">
                 <div class="form-group">
                   <div class="category-button" :class="{ selected: selectedCategories.has(category) }" style="width: 90%;">
                     {{ selectedCategory }}
@@ -184,7 +165,7 @@ const saveNewCategory= ()=> {
 
                 <div class="form-group" v-if="priceUnit === 'perGram'">
                   <label for="price-per-gram">Wieviele Grams</label>
-                  <input type="number" v-model.number="product.pricePerGram" required />
+                  <input type="number" v-model.number="product.Grams" required />
                 </div>
 
                 <div class="form-group">

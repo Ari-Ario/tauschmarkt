@@ -12,7 +12,12 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        //
+        try {
+            $categories = Category::all();
+            return response()->json($categories);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error fetching categories'], 500);
+        }
     }
 
     /**

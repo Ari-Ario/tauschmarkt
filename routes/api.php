@@ -10,6 +10,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\EnterpriseController;
 use App\Http\Controllers\FavoritesController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CategoryController;
 
 Route::post('/sanctum/token', TokenController::class);
 
@@ -17,11 +18,6 @@ Route::get('/enterprises/{userId}', [EnterpriseController::class, 'latestEnterpr
 
 Route::get('/products', [ProductController::class, 'index']);
 
-// Favorites APIs
-Route::get('/favorites/{userId}', [FavoritesController::class, 'getUserFavorites']);
-Route::post('/favorites/add', [FavoritesController::class, 'addFavorite']);
-Route::post('/favorites/remove', [FavoritesController::class, 'removeFavorite']);
-Route::put('/enterprises/favorite', [FavoritesController::class, 'updateFavorite']);   
 
 
 /**
@@ -40,4 +36,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('/user-information', [UserController::class, 'show']);
 
+    // Favorites APIs
+    Route::get('/favorites/{userId}', [FavoritesController::class, 'getUserFavorites']);
+    Route::post('/favorites/add', [FavoritesController::class, 'addFavorite']);
+    Route::post('/favorites/remove', [FavoritesController::class, 'removeFavorite']);
+    Route::put('/enterprises/favorite', [FavoritesController::class, 'updateFavorite']);
+    
+    // Categories and Products APIs
+    Route::get('/categories', [CategoryController::class, 'index']);   
+    Route::post('/product/add', [ProductController::class, 'create']);
 });
