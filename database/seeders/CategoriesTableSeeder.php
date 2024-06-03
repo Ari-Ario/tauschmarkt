@@ -14,18 +14,17 @@ class CategoriesTableSeeder extends Seeder
     {
         \App\Models\Category::factory()->count(10)->create();
         $categories = [
-            ['name' => 'Electronics', 'description' => ''],
-            ['name' => 'Clothing', 'description' => ''],
-            ['name' => 'Electronics', 'description' => ''],
-            ['name' => 'Clothing', 'description' => ''],
-            ['name' => 'Books', 'description' => ''],
+            ['name' => 'Obst &Gemüse', 'description' => ''],
+            ['name' => 'Honigprodukte', 'description' => ''],
+            ['name' => 'Milchprodukte', 'description' => ''],
+            ['name' => 'Getränke & Wienkeller', 'description' => ''],
+            ['name' => 'Fleisch', 'description' => ''],
             ['name' => 'Home & Kitchen', 'description' => ''],
             ['name' => 'Health & Beauty', 'description' => ''],
-            ['name' => 'Toys & Games', 'description' => ''],
-            ['name' => 'Sports & Outdoors', 'description' => ''],
-            ['name' => 'Automotive', 'description' => ''],
-            ['name' => 'Music', 'description' => ''],
-            ['name' => 'Food & Grocery', 'description' => ''],
+            ['name' => 'Blumen & Gärtnerei', 'description' => ''],
+            ['name' => 'überraschungspäckli', 'description' => ''],
+            ['name' => 'Andere Kategorien', 'description' => ''],
+
             // Add more categories here
         ];
 
