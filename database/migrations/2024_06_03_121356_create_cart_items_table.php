@@ -12,13 +12,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('orders', function (Blueprint $table) {
+        Schema::create('cart_items', function (Blueprint $table) {
             $table->id();
-            $table->string('status', 45)->nullable();
-            $table->string('session_id', 255);
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->decimal('total_price', 10, 2);
-            $table->time('pickup')->nullable(); // the picki-up time column
+            $table->foreignIdFor(User::class, 'user_id');
+            $table->foreignId('product_id')->references('id')->on('products');
+            $table->integer('quantity');
             $table->timestamps();
         });
     }
@@ -28,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('orders');
+        Schema::dropIfExists('cart_items');
     }
 };

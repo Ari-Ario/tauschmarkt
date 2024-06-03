@@ -13,7 +13,7 @@ class CategoriesTableSeeder extends Seeder
     public function run(): void
     {
         \App\Models\Category::factory()->count(10)->create();
-/*         $categories = [
+        $categories = [
             ['name' => 'Electronics', 'description' => ''],
             ['name' => 'Clothing', 'description' => ''],
             ['name' => 'Electronics', 'description' => ''],
@@ -31,6 +31,6 @@ class CategoriesTableSeeder extends Seeder
 
         foreach ($categories as $category) {
             \App\Models\Category::create($category);
-        } */
+        }
     }
 }

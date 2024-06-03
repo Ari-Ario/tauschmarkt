@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('firstname');
             $table->string('lastname');
             $table->string('email')->unique();
-            // $table->string('cellphone')->unique()->nullable();
+            $table->integer('cellphone')->unique()->nullable();
             $table->boolean('is_seller')->default(false);
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
@@ -24,6 +24,8 @@ return new class extends Migration
             $table->string('house_number')->nullable();
             $table->string('zip_code')->nullable();
             $table->string('city')->nullable();
+            $table->string('bio')->nullable();
+            $table->integer('payment')->nullable();
             $table->decimal('latitude', 10, 7)->nullable();
             $table->decimal('longitude', 10, 7)->nullable();
             $table->string('profile_picture')->nullable();

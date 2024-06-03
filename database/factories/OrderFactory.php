@@ -24,6 +24,8 @@ class OrderFactory extends Factory
         return [
             'user_id' => User::factory(),
             'total_price' => $this->faker->randomFloat(2, 50, 1000),
+            'status' => $this->faker->randomDigit(),
+            'session_id' => $this->faker->randomDigit(),
         ];
     }
 }
