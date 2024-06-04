@@ -3,7 +3,7 @@ import { useRouter } from 'vue-router';
 import { ref, onMounted } from 'vue';
 // import { Plus } from '@element-plus/icons-vue';
 import axios from 'axios';
-import Swal from 'sweetalert2';
+// import Swal from 'sweetalert2';
 
 defineProps({
     products: Array

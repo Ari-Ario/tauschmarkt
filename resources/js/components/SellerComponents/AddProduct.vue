@@ -1,6 +1,6 @@
 <script setup>
 import FooterSeller from '../../components/footer/FooterSeller.vue';
-
+import { storeToRefs } from 'pinia';
 import { reactive, ref, onMounted } from 'vue';
 import AuthService from "@/services/AuthService";
 import { useAuthStore } from '@/stores/AuthStore';
@@ -9,8 +9,8 @@ import axios from 'axios';
 import {useRouter} from 'vue-router';
 
 const router = useRouter();
-const store = useAuthStore();
-const sellerId = store?.authUser?.id;
+const store = storeToRefs(useAuthStore());
+const sellerId = store.user.id;
 // Define the categories
 const categories = ref([]);
 
@@ -19,6 +19,7 @@ const selectedCategories = ref(new Set());
 
 const loadCategories = async () => {
     try {
+      
         const response = await axios.get(`api/categories`);
         categories.value = response.data;
         console.log(categories)
@@ -92,9 +93,10 @@ const handlePriceUnitChange = (event) => {
 
 const saveProduct = async () => {
   try {
+    console.log(store.user.id)
     const formData = new FormData();
     formData.append('category_id', product.value.CategoryId); // Ensure this matches your backend
-    formData.append('seller_id', product.value.sellerId);
+    formData.append('seller_id', store.authUser.value.id);
     formData.append('name', product.value.name);
     formData.append('description', product.value.description);
     formData.append('published', true);

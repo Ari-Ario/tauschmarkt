@@ -17,8 +17,8 @@ const sellerId = store?.authUser?.id;
 const fetchProduct = async () => {
     try {
         const response = await axios.get(`/api/product/${sellerId}`);
-        products.value = await response.data;
-        console.log(products)
+        products.value = await response.data.products;
+        // console.log(products)
     } catch (error) {
         console.error('Failed to fetch Product:', error);
     }

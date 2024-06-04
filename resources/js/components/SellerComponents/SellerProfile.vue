@@ -1,11 +1,12 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useAuthStore } from '../../stores/AuthStore';
 import axios from 'axios';
 
 // axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-const store = useAuthStore();
+const store = storeToRefs(useAuthStore());
 const seller = ref({
   id: store.authUser.id,
   firstname: store.authUser.firstname,
@@ -14,13 +15,14 @@ const seller = ref({
   enterprise_picture: store.authUser.enterprise_picture,
 });
 
-const sellerId = store?.authUser?.id;
+const sellerId = store?.authUser?.value.id;
 
 const loadUser = async () => {
     try {
         const response = await axios.get(`/api/user/profile/${sellerId}`);
         const data = response.data;
         seller.value = {
+          // id: data.id,
           firstname: data.firstname,
           lastname: data.lastname,
           profile_picture: data.profile_picture,
