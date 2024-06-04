@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -12,11 +13,21 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index($id)
     {
-        //
-        $products = Product::all();
-        return response()->json($products);
+        // Check if the user is authenticated
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Unauthenticated'], 401);
+        }
+
+        // Get the authenticated user's ID
+        $userId = Auth::id();
+
+        // Fetch products by seller_id (assuming seller_id is the same as the user's ID)
+        $products = Product::where('seller_id', $id)->get();
+
+        // Return the products
+        return response()->json(['products' => $products], 200);
     }
 
     /**
@@ -32,6 +43,10 @@ class ProductController extends Controller
             'description' => 'nullable|string',
             'price' => 'nullable|numeric',
             'product_picture' => 'nullable|image|max:2048',
+            'published' => 'nullable',
+            'inStock' => 'nullable',
+            'quantity' => 'nullable',
+
         ]);
 
         if ($validator->fails()) {

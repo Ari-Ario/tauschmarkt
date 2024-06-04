@@ -6,6 +6,9 @@
     import FooterUser from '../components/footer/FooterUser.vue';
     import FooterSeller from '../components/footer/FooterSeller.vue';
     import EnterpriseCard from "../components/EnterpriseCard.vue";
+    import ProductList from "../components/ProductList.vue";
+    import Header from '../components/header/Header.vue';
+
     import SellerProfil from '../components/SellerComponents/SellerProfile.vue';
     import SellerProducts from '../components/SellerComponents/SellerProducts.vue';
     import SellerStatistics from '../components/SellerComponents/SellerStatistics.vue';
@@ -43,22 +46,25 @@
 
 <template>
     <header>
-        <LogoutButton />
+        <Header />
+
+        <!-- <LogoutButton /> -->
     </header>
 
 
     <!-- Seller Profile -->
     <div v-if="user.is_seller" class="content">
-        <div :class="{ active: currentPage !== 'Map' }, menu-container">
+
+        <!-- <div :class="{ active: currentPage !== 'Map' }, menu-container">
             <router-link :to="{ name: 'map'}" class="link">
                 <div class="switch-container">
 
-                    <button>Karte 📍
+                    <button>Karte📍
                     </button>
                     
                 </div>
             </router-link>
-        </div>
+        </div> -->
         
         <div v-if="currentPage === 'Liste'" class="content">
             <div class="EnterpriseCardContainer">
@@ -136,7 +142,13 @@
     display: block;
     width: 100%;
     height: 100%;
+    top: 60px;
 }
+
+.content {
+    margin-top: 60px;
+}
+
 .EnterpriseCardContainer {
     display: flex;
     justify-content: center;

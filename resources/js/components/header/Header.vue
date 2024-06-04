@@ -22,7 +22,7 @@ const toggleModal = () => {
             <Logo></Logo>
                 Tausch
             </div>
-            <div class="right">
+            <div v-if="!store?.authUser" class="right">
                 <ul class="menu">
 
                     <li v-if="!store?.authUser" id="login">
@@ -53,14 +53,6 @@ const toggleModal = () => {
                         </router-link>
                     </li>
 
-                    <li v-if="store?.authUser" id="dashboard">
-                        <router-link :to="{ name: 'dashboard' }" customv-slot="{ navigate }">
-                            <div class="link" @click="navigate" role="link">
-                                Dashboard
-                            </div>
-                        </router-link>
-                    </li>
-
                     <li v-if="!store?.authUser" id="getStarted">
                         <router-link :to="{ name: 'register' }" customv-slot="{ navigate }">
                             <div class="link" @click="navigate" role="link">
@@ -80,7 +72,16 @@ const toggleModal = () => {
                             </div>
                         </router-link>
                     </li>
-                    
+
+
+                    <li v-if="store?.authUser" id="dashboard">
+                        <router-link :to="{ name: 'dashboard' }" customv-slot="{ navigate }">
+                            <div class="link" @click="navigate" role="link">
+                                Dashboard
+                            </div>
+                        </router-link>
+                    </li>
+
                     <li v-if="store?.authUser" id="logout">
                         <div>
                             <LogoutButton>Abmelden</LogoutButton>
@@ -90,10 +91,34 @@ const toggleModal = () => {
                 </ul>
 
             </div>
-            <div class="menu-mobile" @click="toggleModal">
+            <div v-if="!store.authUser" class="menu-mobile" @click="toggleModal">
                 <svg xmlns="http://www.w3.org/2000/svg" height="33px" viewBox="0 -960 960 960" width="33px" fill="#298E46">
                     <path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z" />
                 </svg>
+            </div>
+
+
+            <div v-if="store?.authUser" class="right">
+                <ul class="menu-login">
+
+                    <li v-if="store?.authUser" id="login">
+                        <div :class="{ active: currentPage !== 'Map' }, menu-container">
+                            <router-link :to="{ name: 'map'}" class="link">
+                                <div class="switch-container">
+                                   Karte📍
+                                </div>
+                            </router-link>
+                        </div>
+                    </li>
+                    
+                    <li v-if="store?.authUser" id="logout">
+                        <div>
+                            <LogoutButton>Abmelden</LogoutButton>
+                        </div>
+
+                    </li>
+                </ul>
+
             </div>
 
         </div>
@@ -178,7 +203,7 @@ const toggleModal = () => {
     height: 63px;
 }
 
-.menu {
+.menu , .menu-login {
     display: flex;
     flex-direction: row;
     justify-content: end;

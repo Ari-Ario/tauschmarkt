@@ -15,11 +15,11 @@ class Product extends Model
         'category_id',
         'name',
         'description',
-        'published',
         'amount',
         'price',
-        'product_picture',
-        'deleted_by',
+        // 'published',
+        // 'product_picture',
+        // 'deleted_by',
     ];
 
     public function product_images()

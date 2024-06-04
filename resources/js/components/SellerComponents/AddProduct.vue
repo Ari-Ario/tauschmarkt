@@ -44,6 +44,9 @@ const product = ref({
     Grams: null,
     unitPrice: null,
     photo: null,
+    published: false,
+    inStock: false,
+    quantity: 1
 });
 const priceUnit = ref('perGram');
 const selectedCategory = ref('');
@@ -78,6 +81,7 @@ const resetForm = () => {
       };
       priceUnit.value = 'perGram';
     };
+
 const handleFileUpload = (event) => {
   product.value.photo = event.target.files[0];
 };
@@ -89,20 +93,27 @@ const handlePriceUnitChange = (event) => {
 const saveProduct = async () => {
   try {
     const formData = new FormData();
-    formData.append('category_id', product.value.CategoryId); // Ensure this is correct
+    formData.append('category_id', product.value.CategoryId); // Ensure this matches your backend
     formData.append('seller_id', product.value.sellerId);
     formData.append('name', product.value.name);
     formData.append('description', product.value.description);
+    formData.append('published', true);
+    formData.append('inStock', true);
+    formData.append('quantity', 1);
+
+
     if (priceUnit.value === 'perGram') {
       formData.append('amount', product.value.Grams);
+    } else {
+      formData.append('amount', 0); // Default to 1 if not perGram
     }
+
     formData.append('price', product.value.unitPrice);
+
     if (product.value.photo) {
       formData.append('product_picture', product.value.photo);
     }
-    if (!product.value.Grams) {
-      formData.append('amount', 1);
-    }
+    console.log(product.value);
 
     const response = await axios.post('/api/product/add', formData, {
       headers: {

@@ -32,7 +32,7 @@ const loadUser = async () => {
           latitude: data.latitude,
           longitude: data.longitude,
         };
-        console.log(seller.value);
+        // console.log(seller.value);
     } catch (error) {
         console.error("Error loading user profile:", error);
     }

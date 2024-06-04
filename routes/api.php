@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
+use Laravel\Sanctum\Http\Controllers;
 use App\Models\User;
 
 use App\Http\Controllers\TokenController;
@@ -45,4 +45,5 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Categories and Products APIs
     Route::get('/categories', [CategoryController::class, 'index']);   
     Route::post('/product/add', [ProductController::class, 'create']);
+    Route::get('/product/{id}', [ProductController::class, 'index']);
 });

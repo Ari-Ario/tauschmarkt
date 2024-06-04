@@ -1,5 +1,7 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { useAuthStore } from '../../stores/AuthStore';
+import axios from 'axios';
 
 const products = ref([
   { id: 1, name: 'Product 1', price: 100, image: '' },
@@ -9,6 +11,22 @@ const products = ref([
 
   // Add more products as needed
 ]);
+const store = useAuthStore();
+const sellerId = store?.authUser?.id;
+
+const fetchProduct = async () => {
+    try {
+        const response = await axios.get(`/api/product/${sellerId}`);
+        products.value = await response.data;
+        console.log(products)
+    } catch (error) {
+        console.error('Failed to fetch Product:', error);
+    }
+};
+
+onMounted(() => {
+  fetchProduct();
+});
 </script>
 
 <template>
