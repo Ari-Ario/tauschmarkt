@@ -18,6 +18,11 @@ Route::get('/enterprises/{userId}', [EnterpriseController::class, 'latestEnterpr
 
 Route::get('/products', [ProductController::class, 'index']);
 
+//routes for products list and filter 
+Route::prefix('products')->controller(ProductController::class)->group(function ()  {
+    Route::get('/','index')->name('products.index');
+    
+});
 
 
 /**
@@ -47,3 +52,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/product/add', [ProductController::class, 'create']);
     Route::get('/product/{id}', [ProductController::class, 'index']);
 });
+
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/products', [ProductController::class, 'index'])->name('admin.products.index');
+    Route::post('/products/store',[ProductController::class,'store'])->name('admin.products.store');
+    Route::put('/products/update/{id}',[ProductController::class,'update'])->name('admin.products.update');
+    Route::delete('/products/image/{id}',[ProductController::class,'deleteImage'])->name('admin.products.image.delete');
+    Route::delete('/products/destory/{id}',[ProductController::class,'destory'])->name('admin.products.destory');
+});
+
+// require __DIR__ . '/auth.php';
