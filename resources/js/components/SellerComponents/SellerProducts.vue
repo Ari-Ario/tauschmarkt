@@ -1,16 +1,18 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../../stores/AuthStore';
-import axios from 'axios';
+import axios, { formToJSON } from 'axios';
 import { Plus } from '@element-plus/icons-vue';
 import Swal from 'sweetalert2';
 
-
+defineProps({
+    products: Array
+});
 const products = ref([]);
 const store = useAuthStore();
 const sellerId = store?.authUser?.id;
 const selectedProduct = ref(null);
-
+const dialogVisible = ref(false);
 const categories = ref([]);
 
 const fetchProduct = async () => {
@@ -19,6 +21,13 @@ const fetchProduct = async () => {
         products.value = response.data.products;
     } catch (error) {
         console.error('Failed to fetch Product:', error);
+    }
+    try {
+        const data = await axios.get(`/api/categories`);
+        categories.value = data.data;
+        console.log(categories)
+    } catch (error) {
+        console.error('Failed to fetch Categories:', error);
     }
 };
 
@@ -81,12 +90,14 @@ const openWatchPopup = async (product) => {
 // Add product method
 const addProduct = async () => {
     const formData = new FormData();
-    formData.append('title', title.value);
+    formData.append('name', title.value);
     formData.append('price', price.value);
     formData.append('quantity', quantity.value);
     formData.append('description', description.value);
-    formData.append('brand_id', brand_id.value);
+    formData.append('amount', 2);
     formData.append('category_id', category_id.value);
+    formData.append('seller_id', sellerId);
+
     for (const image of productImages.value) {
         formData.append('product_images[]', image.raw);
     }
@@ -142,23 +153,35 @@ const updateProduct = async () => {
     formData.append('price', price.value);
     formData.append('quantity', quantity.value);
     formData.append('description', description.value);
+    formData.append('amount', 2);
     formData.append('category_id', category_id.value);
-    formData.append('_method', 'PUT');
+    formData.append('seller_id', sellerId);
+    // formData.append('_method', 'PUT');
+
     for (const image of productImages.value) {
         formData.append('product_images[]', image.raw);
     }
+    for (const value of formData.values()) {
+      console.log(value);
+    }
 
     try {
-        const response = await axios.post(`/products/update/${id.value}`, formData);
+        const response = await axios.put(`/api/products/update/${id.value}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        withCredentials: true, 
+      },
+    });
+    // console.log(response)
         dialogVisible.value = false;
         resetFormData();
-        Swal.fire({
-            toast: true,
-            icon: 'success',
-            position: 'top-end',
-            showConfirmButton: false,
-            title: response.data.flash.success
-        });
+        // Swal.fire({
+        //     toast: true,
+        //     icon: 'success',
+        //     position: 'top-end',
+        //     showConfirmButton: false,
+        //     title: response.data.flash.success
+        // });
     } catch (err) {
         console.log(err);
     }
@@ -212,45 +235,49 @@ onMounted(() => {
     </div>
   </div>
 
-  <div class="fixed-toolbar">
+  <!-- <div class="fixed-toolbar">
     <button @click="openEditPopup(selectedProduct)">Edit</button>
     <button @click="openWatchPopup(selectedProduct)">Watch</button>
-  </div>
+  </div> -->
 
   <div v-if="selectedProduct" :title="editMode ? 'Edit product' : 'Add Product'" class="popup" @click.self="selectedProduct = null">
     <div class="popup-content">
-      <h2>{{ selectedProduct.name }}</h2>
-      <p>${{ selectedProduct.price }}</p>
-
       
       <form @submit.prevent="editMode ? AddProduct() : updateProduct()">
+        <div class="form-group">
+          <label for="category" class="block-label ">Select Category</label>
+          <select id="category" v-model="category_id" class="form-select">
+            <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
+            <!-- <input type="hidden" name="" v-model="category.id"> -->
+          </select>
+        </div>
+
         <div class="form-group">
           <input v-model="title" type="text" name="floating_title" id="floating_title" class="form-input" placeholder=" " required />
           <label for="floating_title" class="form-label">Name</label>
         </div>
+
         <div class="form-group">
           <input type="text" name="floating_price" id="floating_price" class="form-input" placeholder=" " required v-model="price" />
           <label for="floating_price" class="form-label">Price</label>
         </div>
+
         <div class="form-group">
           <input type="number" name="qty" id="floating_qty" class="form-input" placeholder=" " required v-model="quantity" />
           <label for="floating_qty" class="form-label">Quantity</label>
-        </div>
-        <div>
-          <label for="category" class="block-label">Select Category</label>
-          <select id="category" v-model="category_id" class="form-select">
-            <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
-          </select>
         </div>
 
         <div class="form-group">
           <label for="message" class="block-label">Description</label>
           <textarea id="message" rows="4" v-model="description" class="form-textarea" placeholder="Leave a comment..."></textarea>
         </div>
-        <div class="form-group">
+
+        <!-- multiple images upload -->
+        <div class="image-group">
           <el-upload v-model:file-list="productImages" list-type="picture-card" multiple :on-preview="handlePictureCardPreview" :on-remove="handleRemove" :on-change="handleFileChange">
-            <el-icon>
-              <Plus />
+            <el-icon class="el-icon">
+              <!-- <Plus class="plus-icon" /> -->
+              <Plus style="width: 1em; height: 1em; color: darkgreen;" />
             </el-icon>
           </el-upload>
         </div>
@@ -323,6 +350,8 @@ onMounted(() => {
   position: relative;
   width: 100%;
   margin-bottom: 1.5rem;
+  /* max-height: 40px; */
+
 }
 .form-input {
   padding: 10px 0 5px;
@@ -375,6 +404,30 @@ onMounted(() => {
   flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 20px;
+}
+
+.image-group {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 80px;
+  height: 80px;
+  border: 2px dashed #d1d5db;
+  border-radius: 5px;
+}
+.el-icon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  font-size: 24px;
+  color: #2563eb;
+}
+
+.plus-icon {
+  font-size: 24px;
+  color: #2563eb;
 }
 .image-item {
   position: relative;

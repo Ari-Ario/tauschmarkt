@@ -83,13 +83,15 @@ class ProductController extends Controller
     {
 
         $product = new Product;
-        $product->title = $request->title;
+        $product->name = $request->name;
         $product->price = $request->price;
         $product->quantity = $request->quantity;
         $product->description = $request->description;
         $product->category_id = $request->category_id;
-        $product->brand_id = $request->brand_id;
+        $product->seller_id = $request->seller_id;
         $product->save();
+        // Product::save($product);
+
 
         //check if product has images upload 
 
@@ -101,7 +103,7 @@ class ProductController extends Controller
                 // Store the image in the public folder with the unique name
                 $image->move('product_images', $uniqueName);
                 // Create a new product image record with the product_id and unique name
-                ProductImage::create([
+                ProductImages::create([
                     'product_id' => $product->id,
                     'image' => 'product_images/' . $uniqueName,
                 ]);
@@ -135,12 +137,17 @@ class ProductController extends Controller
 
         $product = Product::findOrFail($id);
 
-        // dd($product);
-        $product->title = $request->title;
+        //  return $request->all();
+        $product->name = $request->title;
         $product->price = $request->price;
         $product->quantity = $request->quantity;
+        $product->amount = $request->amount;
         $product->description = $request->description;
         $product->category_id = $request->category_id;
+        $product->seller_id = $request->seller_id;
+        // $updateTime = new \DateTime();
+        // $product->updated_at = $updateTime->format("Y-m-d H:i:s");
+
         // Check if product images were uploaded
         if ($request->hasFile('product_images')) {
             $productImages = $request->file('product_images');
@@ -153,7 +160,7 @@ class ProductController extends Controller
                 $image->move('product_images', $uniqueName);
 
                 // Create a new product image record with the product_id and unique name
-                ProductImage::create([
+                ProductImages::create([
                     'product_id' => $product->id,
                     'image' => 'product_images/' . $uniqueName,
                 ]);

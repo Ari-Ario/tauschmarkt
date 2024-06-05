@@ -5,6 +5,7 @@ import { reactive, ref, onMounted } from 'vue';
 import AuthService from "@/services/AuthService";
 import { useAuthStore } from '@/stores/AuthStore';
 import axios from 'axios';
+import Swal from 'sweetalert2';
 
 import {useRouter} from 'vue-router';
 
@@ -115,7 +116,7 @@ const saveProduct = async () => {
     if (product.value.photo) {
       formData.append('product_picture', product.value.photo);
     }
-    console.log(product.value);
+    // console.log(product.value);
 
     const response = await axios.post('/api/product/add', formData, {
       headers: {

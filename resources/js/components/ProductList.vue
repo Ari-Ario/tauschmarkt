@@ -152,7 +152,7 @@ const updateProduct = async () => {
     formData.append('description', description.value);
     formData.append('category_id', category_id.value);
     formData.append('brand_id', brand_id.value);
-    // formData.append('_method', 'PUT');
+    formData.append('_method', 'PUT');
     for (const image of productImages.value) {
         formData.append('product_images[]', image.raw);
     }
