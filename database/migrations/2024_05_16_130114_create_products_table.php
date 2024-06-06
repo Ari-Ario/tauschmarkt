@@ -21,7 +21,7 @@ return new class extends Migration
             $table->boolean('published')->default(0);
             $table->boolean('inStock')->default(0);
             $table->decimal('amount', 10, 2);
-            $table->decimal('quantity', 10, 2)->nullable();
+            $table->integer('quantity')->nullable();
             $table->decimal('price', 10, 2);
             $table->string('product_picture')->nullable();
             $table->foreignId('category_id')->constrained()->onDelete('cascade');

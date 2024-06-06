@@ -18,7 +18,11 @@ Route::get('/enterprises/{userId}', [EnterpriseController::class, 'latestEnterpr
 
 Route::get('/products', [ProductController::class, 'index']);
 
-
+//routes for products list and filter 
+// Route::prefix('products')->controller(ProductController::class)->group(function ()  {
+//     Route::get('/','index')->name('products.index');
+    
+// });
 
 /**
  * AUTH ROUTES

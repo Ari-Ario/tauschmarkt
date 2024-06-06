@@ -135,61 +135,57 @@ class ProductController extends Controller
     //update 
     public function update(Request $request, $id)
     {
-        // error_log(print_r($request->all(), true));
-
-        // Validate the incoming request
-        $request->validate([
+        // Validate the request data
+        $validator = Validator::make($request->all(), [
+            'category_id' => 'required|integer|exists:categories,id',
+            // 'brand_id' => 'required|integer|exists:brands,id',
             'name' => 'required|string|max:255',
-            'price' => 'required|numeric',
-            'quantity' => 'required|integer',
             'description' => 'nullable|string',
-            'amount' => 'required|integer',
-            'category_id' => 'required|integer',
-            'seller_id' => 'required|integer',
-            'product_images.*' => 'nullable|image|mimes:jpg,jpeg,png,bmp|max:20000'
+            'price' => 'nullable|numeric',
+            'product_images.*' => 'nullable|image|max:2048',
+            'quantity' => 'nullable|integer',
         ]);
-
-        // Find the product by id
-        $product = Product::findOrFail($id);
-
-        // Update the product fields
-        $product->name = $request->name;
-        $product->price = $request->price;
-        $product->quantity = $request->quantity;
-        $product->amount = $request->amount;
-        $product->description = $request->description;
-        $product->category_id = $request->category_id;
-        $product->seller_id = $request->seller_id;
-
-        // Check if product images were uploaded
-        if ($request->hasFile('product_images')) {
-            $productImages = $request->file('product_images');
-            // Loop through each uploaded image
-            foreach ($productImages as $image) {
-                // Generate a unique name for the image using timestamp and random string
-                $uniqueName = time() . '-' . Str::random(10) . '.' . $image->getClientOriginalExtension();
-
-                // Store the image in the public folder with the unique name
-                $image->move(public_path('product_images'), $uniqueName);
-
-                // Create a new product image record with the product_id and unique name
-                ProductImages::create([
-                    'product_id' => $product->id,
-                    'image' => 'product_images/' . $uniqueName,
-                ]);
-            }
+    
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
         }
-
-        // Save the updated product to the database
-        $product->save();
-
-        // Return a JSON response
-        return response()->json([
-            'success' => true,
-            'message' => 'Product updated successfully.',
-            'product' => $product,
-        ]);
+    
+        try {
+            // Find the existing product
+            $product = Product::findOrFail($id);
+    
+            // Update the product fields
+            $product->name = $request->name; // Corrected this line
+            $product->price = $request->price;
+            $product->quantity = $request->quantity;
+            $product->description = $request->description;
+            $product->category_id = $request->category_id;
+            // $product->brand_id = $request->brand_id;
+    
+            // Handle file uploads if there are images
+            if ($request->hasFile('product_images')) {
+                // Assuming there's a one-to-many relationship with the ProductImage model
+                $product->images()->delete(); // Delete old images if necessary
+    
+                // Save new images
+                $productImages = $request->file('product_images');
+                foreach ($productImages as $image) {
+                    $uniqueName = time() . '-' . Str::random(10) . '.' . $image->getClientOriginalExtension();
+                    $path = $image->storeAs('product_images', $uniqueName, 'public');
+    
+                    $product->images()->create(['path' => $path]);
+                }
+            }
+    
+            // Save the updated product to the database
+            $product->save();
+    
+            return redirect()->route('admin.products.index')->with('success', 'Product updated successfully.');
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Error updating product', 'details' => $e->getMessage()], 500);
+        }
     }
+    
 
     /**
      * Remove the specified resource from storage.

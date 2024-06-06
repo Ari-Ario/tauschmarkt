@@ -14,8 +14,9 @@ const products = ref([]);
 const store = useAuthStore();
 const sellerId = store?.authUser?.id;
 const selectedProduct = ref(null);
-const dialogVisible = ref(false);
+const productImages = ref([]);
 const categories = ref([]);
+const brands = ref([]);
 
 const fetchProduct = async () => {
     try {
@@ -34,7 +35,6 @@ const fetchProduct = async () => {
 };
 
 // Upload multiple images
-const productImages = ref([]);
 const dialogImageUrl = ref('');
 
 const handleFileChange = (file) => {
@@ -80,45 +80,6 @@ const openEditPopup = async (product) => {
     }
 };
 
-const openWatchPopup = async (product) => {
-    try {
-        const response = await axios.get(`/api/product/${product.id}`);
-        selectedProduct.value = response.data;
-    } catch (error) {
-        console.error('Failed to fetch Product for watching:', error);
-    }
-};
-
-// Add product method
-const addProduct = async () => {
-    const formData = new FormData();
-    formData.append('name', title.value);
-    formData.append('price', price.value);
-    formData.append('quantity', quantity.value);
-    formData.append('description', description.value);
-    formData.append('amount', 2);
-    formData.append('category_id', category_id.value);
-    formData.append('seller_id', sellerId);
-
-    for (const image of productImages.value) {
-        formData.append('product_images[]', image.raw);
-    }
-
-    try {
-        const response = await axios.post('/products/store', formData);
-        Swal.fire({
-            toast: true,
-            icon: 'success',
-            position: 'top-end',
-            showConfirmButton: false,
-            title: response.data.flash.success
-        });
-        dialogVisible.value = false;
-        resetFormData();
-    } catch (err) {
-        console.log(err);
-    }
-};
 
 // Reset data after added
 const resetFormData = () => {
@@ -151,24 +112,30 @@ const deleteImage = async (pimage, index) => {
 // Update product method
 const updateProduct = async () => {
     const formData = new FormData();
-    formData.append('name', name.value);
-    formData.append('price', price.value);
-    formData.append('quantity', quantity.value);
-    formData.append('description', description.value);
+    formData.append('name', name.value || "update");
+    formData.append('price', price.value || 1);
+    formData.append('quantity', quantity.value || 1);
+    formData.append('description', description.value || "the last update");
     formData.append('amount', 2);
-    formData.append('category_id', category_id.value);
+    formData.append('category_id', category_id.value || 12);
     formData.append('seller_id', sellerId);
+    formData.append('_method', 'PUT');
 
     for (const image of productImages.value) {
         formData.append('product_images[]', image.raw);
     }
-    
+
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+    // Log formData values to debug
+    for (const [key, value] of formData.entries()) {
+        console.log(key, value);
+    }
     
     // console.log('CSRF Token:', csrfToken);
     // for (const value of formData.values()) { console.log(value) }
     try {
-        const response = await authClient.put(`products/update/${id.value}`, formData, {
+        const response = await authClient.post(`products/update/${id.value}`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 'X-CSRF-TOKEN': csrfToken,
@@ -247,40 +214,39 @@ onMounted(() => {
   <div v-if="selectedProduct" :title="editMode ? 'Edit product' : 'Add Product'" class="popup" @click.self="selectedProduct">
     <div class="popup-content">
       
-      <form @submit.prevent="editMode ? AddProduct() : updateProduct()">
+      <form @submit.prevent="updateProduct()">
         <div class="form-group">
-          <label for="category" class="block-label ">Select Category</label>
+          <label for="category" class="block-label">Select Category</label>
           <select id="category" v-model="category_id" class="form-select">
             <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
-            <!-- <input type="hidden" name="" v-model="category.id"> -->
           </select>
         </div>
-
         <div class="form-group">
           <input v-model="name" type="text" name="floating_title" id="floating_title" class="form-input" placeholder=" " required />
           <label for="floating_title" class="form-label">Name</label>
         </div>
-
         <div class="form-group">
           <input type="text" name="floating_price" id="floating_price" class="form-input" placeholder=" " required v-model="price" />
           <label for="floating_price" class="form-label">Price</label>
         </div>
-
         <div class="form-group">
           <input type="number" name="qty" id="floating_qty" class="form-input" placeholder=" " required v-model="quantity" />
           <label for="floating_qty" class="form-label">Quantity</label>
         </div>
-
         <div class="form-group">
           <label for="message" class="block-label">Description</label>
           <textarea id="message" rows="4" v-model="description" class="form-textarea" placeholder="Leave a comment..."></textarea>
         </div>
-
-        <!-- multiple images upload -->
         <div class="image-group">
-          <el-upload v-model:file-list="productImages" list-type="picture-card" multiple :on-preview="handlePictureCardPreview" :on-remove="handleRemove" :on-change="handleFileChange">
+          <el-upload
+            v-model:file-list="productImages"
+            list-type="picture-card"
+            multiple
+            :on-preview="handlePictureCardPreview"
+            :on-remove="handleRemove"
+            :on-change="handleFileChange"
+          >
             <el-icon class="el-icon">
-              <!-- <Plus class="plus-icon" /> -->
               <Plus style="width: 1em; height: 1em; color: darkgreen;" />
             </el-icon>
           </el-upload>
