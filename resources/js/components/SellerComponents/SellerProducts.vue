@@ -62,6 +62,10 @@ const published = ref(false);
 const category_id = ref(null);
 const inStock = ref(false);
 
+const isAddProduct = ref(false);
+const editMode = ref(false);
+const dialogVisible = ref(false);
+
 const openEditPopup = async (product) => {
 
     console.log(product);
@@ -72,12 +76,15 @@ const openEditPopup = async (product) => {
     description.value = product.description;
     category_id.value = product.category_id;
     product_images.value = product.product_images;
-    try {
-        const response = await axios.get(`/api/product/${product.id}`);
-        selectedProduct.value = response.data;
-    } catch (error) {
-        console.error('Failed to fetch Product for editing:', error);
-    }
+
+    editMode.value = true;
+    dialogVisible.value = true;
+    // try {
+    //     const response = await axios.get(`/api/product/${product.id}`);
+    //     selectedProduct.value = response.data;
+    // } catch (error) {
+    //     console.error('Failed to fetch Product for editing:', error);
+    // }
 };
 
 
@@ -211,7 +218,7 @@ onMounted(() => {
     <button @click="openWatchPopup(selectedProduct)">Watch</button>
   </div> -->
 
-  <div v-if="selectedProduct" :title="editMode ? 'Edit product' : 'Add Product'" class="popup" @click.self="selectedProduct">
+  <div v-if="dialogVisible" :title="editMode ? 'Edit product' : 'Add Product'" class="popup" @click.self="selectedProduct">
     <div class="popup-content">
       
       <form @submit.prevent="updateProduct()">

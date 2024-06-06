@@ -180,7 +180,7 @@ class ProductController extends Controller
             // Save the updated product to the database
             $product->save();
     
-            return redirect()->route('admin.products.index')->with('success', 'Product updated successfully.');
+            return response()->json(['success' => 'Product updated successfully'], 201);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Error updating product', 'details' => $e->getMessage()], 500);
         }
