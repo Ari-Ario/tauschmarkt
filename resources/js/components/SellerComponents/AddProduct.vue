@@ -2,7 +2,7 @@
 import FooterSeller from '../../components/footer/FooterSeller.vue';
 import { storeToRefs } from 'pinia';
 import { reactive, ref, onMounted } from 'vue';
-import AuthService from "@/services/AuthService";
+import { authClient } from "@/services/AuthService";
 import { useAuthStore } from '@/stores/AuthStore';
 import axios from 'axios';
 import Swal from 'sweetalert2';
@@ -94,7 +94,7 @@ const handlePriceUnitChange = (event) => {
 
 const saveProduct = async () => {
   try {
-    console.log(store.user.id)
+    // console.log(store.user.id)
     const formData = new FormData();
     formData.append('category_id', product.value.CategoryId); // Ensure this matches your backend
     formData.append('seller_id', store.authUser.value.id);
@@ -117,10 +117,12 @@ const saveProduct = async () => {
       formData.append('product_picture', product.value.photo);
     }
     // console.log(product.value);
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    const response = await axios.post('/api/product/add', formData, {
+    const response = await authClient.post('/product/add', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
+        'X-CSRF-TOKEN': csrfToken,
       },
     });
 

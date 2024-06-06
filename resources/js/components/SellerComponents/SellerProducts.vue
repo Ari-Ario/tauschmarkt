@@ -2,6 +2,8 @@
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../../stores/AuthStore';
 import axios, { formToJSON } from 'axios';
+import { authClient } from "@/services/AuthService";
+
 import { Plus } from '@element-plus/icons-vue';
 import Swal from 'sweetalert2';
 
@@ -50,21 +52,21 @@ const handleRemove = (file) => {
 };
 
 // Product form data
-const id = ref('');
-const title = ref('');
-const price = ref('');
-const quantity = ref('');
+const id = ref(null);
+const name = ref('');
+const price = ref(null);
+const quantity = ref(null);
 const description = ref('');
 const product_images = ref([]);
-const published = ref('');
-const category_id = ref('');
-const inStock = ref('');
+const published = ref(false);
+const category_id = ref(null);
+const inStock = ref(false);
 
 const openEditPopup = async (product) => {
 
     console.log(product);
     id.value = product.id;
-    title.value = product.name;
+    name.value = product.name;
     price.value = product.price;
     quantity.value = product.quantity;
     description.value = product.description;
@@ -121,7 +123,7 @@ const addProduct = async () => {
 // Reset data after added
 const resetFormData = () => {
     id.value = '';
-    title.value = '';
+    name.value = '';
     price.value = '';
     quantity.value = '';
     description.value = '';
@@ -149,43 +151,45 @@ const deleteImage = async (pimage, index) => {
 // Update product method
 const updateProduct = async () => {
     const formData = new FormData();
-    formData.append('title', title.value);
+    formData.append('name', name.value);
     formData.append('price', price.value);
     formData.append('quantity', quantity.value);
     formData.append('description', description.value);
     formData.append('amount', 2);
     formData.append('category_id', category_id.value);
     formData.append('seller_id', sellerId);
-    // formData.append('_method', 'PUT');
 
     for (const image of productImages.value) {
         formData.append('product_images[]', image.raw);
     }
-    for (const value of formData.values()) {
-      console.log(value);
-    }
-
+    
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    
+    // console.log('CSRF Token:', csrfToken);
+    // for (const value of formData.values()) { console.log(value) }
     try {
-        const response = await axios.put(`/api/products/update/${id.value}`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        withCredentials: true, 
-      },
-    });
-    // console.log(response)
+        const response = await authClient.put(`products/update/${id.value}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+                'X-CSRF-TOKEN': csrfToken,
+            },
+        });
+        console.log(response);
+
         dialogVisible.value = false;
         resetFormData();
-        // Swal.fire({
-        //     toast: true,
-        //     icon: 'success',
-        //     position: 'top-end',
-        //     showConfirmButton: false,
-        //     title: response.data.flash.success
-        // });
+        Swal.fire({
+            toast: true,
+            icon: 'success',
+            position: 'top-end',
+            showConfirmButton: false,
+            title: response.data.flash.success,
+        });
     } catch (err) {
         console.log(err);
     }
 };
+
 
 // Delete product method
 const deleteProduct = (product, index) => {
@@ -240,7 +244,7 @@ onMounted(() => {
     <button @click="openWatchPopup(selectedProduct)">Watch</button>
   </div> -->
 
-  <div v-if="selectedProduct" :title="editMode ? 'Edit product' : 'Add Product'" class="popup" @click.self="selectedProduct = null">
+  <div v-if="selectedProduct" :title="editMode ? 'Edit product' : 'Add Product'" class="popup" @click.self="selectedProduct">
     <div class="popup-content">
       
       <form @submit.prevent="editMode ? AddProduct() : updateProduct()">
@@ -253,7 +257,7 @@ onMounted(() => {
         </div>
 
         <div class="form-group">
-          <input v-model="title" type="text" name="floating_title" id="floating_title" class="form-input" placeholder=" " required />
+          <input v-model="name" type="text" name="floating_title" id="floating_title" class="form-input" placeholder=" " required />
           <label for="floating_title" class="form-label">Name</label>
         </div>
 

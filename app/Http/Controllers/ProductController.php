@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Models\Category;
 use App\Models\ProductImages;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -134,19 +135,31 @@ class ProductController extends Controller
     //update 
     public function update(Request $request, $id)
     {
+        // error_log(print_r($request->all(), true));
 
+        // Validate the incoming request
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric',
+            'quantity' => 'required|integer',
+            'description' => 'nullable|string',
+            'amount' => 'required|integer',
+            'category_id' => 'required|integer',
+            'seller_id' => 'required|integer',
+            'product_images.*' => 'nullable|image|mimes:jpg,jpeg,png,bmp|max:20000'
+        ]);
+
+        // Find the product by id
         $product = Product::findOrFail($id);
 
-        //  return $request->all();
-        $product->name = $request->title;
+        // Update the product fields
+        $product->name = $request->name;
         $product->price = $request->price;
         $product->quantity = $request->quantity;
         $product->amount = $request->amount;
         $product->description = $request->description;
         $product->category_id = $request->category_id;
         $product->seller_id = $request->seller_id;
-        // $updateTime = new \DateTime();
-        // $product->updated_at = $updateTime->format("Y-m-d H:i:s");
 
         // Check if product images were uploaded
         if ($request->hasFile('product_images')) {
@@ -157,7 +170,7 @@ class ProductController extends Controller
                 $uniqueName = time() . '-' . Str::random(10) . '.' . $image->getClientOriginalExtension();
 
                 // Store the image in the public folder with the unique name
-                $image->move('product_images', $uniqueName);
+                $image->move(public_path('product_images'), $uniqueName);
 
                 // Create a new product image record with the product_id and unique name
                 ProductImages::create([
@@ -166,8 +179,16 @@ class ProductController extends Controller
                 ]);
             }
         }
-        $product->update();
-        return redirect()->route('admin.products.index')->with('success', 'Product updated successfully.');
+
+        // Save the updated product to the database
+        $product->save();
+
+        // Return a JSON response
+        return response()->json([
+            'success' => true,
+            'message' => 'Product updated successfully.',
+            'product' => $product,
+        ]);
     }
 
     /**
