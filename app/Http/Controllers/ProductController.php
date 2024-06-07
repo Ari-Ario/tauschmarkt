@@ -196,9 +196,16 @@ class ProductController extends Controller
         return redirect()->route('admin.products.index')->with('success', 'Image deleted successfully.');
     }
 
-    public function destory($id)
+    function destroy($id)
     {
-        $product = Product::findOrFail($id)->delete();
-        return redirect()->route('admin.products.index')->with('success', 'Product deleted successfully.');
+        try {
+            $product = Product::findOrFail($id);
+            $product->delete();
+
+            return response()->json(['success' => 'Product deleted successfully'], 200);
+        } catch (\Exception $e) {
+            Log::error('Error deleting product: ' . $e->getMessage());
+            return response()->json(['error' => 'Error deleting product', 'details' => $e->getMessage()], 500);
+        }
     }
 }

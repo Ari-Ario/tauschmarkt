@@ -1,15 +1,13 @@
-<script setup>
+<script lang="ts" setup>
 import { ref, onMounted } from 'vue';
 import { useAuthStore } from '../../stores/AuthStore';
 import axios, { formToJSON } from 'axios';
 import { authClient } from "@/services/AuthService";
-
-import { Plus } from '@element-plus/icons-vue';
+import  { UploadFile } from 'element-plus';
+import { Plus, Delete, Download, ZoomIn  } from '@element-plus/icons-vue';
 import Swal from 'sweetalert2';
 
-defineProps({
-    products: Array
-});
+
 const products = ref([]);
 const store = useAuthStore();
 const sellerId = store?.authUser?.id;
@@ -35,21 +33,22 @@ const fetchProduct = async () => {
 };
 
 // Upload multiple images
-const dialogImageUrl = ref('');
-
-const handleFileChange = (file) => {
-    console.log(file);
-    productImages.value.push(file);
-};
-
-const handlePictureCardPreview = (file) => {
-    dialogImageUrl.value = file.url;
-    dialogVisible.value = true;
-};
+const dialogImageUrl = ref('')
+const dialogVisible = ref(false)
+const disabled = ref(false)
 
 const handleRemove = (file) => {
-    console.log(file);
-};
+  console.log(file)
+}
+
+const handlePictureCardPreview = (file) => {
+  dialogImageUrl.value = file.url
+  dialogVisible.value = true
+}
+
+const handleDownload = (file) => {
+  console.log(file)
+}
 
 // Product form data
 const id = ref(null);
@@ -64,7 +63,6 @@ const inStock = ref(false);
 
 const isAddProduct = ref(false);
 const editMode = ref(false);
-const dialogVisible = ref(false);
 
 const openEditPopup = async (product) => {
 
@@ -79,14 +77,12 @@ const openEditPopup = async (product) => {
 
     editMode.value = true;
     dialogVisible.value = true;
-    // try {
-    //     const response = await axios.get(`/api/product/${product.id}`);
-    //     selectedProduct.value = response.data;
-    // } catch (error) {
-    //     console.error('Failed to fetch Product for editing:', error);
-    // }
-};
 
+};
+const closeEditPopup = () => {
+    dialogVisible.value = false;
+    editMode.value = false;
+};
 
 // Reset data after added
 const resetFormData = () => {
@@ -149,7 +145,6 @@ const updateProduct = async () => {
             },
         });
         console.log(response);
-
         dialogVisible.value = false;
         resetFormData();
         Swal.fire({
@@ -157,7 +152,7 @@ const updateProduct = async () => {
             icon: 'success',
             position: 'top-end',
             showConfirmButton: false,
-            title: response.data.flash.success,
+            title: 'Produkt aktualisiert',
         });
     } catch (err) {
         console.log(err);
@@ -165,31 +160,43 @@ const updateProduct = async () => {
 };
 
 
-// Delete product method
-const deleteProduct = (product, index) => {
+const deleteProduct = (product) => {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     Swal.fire({
-        title: 'Are you sure?',
-        text: 'This action cannot be undone!',
+        title: 'Sind Sie?',
+        text: 'Diese Aktion kann nicht rückgängig gemacht werden!',
         icon: 'warning',
         showCancelButton: true,
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
-        cancelButtonText: 'No',
-        confirmButtonText: 'Yes, delete!'
+        cancelButtonText: 'Nein',
+        confirmButtonText: 'Ja, Löschen!'
     }).then(async (result) => {
         if (result.isConfirmed) {
             try {
-                const response = await axios.delete(`/products/destroy/${product.id}`);
-                this.delete(product, index);
+                const response = await authClient.delete(`products/destroy/${product.id}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                    },
+                });
+                // Handle success response
                 Swal.fire({
                     toast: true,
                     icon: 'success',
                     position: 'top-end',
                     showConfirmButton: false,
-                    title: response.data.flash.success
+                    title: 'Produkt wurde gelöscht'
                 });
             } catch (err) {
                 console.log(err);
+                Swal.fire({
+                    toast: true,
+                    icon: 'error',
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    title: 'Produkt konnte nicht gelöscht werden'
+                });
             }
         }
     });
@@ -207,64 +214,87 @@ onMounted(() => {
       <h3>{{ product.name }}</h3>
       <p>${{ product.price }}</p>
       <div class="product-actions">
-        <button @click="openEditPopup(product)">Edit</button>
-        <button @click="openWatchPopup(product)">Watch</button>
+        <button @click="openEditPopup(product)">Bearbeiten</button>
+        <button @click="deleteProduct(product)">Löschen</button>
       </div>
     </div>
   </div>
-
-  <!-- <div class="fixed-toolbar">
-    <button @click="openEditPopup(selectedProduct)">Edit</button>
-    <button @click="openWatchPopup(selectedProduct)">Watch</button>
-  </div> -->
 
   <div v-if="dialogVisible" :title="editMode ? 'Edit product' : 'Add Product'" class="popup" @click.self="selectedProduct">
     <div class="popup-content">
       
       <form @submit.prevent="updateProduct()">
         <div class="form-group">
-          <label for="category" class="block-label">Select Category</label>
+          <label for="category" class="block-label">Kategorie wählen</label>
           <select id="category" v-model="category_id" class="form-select">
             <option v-for="category in categories" :key="category.id" :value="category.id">{{ category.name }}</option>
           </select>
         </div>
         <div class="form-group">
           <input v-model="name" type="text" name="floating_title" id="floating_title" class="form-input" placeholder=" " required />
-          <label for="floating_title" class="form-label">Name</label>
+          <label for="floating_title" class="form-label">Produktname</label>
         </div>
         <div class="form-group">
           <input type="text" name="floating_price" id="floating_price" class="form-input" placeholder=" " required v-model="price" />
-          <label for="floating_price" class="form-label">Price</label>
+          <label for="floating_price" class="form-label">Preis</label>
         </div>
         <div class="form-group">
           <input type="number" name="qty" id="floating_qty" class="form-input" placeholder=" " required v-model="quantity" />
-          <label for="floating_qty" class="form-label">Quantity</label>
+          <label for="floating_qty" class="form-label">Quantität</label>
         </div>
         <div class="form-group">
-          <label for="message" class="block-label">Description</label>
+          <label for="message" class="block-label">Beschreibung</label>
           <textarea id="message" rows="4" v-model="description" class="form-textarea" placeholder="Leave a comment..."></textarea>
         </div>
         <div class="image-group">
-          <el-upload
-            v-model:file-list="productImages"
-            list-type="picture-card"
-            multiple
-            :on-preview="handlePictureCardPreview"
-            :on-remove="handleRemove"
-            :on-change="handleFileChange"
-          >
-            <el-icon class="el-icon">
-              <Plus style="width: 1em; height: 1em; color: darkgreen;" />
-            </el-icon>
+          <!-- <el-upload v-model:file-list="productImages" list-type="picture-card" multiple
+            :on-preview="handlePictureCardPreview" :on-remove="handleRemove" :on-change="handleFileChange"> -->
+          <el-upload action="#" list-type="picture-card" :auto-upload="false">
+
+            <div class="image-plus"><el-icon><Plus style="width: 1rem;" /></el-icon></div>
+            
+            <template #file="{ file }">
+              <div>
+                <img class="el-upload-list__item-thumbnail" :src="file.url" alt="" />
+                <span class="el-upload-list__item-actions">
+                  <span
+                    class="el-upload-list__item-preview"
+                    @click="handlePictureCardPreview(file)"
+                  >
+                    <el-icon><zoom-in /></el-icon>
+                  </span>
+                  <span
+                    v-if="!disabled"
+                    class="el-upload-list__item-delete"
+                    @click="handleDownload(file)"
+                  >
+                    <el-icon><Download /></el-icon>
+                  </span>
+                  <span
+                    v-if="!disabled"
+                    class="el-upload-list__item-delete"
+                    @click="handleRemove(file)"
+                  >
+                    <el-icon><Delete /></el-icon>
+                  </span>
+                </span>
+              </div>
+            </template>
           </el-upload>
+          <el-dialog v-model="dialogVisible">
+            <img w-full :src="dialogImageUrl" alt="Preview Image" />
+          </el-dialog>
         </div>
-        <div class="image-list">
-          <div v-for="(pimage, index) in product_images" :key="pimage.id" class="image-item">
+
+
+        <!-- <el-row class="image-list">
+          <el-col v-for="(pimage, index) in product_images" :key="pimage.id" class="image-item">
             <img class="image-thumb" :src="`/${pimage.image}`" alt="">
             <span class="delete-icon" @click="deleteImage(pimage, index)">x</span>
-          </div>
-        </div>
-        <button type="submit" class="form-submit">Submit</button>
+          </el-col>
+        </el-row> -->
+        <button type="submit" style="margin-bottom: 10px;">Speichern</button>
+        <button type="button" @click="closeEditPopup()" style="background-color: #e0e0e0; color: #555;">Ablehnen</button>
       </form>
     </div>
   </div>
@@ -368,7 +398,7 @@ onMounted(() => {
   color: #000;
 }
 .form-textarea {
-  width: 100%;
+  width: 94%;
   padding: 10px;
   margin-top: 5px;
   border: 1px solid #d1d5db;
@@ -387,11 +417,20 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   align-items: center;
+  width: 100%;
+  height: 80px;
+  /* border: 2px dashed #d1d5db; */
+  border-radius: 5px;
+}
+/* .image-plus {
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 80px;
   height: 80px;
   border: 2px dashed #d1d5db;
   border-radius: 5px;
-}
+} */
 .el-icon {
   display: flex;
   justify-content: center;
@@ -430,21 +469,42 @@ onMounted(() => {
   align-items: center;
   cursor: pointer;
 }
-.form-submit {
-  display: inline-block;
-  padding: 10px 20px;
-  background: #2563eb;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
+form button {
+  padding: 12px 20px;
   font-size: 1rem;
+  color: white;
+  background-color: #42b983;
+  border: none;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background 0.2s ease;
-}
-.form-submit:hover {
-  background: #1e40af;
+  transition: background-color 0.3s;
+  margin-right: 10px;
 }
 
+form button:hover {
+  background-color: #38a169;
+}
+
+.product-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.product-actions button{
+
+  padding: 6px 10px;
+  font-size: 1rem;
+  color: #555;
+  background-color: #e0e0e0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.product-actions button:hover {
+  background-color: #d0d0d0;
+}
 
 /* Responsive styles */
 @media only screen and (max-width: 600px) {

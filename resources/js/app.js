@@ -6,6 +6,8 @@ import { createApp } from "vue";
 import { useAuthStore } from "./stores/AuthStore";
 import App from "./App.vue";
 import axios from 'axios';
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
 
 // Get CSRF token from the meta tag
 const tokenElement = document.querySelector('meta[name="csrf-token"]');
@@ -43,6 +45,6 @@ router.beforeEach((to, from, next) => {
     }
 });
 
-
 app.use(router);
+app.use(ElementPlus)
 app.mount("#app");
