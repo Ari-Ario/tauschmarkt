@@ -12,12 +12,12 @@ export default defineConfig({
             input: ["resources/css/app.css", "resources/js/app.js"],
             refresh: true,
         }),
-        AutoImport({
-            resolvers: [ElementPlusResolver()],
-          }),
-          Components({
-            resolvers: [ElementPlusResolver()],
-          }),
+        // AutoImport({
+        //     resolvers: [ElementPlusResolver()],
+        //   }),
+        //   Components({
+        //     resolvers: [ElementPlusResolver()],
+        //   }),
     ],
     resolve: {
         alias: {

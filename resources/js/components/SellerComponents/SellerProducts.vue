@@ -20,35 +20,36 @@ const fetchProduct = async () => {
     try {
         const response = await axios.get(`/api/product/${sellerId}`);
         products.value = response.data.products;
+        console.log(products.value)
     } catch (error) {
         console.error('Failed to fetch Product:', error);
     }
     try {
         const data = await axios.get(`/api/categories`);
         categories.value = data.data;
-        console.log(categories)
+        // console.log(categories)
     } catch (error) {
         console.error('Failed to fetch Categories:', error);
     }
 };
 
-// Upload multiple images
-const dialogImageUrl = ref('')
-const dialogVisible = ref(false)
-const disabled = ref(false)
+const dialogVisible = ref(false);
 
-const handleRemove = (file) => {
-  console.log(file)
-}
+// Upload multiple images
+const dialogImageUrl = ref('');
+const handleFileChange = (file) => {
+    console.log(file);
+    productImages.value.push(file);
+};
 
 const handlePictureCardPreview = (file) => {
-  dialogImageUrl.value = file.url
-  dialogVisible.value = true
-}
+    dialogImageUrl.value = file.url;
+    dialogVisible.value = true;
+};
 
-const handleDownload = (file) => {
-  console.log(file)
-}
+const handleRemove = (file) => {
+    console.log(file);
+};
 
 // Product form data
 const id = ref(null);
@@ -246,53 +247,33 @@ onMounted(() => {
           <label for="message" class="block-label">Beschreibung</label>
           <textarea id="message" rows="4" v-model="description" class="form-textarea" placeholder="Leave a comment..."></textarea>
         </div>
-        <div class="image-group">
-          <!-- <el-upload v-model:file-list="productImages" list-type="picture-card" multiple
-            :on-preview="handlePictureCardPreview" :on-remove="handleRemove" :on-change="handleFileChange"> -->
-          <el-upload action="#" list-type="picture-card" :auto-upload="false">
 
-            <div class="image-plus"><el-icon><Plus style="width: 1rem;" /></el-icon></div>
+        <div class="image-group">
+          <div class="relative z-0 w-full mb-6 group" style="display: relative;">
+              <el-upload v-model:file-list="productImages" list-type="picture-card" multiple
+                  :on-preview="handlePictureCardPreview" :on-remove="handleRemove" :on-change="handleFileChange">
+                  <el-icon>
+                      <Plus />
+                  </el-icon>
+              </el-upload>
+
+          </div>
             
-            <template #file="{ file }">
-              <div>
-                <img class="el-upload-list__item-thumbnail" :src="file.url" alt="" />
-                <span class="el-upload-list__item-actions">
-                  <span
-                    class="el-upload-list__item-preview"
-                    @click="handlePictureCardPreview(file)"
-                  >
-                    <el-icon><zoom-in /></el-icon>
-                  </span>
-                  <span
-                    v-if="!disabled"
-                    class="el-upload-list__item-delete"
-                    @click="handleDownload(file)"
-                  >
-                    <el-icon><Download /></el-icon>
-                  </span>
-                  <span
-                    v-if="!disabled"
-                    class="el-upload-list__item-delete"
-                    @click="handleRemove(file)"
-                  >
-                    <el-icon><Delete /></el-icon>
-                  </span>
-                </span>
-              </div>
-            </template>
-          </el-upload>
-          <el-dialog v-model="dialogVisible">
-            <img w-full :src="dialogImageUrl" alt="Preview Image" />
-          </el-dialog>
+          <div v-for="(pimage, index) in product_images" :key="pimage.id" class="relative w-32 h-32 " style="display: relative;">
+              <img class="w-24 h-20 rounded" :src="`/${pimage.image}`" alt="">
+              <span
+              class="absolute top-0 right-8 transform -translate-y-1/2 w-3.5 h-3.5 bg-red-400 border-2 border-white dark:border-gray-800 rounded-full">
+              <!-- <span
+                class="el-upload-list__item-preview"
+                @click="handlePictureCardPreview(pimage, index)"
+              >
+              </span> -->
+              <span @click="deleteImage(pimage, index)"
+                      class="text-white text-xs font-bold absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">x</span>
+              </span>
+          </div>
         </div>
 
-
-        <!-- <el-row class="image-list">
-          <el-col v-for="(pimage, index) in product_images" :key="pimage.id" class="image-item">
-            <img class="image-thumb" :src="`/${pimage.image}`" alt="">
-            <span class="delete-icon" @click="deleteImage(pimage, index)">x</span>
-          </el-col>
-        </el-row> -->
         <button type="submit" style="margin-bottom: 10px;">Speichern</button>
         <button type="button" @click="closeEditPopup()" style="background-color: #e0e0e0; color: #555;">Ablehnen</button>
       </form>
@@ -418,8 +399,8 @@ onMounted(() => {
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 80px;
-  /* border: 2px dashed #d1d5db; */
+  height: fit-content;
+  border: 2px dashed #d1d5db;
   border-radius: 5px;
 }
 /* .image-plus {
