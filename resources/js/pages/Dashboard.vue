@@ -6,7 +6,6 @@
     import FooterUser from '../components/footer/FooterUser.vue';
     import FooterSeller from '../components/footer/FooterSeller.vue';
     import EnterpriseCard from "../components/EnterpriseCard.vue";
-    import ProductList from "../components/ProductList.vue";
     import Header from '../components/header/Header.vue';
 
     import SellerProfil from '../components/SellerComponents/SellerProfile.vue';

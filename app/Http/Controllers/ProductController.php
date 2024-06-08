@@ -19,24 +19,24 @@ class ProductController extends Controller
      */
     public function index($id)
     {
-        // Check if the user is authenticated
-        if (!Auth::check()) {
-            return response()->json(['error' => 'Unauthenticated'], 401);
+    // Check if the user is authenticated
+    if (!Auth::check()) {
+        return response()->json(['error' => 'Unauthenticated'], 401);
         }
 
-        $products = Product::with('category', 'product_images');
-        $filterProducts = $products->filtered()->paginate(9)->withQueryString();
+        // Fetch products by seller_id with category and product images relationships
+        $products = Product::with('category', 'product_images')
+            ->where('seller_id', $id)
+            ->paginate(40);
 
-        $categories = Category::get();
+        // Fetch all categories
+        $categories = Category::all();
 
-        // Get the authenticated user's ID
-        $userId = Auth::id();
-
-        // Fetch products by seller_id (assuming seller_id is the same as the user's ID)
-        $products = Product::where('seller_id', $id)->get();
-
-        // Return the products
-        return response()->json(['products' => $products], 200);
+        // Return the products and categories
+        return response()->json([
+            'products' => $products,
+            'categories' => $categories,
+        ], 200);
     }
 
     /**
@@ -64,22 +64,40 @@ class ProductController extends Controller
         if ($validator->fails()) {
             return response()->json(['error' => $validator->errors()], 400);
         }
+
+        $product = new Product;
+        $product->name = $request->name;
+        $product->category_id = $request->category_id;
+        $product->seller_id = $request->seller_id;
+        $product->description = $request->description;
+        $product->price = $request->price;
+        $product->amount = $request->amount;
+        $product->quantity = $request->quantity;
+
+        $product->save();
         
         try {
-            // Handle file upload if there is a photo
+            // Handle file uploads if there are images
             if ($request->hasFile('product_picture')) {
                 $image = $request->file('product_picture');
+                // Loop through each uploaded image
+ 
+                // Generate a unique name for the image using timestamp and random string
                 $uniqueName = time() . '-' . Str::random(10) . '.' . $image->getClientOriginalExtension();
-    
-                // Store the file and get the path
-                $path = $request->file('product_picture')->storeAs('product_photos', $uniqueName, 'public');
-    
-                // Merge the path into the request data with the correct key
-                $request->merge(['product_picture' => $path]);
+
+                // Store the image in the public folder with the unique name
+                $image->move('product_images', $uniqueName);
+
+                // Create a new product image record with the product_id and unique name
+                ProductImages::create([
+                    'product_id' => $product->id,
+                    'image' => 'product_images/' . $uniqueName,
+                ]);
+                
             }
     
             // Create the product
-            $product = Product::create($request->all());
+            // $product = Product::create($request->all());
 
             return response()->json(['message' => 'Product added successfully', 'product' => $product], 201);
         } catch (\Exception $e) {
@@ -120,8 +138,8 @@ class ProductController extends Controller
                 ]);
             }
         }
-        return redirect()->route('admin.products.index')->with('success', 'Product created successfully.');
-    }
+        return response()->json(['success' => 'Product stored successfully'], 201); 
+}
 
     /**
      * Display the specified resource.
@@ -206,7 +224,8 @@ class ProductController extends Controller
      */
     public function deleteImage($id)
     {
-        $image = ProductImage::where('id', $id)->delete();
+        $image = ProductImages::where('id', $id);
+        $image->delete();
         return response()->json(['success' => 'Image deleted successfully'], 200);
     }
 

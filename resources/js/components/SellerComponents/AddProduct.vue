@@ -135,7 +135,7 @@ const saveProduct = async () => {
             icon: 'success',
             position: 'top-end',
             showConfirmButton: false,
-            title: 'Produkt hizugefügt',
+            title: 'Produkt wurde hizugefügt!',
         });
   } catch (error) {
     console.error('Error adding product:', error);
