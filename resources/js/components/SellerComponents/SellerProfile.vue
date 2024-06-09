@@ -7,33 +7,15 @@ import axios from 'axios';
 // axios.defaults.headers.common['X-CSRF-TOKEN'] = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
 const store = storeToRefs(useAuthStore());
-const seller = ref({
-  id: store.authUser.id,
-  firstname: store.authUser.firstname,
-  lastname: store.authUser.lastname,
-  profile_picture: store.authUser.profile_picture,
-  enterprise_picture: store.authUser.enterprise_picture,
-});
+const seller = ref({});
 
 const sellerId = store?.authUser?.value.id;
 
 const loadUser = async () => {
     try {
         const response = await axios.get(`/api/user/profile/${sellerId}`);
-        const data = response.data;
-        seller.value = {
-          // id: data.id,
-          firstname: data.firstname,
-          lastname: data.lastname,
-          profile_picture: data.profile_picture,
-          enterprise_picture: data.enterprise_picture,
-          street: data.street,
-          house_number: data.house_number,
-          city: data.city,
-          zip_code: data.zip_code,
-          latitude: data.latitude,
-          longitude: data.longitude,
-        };
+        seller.value = response.data;
+
         // console.log(seller.value);
     } catch (error) {
         console.error("Error loading user profile:", error);
@@ -87,17 +69,21 @@ const onBackgroundImageChange = async (event) => {
   const formData = new FormData();
   formData.append('enterprise_picture', file);
 
+  const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
   try {
     const response = await axios.post('/api/bg-picture', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+        headers: {
+            'Content-Type': 'multipart/form-data',
+            'X-CSRF-TOKEN': csrfToken,
+        },
     });
-    console.log(response.data);
+    // console.log(response.data);
   } catch (error) {
     console.error('Error updating background image:', error);
   }
 }
+const defaultImage = '../assets/Placeholder-enterprise.png'; 
 
 </script>
 
@@ -107,7 +93,7 @@ const onBackgroundImageChange = async (event) => {
     <input type="file" ref="backgroundImageInput" @change="onBackgroundImageChange" style="display: none;" />
 
     <div class="background-container">
-      <img :src="seller.enterprise_picture" alt="Background Image" class="background-image" />
+      <img :src="seller.enterprise_picture || defaultImage" alt="Background Image" class="background-image" />
       <div class="camera-icon bg-camera" @click="changeBackgroundImage">
         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46">
           <path d="M440-440ZM120-120q-33 0-56.5-23.5T40-200v-480q0-33 23.5-56.5T120-760h126l74-80h240v80H355l-73 80H120v480h640v-360h80v360q0 33-23.5 56.5T760-120H120Zm640-560v-80h-80v-80h80v-80h80v80h80v80h-80v80h-80ZM440-260q75 0 127.5-52.5T620-440q0-75-52.5-127.5T440-620q-75 0-127.5 52.5T260-440q0 75 52.5 127.5T440-260Zm0-80q-42 0-71-29t-29-71q0-42 29-71t71-29q42 0 71 29t29 71q0 42-29 71t-71 29Z"/>
@@ -123,7 +109,7 @@ const onBackgroundImageChange = async (event) => {
       </div>
     </div>
     <h2>{{ seller.firstname }} {{ seller.lastname }}</h2>
-    <p>{{ seller.bio }}</p>
+    <!-- <p>{{ seller.bio }}</p> -->
   </div>
 </template>
 
@@ -137,7 +123,7 @@ const onBackgroundImageChange = async (event) => {
 .background-container {
   position: relative;
   width: 100%;
-  height: 200px;
+  height: 300px;
   overflow: hidden;
 }
 
@@ -156,7 +142,7 @@ const onBackgroundImageChange = async (event) => {
 }
 
 .bg-camera {
-  bottom: 10px;
+  top: 10px;
   right: 0;
 }
 
@@ -167,8 +153,8 @@ const onBackgroundImageChange = async (event) => {
 
 .overlay {
   position: absolute;
-  bottom: -50px;
-  left: 50%;
+  bottom: 2px;
+  left: 25%;
   transform: translateX(-50%);
   border: 3px solid white;
   border-radius: 50%;
@@ -185,7 +171,7 @@ const onBackgroundImageChange = async (event) => {
 }
 
 h2 {
-  margin-top: 60px; /* Adjust this to ensure the text is below the profile image */
+  margin-top: 20px; /* Adjust this to ensure the text is below the profile image */
   font-size: 24px;
   font-weight: bold;
 }
@@ -197,17 +183,17 @@ p {
 
 @media (max-width: 600px) {
   .background-container {
-    height: 150px;
+    height: 200px;
   }
 
   .overlay {
     width: 80px;
     height: 80px;
-    bottom: -40px;
+    bottom: 2px;
   }
 
   h2 {
-    margin-top: 50px;
+    margin-top: 20px;
     font-size: 20px;
   }
 

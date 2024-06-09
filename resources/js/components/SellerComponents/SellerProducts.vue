@@ -1,46 +1,44 @@
 <script lang="ts" setup>
 import { ref, onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useAuthStore } from '../../stores/AuthStore';
 import axios, { formToJSON } from 'axios';
 import { authClient } from "@/services/AuthService";
 import  { UploadFile } from 'element-plus';
 import { Plus, Delete, Download, ZoomIn  } from '@element-plus/icons-vue';
 import Swal from 'sweetalert2';
-import { Carousel, Slide } from 'vue-carousel';
-import { h, resolveComponent } from 'vue';
+import { defineComponent } from 'vue'
+import { Carousel, Navigation, Pagination, Slide } from 'vue3-carousel'
+import 'vue3-carousel/dist/carousel.css'
+
 
 const products = ref([]);
-const store = useAuthStore();
-const sellerId = store?.authUser?.id;
+// const sellerId = store?.authUser?.id;
 const selectedProduct = ref(null);
 const productImages = ref([]);
 const categories = ref([]);
-const mainProductPhoto = ref('');
+
+// Fetch user profile data on mount
+const store = storeToRefs(useAuthStore());
+const sellerId = store?.authUser?.value.id;
 
 const fetchProduct = async () => {
+  // console.log(sellerId);
+
     try {
         const response = await axios.get(`/api/product/${sellerId}`);
         categories.value = response.data.categories;
         products.value = response.data.products.data;
-        // mainProductPhoto.value = products.product_images;
         // console.log(products.value)
         // console.log(categories.value)
 
     } catch (error) {
         console.error('Failed to fetch Product:', error);
     }
-    // try {
-    //     const data = await axios.get(`/api/categories`);
-    //     categories.value = data.data;
-    //     // console.log(categories)
-    // } catch (error) {
-    //     console.error('Failed to fetch Categories:', error);
-    // }
 };
 
-const dialogVisible = ref(false);
-
 // Upload multiple images
+const dialogVisible = ref(false);
 const dialogImageUrl = ref('');
 const handleFileChange = (file) => {
     console.log(file);
@@ -67,7 +65,6 @@ const published = ref(false);
 const category_id = ref(null);
 const inStock = ref(false);
 
-const isAddProduct = ref(false);
 const editMode = ref(false);
 
 const openEditPopup = async (product, index) => {
@@ -104,7 +101,8 @@ const resetFormData = () => {
 const imagesMode = ref(false);
 
 const openImagesPopup = async (product) => {
-  const data = product.product_images;
+  product_images.value = product.product_images;
+  // console.log(productImages)
   imagesMode.value = true;
 
   };
@@ -190,7 +188,6 @@ const updateProduct = async () => {
   }
 };
 
-
 const deleteProduct = (product) => {
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
     Swal.fire({
@@ -212,6 +209,8 @@ const deleteProduct = (product) => {
                     },
                 });
                 // Handle success response
+                products.value.splice(products.value.id, 1);
+
                 Swal.fire({
                     toast: true,
                     icon: 'success',
@@ -240,7 +239,6 @@ function getProductImage(product) {
     return '../assets/Placeholder-enterprise.png';
   }
 }
-
 
 
 onMounted(() => {
@@ -327,26 +325,25 @@ onMounted(() => {
   </div>
 
 
-  <div v-if="imagesMode" class="popupImages" @click.self="selectedProduct">
+  <div v-if="imagesMode" class="popupImages" @click.self="closeImagesPopup()">
     <div class="broadcast">
-      <vue-carousel :interval="3000" direction="up">
-        <slide v-for="(image, index) in productImages" :key="index">
-          <img :src="`/${image.image}`" alt="Product Image" class="slider-image" />
-        </slide>
-      </vue-carousel>
+      <Carousel>
+        <Slide v-for="(pimage, index) in product_images" :key="pimage.id">
+          <div class="carousel__item">
+            <img :src="`/${pimage.image}`" alt="Product Image" class="slider-image" />
+            <span class="delete-icon" @click="deleteImage(pimage, index)">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>
+            </span>
+          </div>
+        </Slide>
+        <template #addons>
+          <Navigation />
+          <Pagination />
+        </template>
+      </Carousel>
     </div>
   </div>
-<!-- 
-  <div v-if="imagesMode" class="popup-overlay" @click.self="closeImagesPopup()">
-    <div class="popup-content">
-      <carousel :per-page="1" :navigationEnabled="true" :paginationEnabled="false">
-        <slide v-for="(image, index) in productImages" :key="index">
-          <img :src="`/${image.image}`" alt="Product Image" class="slider-image" />
-        </slide>
-      </carousel>
-      <button class="close-btn" @click="closeImagesPopup()">Close</button>
-    </div>
-  </div> -->
+
 </template>
 
 <style scoped>
@@ -358,16 +355,16 @@ onMounted(() => {
 }
 .product-card {
   border: 1px solid #ddd;
-  padding: 10px;
+  /* padding: 10px; */
   border-radius: 10px;
-  width: 200px;
+  width: 380px;
   text-align: center;
   position: relative;
   /* display: block; */
 }
 .product-image {
   width: 100%;
-  height: 150px;
+  height: auto;
   text-align: center;
   object-fit: cover;
   border-radius: 10px;
@@ -376,19 +373,25 @@ onMounted(() => {
 }
 .product-actions {
   /* margin-top: 10px; */
-  width: 94%;
+  width: 100%;
   display: flex;
   justify-content: space-around;
-
   position: absolute;
   bottom: 0;
 }
 .product-info {
+  width: 100%;
+  /* padding: 0 10px; */
   display: flex;
-  justify-content: space-between;
-  /* margin-top: 10px; */
-  /* position: absolute; */
-  bottom: 0;
+  justify-content: space-around;
+   /* margin-bottom: 4px; */
+  position: absolute;
+  top: 0;
+  background: rgba(255, 255, 255, 0.8); 
+}
+p {
+  padding-bottom: 0;
+  margin-bottom: 0;
 }
 .fixed-toolbar {
   position: fixed;
@@ -529,7 +532,7 @@ onMounted(() => {
   right: 5px;
   width: 20px;
   height: 20px;
-  background: red;
+  background: rgba(236, 236, 236, 0.466);
   color: #fff;
   border-radius: 50%;
   display: flex;
@@ -641,6 +644,46 @@ form button:hover {
   justify-content: space-between;
 }
 
+
+
+
+.popupImages {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.broadcast {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  position: relative;
+  max-width: 90%;
+  max-height: 80%;
+  overflow: auto;
+}
+
+.carousel__item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+.slider-image {
+  max-width: 100%;
+  max-height: 500px;  /* Adjust as needed */
+  object-fit: cover;
+  border-radius: 8px;
+}
+
 @media (max-width: 768px) {
   .img-thumbnail {
     width: 80px;
@@ -658,7 +701,7 @@ form button:hover {
 /* Responsive styles */
 @media only screen and (max-width: 600px) {
     .product-list{
-        width: 90%;
+        width: 100%;
         height: fit-content;
     }
 
@@ -668,7 +711,7 @@ form button:hover {
     }
 
     .product-image {
-        margin-top: 30px;
+        /* margin-top: 30px; */
         width: 100%;
     }
 }

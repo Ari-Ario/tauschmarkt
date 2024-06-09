@@ -22,6 +22,7 @@
         "vue-carousel": "^0.18.0",
         "vue-google-autocomplete": "^1.1.4",
         "vue-router": "^4.3.0",
+        "vue3-carousel": "^0.3.3",
         "vue3-google-map": "^0.20.0"
     }
 }

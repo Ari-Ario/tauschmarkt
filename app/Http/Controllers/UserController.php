@@ -35,11 +35,11 @@ class UserController extends Controller
             'email' => $user->email,
             // 'is_seller' => $user->is_seller,
             'profile_picture' => $user->profile_picture
-                ? asset($user->profile_picture)
+                ? asset('storage/' .$user->profile_picture)
                 : asset('storage/profile_images/default.png'),
             'enterprise_picture' => $user->enterprise_picture
-                ? asset('storage/enterprise_images/' . $user->enterprise_picture)
-                : asset('storage/enterprise_images/default.png'),
+                ? asset('storage/' . $user->enterprise_picture)
+                : asset('storage/default.png'),
             'street' => $user->street,
             'house_number' => $user->house_number,
             'city' => $user->city,
@@ -87,14 +87,24 @@ class UserController extends Controller
         public function updateBackgroundImage(Request $request)
         {
             $request->validate([
-                'enterprise_picture' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'enterprise_picture' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             ]);
+            $user = auth()->user();
+
+            $oldImage = $user->enterprise_picture;
+            // $oldImagePath->delete();
+
+            if ($oldImage) {
+                $oldImagePath = public_path('storage/' . $oldImage);
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
+            }
     
             $file = $request->file('enterprise_picture');
             $path = $file->store('enterprise_images', 'public');
     
             // Update the user's profile with the new image path
-            $user = auth()->user();
             $user->enterprise_picture = $path;
             $user->save();
     
@@ -105,14 +115,22 @@ class UserController extends Controller
         public function updateProfileImage(Request $request)
         {
             $request->validate([
-                'profile_picture' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'profile_picture' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             ]);
+            $user = auth()->user();
+            $oldImage = $user->profile_picture;
+
+            if ($oldImage) {
+                $oldImagePath = public_path('storage/' . $oldImage);
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
+            }
     
             $file = $request->file('profile_picture');
             $path = $file->store('profile_images', 'public');
     
             // Update the user's profile with the new image path
-            $user = auth()->user();
             $user->profile_picture = $path;
             $user->save();
     

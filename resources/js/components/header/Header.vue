@@ -8,6 +8,7 @@ import Logo from './Logo.vue';
 const route = useRoute();
 const store = useAuthStore();
 const modalVisible = ref(false);
+const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
 const toggleModal = () => {
     modalVisible.value = !modalVisible.value;
@@ -22,7 +23,7 @@ const toggleModal = () => {
             <Logo></Logo>
                 Tausch
             </div>
-            <div v-if="!store?.authUser" class="right">
+            <div v-if="!store?.authUser || !csrfToken" class="right">
                 <ul class="menu">
 
                     <li v-if="!store?.authUser" id="login">
@@ -98,7 +99,7 @@ const toggleModal = () => {
             </div>
 
 
-            <div v-if="store?.authUser" class="right">
+            <div v-else class="right">
                 <ul class="menu-login">
 
                     <li v-if="store?.authUser" id="login">

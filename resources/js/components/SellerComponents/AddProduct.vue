@@ -117,7 +117,7 @@ const saveProduct = async () => {
     if (product.value.photo) {
       formData.append('product_picture', product.value.photo);
     }
-    console.log(product.value);
+    // console.log(product.value);
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
     const response = await authClient.post('/product/add', formData, {
