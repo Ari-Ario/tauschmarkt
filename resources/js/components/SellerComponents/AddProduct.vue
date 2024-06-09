@@ -262,18 +262,12 @@ const saveProduct = async () => {
   background-color: #87e887;
 }
 
-legend {
-    padding: 0;
-    margin: 0;
-    border-radius: 10px;
-}
-
 .product-form-page {
     padding: 20px;
   }
   
   .form-popup {
-    position: fixed;
+    position: absolute;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -352,7 +346,7 @@ legend {
 
 }
 .form-input {
-  padding: 10px 0 5px;
+  padding: 5px 0 5px;
   width: 100%;
   border: none;
   border-bottom: 2px solid #d1d5db;
@@ -362,7 +356,7 @@ legend {
 }
 .form-label {
   position: absolute;
-  top: 10px;
+  top: 5px;
   left: 0;
   color: #6b7280;
   font-size: 1rem;

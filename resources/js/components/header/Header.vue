@@ -83,15 +83,10 @@ const toggleModal = () => {
                         </router-link>
                     </li>
 
-                    <li v-if="store?.authUser" id="logout">
-                        <div>
-                            <LogoutButton>Abmelden</LogoutButton>
-                        </div>
-
-                    </li>
                 </ul>
 
             </div>
+
             <div v-if="!store.authUser" class="menu-mobile" @click="toggleModal">
                 <svg xmlns="http://www.w3.org/2000/svg" height="33px" viewBox="0 -960 960 960" width="33px" fill="#298E46">
                     <path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z" />
@@ -176,19 +171,20 @@ const toggleModal = () => {
     top: 0;
     left: 0;
     display: flex;
-    flex-direction: row;
+    justify-content: space-around;
     align-items: center;
-    justify-items: center;
+    /* justify-content: space-around; */
     height: 40px;
-    width: 100vw;
+    width: 100%;
     /* position: absolute; */
     background-color: rgba(243, 243, 243, 0.842);
+    z-index: 5;
 
 }
 
 .left {
     margin-left: 10px;
-    width: 40vw;
+    width: 40%;
     height: auto;
     color: #298E46;
     font-size: large;
@@ -200,8 +196,9 @@ const toggleModal = () => {
 } */
 
 .right {
-    width: 60vw;
+    width: 60%;
     height: 63px;
+    align-items: end;
 }
 
 .menu , .menu-login {
@@ -302,6 +299,10 @@ const toggleModal = () => {
         margin-top: 0px;
         font-weight: bold;
         font-size: smaller;
+
+    }
+    .right {
+    display: flex;
 
     }
 

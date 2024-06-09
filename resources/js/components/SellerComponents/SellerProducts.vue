@@ -295,11 +295,11 @@ onMounted(() => {
           <textarea id="message" rows="4" v-model="description" class="form-textarea" placeholder="Leave a comment..."></textarea>
         </div>
 
-        <div class="upload-image-group">
+        <div class="upload-image-group" >
           <div class="relative z-0 w-full mb-6 group" style="display: relative;">
-              <el-upload v-model:file-list="productImages" list-type="picture-card" multiple
+              <el-upload v-model:file-list="productImages" list-type="picture-card" class="avatar-uploader el-upload " multiple
                   :on-preview="handlePictureCardPreview" :on-remove="handleRemove" :on-change="handleFileChange">
-                  <el-icon>
+                  <el-icon class="avatar-uploader-icon">
                       <Plus />
                   </el-icon>
               </el-upload>
@@ -405,7 +405,7 @@ p {
   gap: 10px;
 }
 .popup {
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   right: 0;
@@ -413,13 +413,16 @@ p {
   background: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
+  width: 100%;
   align-items: center;
+  z-index: 10;
 }
 .popup-content {
   background: #fff;
-  padding: 20px;
+  margin-top: 20px;
+  padding: 20px ;
   border-radius: 10px;
-  width: 80%;
+  width: 100%;
   max-width: 500px;
   text-align: center;
 }
@@ -431,7 +434,7 @@ p {
 
 }
 .form-input {
-  padding: 10px 0 5px;
+  padding: 5px 0 5px;
   width: 100%;
   border: none;
   border-bottom: 2px solid #d1d5db;
@@ -441,7 +444,7 @@ p {
 }
 .form-label {
   position: absolute;
-  top: 10px;
+  top: 5px;
   left: 0;
   color: #6b7280;
   font-size: 1rem;
@@ -579,6 +582,7 @@ form button:hover {
 
 
 .image-group {
+  width: ;
   display: flex;
   flex-wrap: nowrap;
   overflow-x: auto; /* Ensure horizontal scroll if images overflow */
@@ -684,6 +688,29 @@ form button:hover {
   border-radius: 8px;
 }
 
+
+
+/* .avatar-uploader .el-upload {
+  border: 1px dashed var(--el-border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: var(--el-transition-duration-fast);
+}
+
+.avatar-uploader .el-upload:hover {
+  border-color: var(--el-color-primary);
+}
+
+.el-icon.avatar-uploader-icon {
+  font-size: 28px;
+  color: #8c939d;
+  width: 178px;
+  height: 178px;
+  text-align: center;
+} */
+
 @media (max-width: 768px) {
   .img-thumbnail {
     width: 80px;
@@ -697,6 +724,11 @@ form button:hover {
     height: 48px;
   }
 }
+.form-popup {
+    position: absolute;
+    width: 90%;
+    height: 100%;
+    }
 
 /* Responsive styles */
 @media only screen and (max-width: 600px) {
@@ -714,5 +746,9 @@ form button:hover {
         /* margin-top: 30px; */
         width: 100%;
     }
+    .el-upload {
+      width: 20%;
+      height: 20%;
+  }
 }
 </style>

@@ -53,6 +53,15 @@ onMounted(() => {
     axios.defaults.withCredentials = true;
     loadEnterprises();
 });
+
+const getEnterprisePicture = (path) => {
+  return path ? `storage/${path}` : 'storage/enterprise_images/default.png';
+};
+
+const getProfilePicture = (path) => {
+  return path ? `storage/${path}` : 'storage/profile_images/default.png';
+};
+
 </script>
 
 <template>
@@ -61,7 +70,7 @@ onMounted(() => {
             <div class="Photo">
                 <img
                     class="Photo"
-                    :src="enterprise.enterprise_picture || 'storage/enterprise_images/default.png'"
+                    :src="getEnterprisePicture(enterprise.enterprise_picture)"
                     alt=""
                 />
                 <div class="favorite" @click="addOrRemoveFavorites(enterprise)">
@@ -74,16 +83,18 @@ onMounted(() => {
                     <div class="user-photo">
                         <img
                             class="user-photo"
-
-                            :src="enterprise.profile_picture || 'storage/profile_images/default.png'"
-                        />
+                            :src="getProfilePicture(enterprise.profile_picture)"
+                            />
                     </div>
                     <p class="user-name description">
                         {{ enterprise.firstname }} {{ enterprise.lastname }} 
                     </p>
-                    <p class="published-on description">
+                    <!-- <p class="published-on description">
                         {{ enterprise.updated_at }}
-                    </p>
+                    </p> -->
+                <div>
+                    <button class="button" >Besuchen</button>
+                </div>
                 </div>
             </div>
         </div>
@@ -157,7 +168,7 @@ p {
 .button {
     all: unset;
     width: fit-content;
-    background: black;
+    background: #004d40;
     border-radius: 50px;
     color: white;
     font-weight: bold;

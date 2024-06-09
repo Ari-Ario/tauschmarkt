@@ -14,9 +14,24 @@
 
 <template>
     <button
+    class="button"
       type="button"
       @click="logout"
     >Logout
     </button>
-  </template>
+</template>
   
+<style scoped>
+.button {
+    all: unset;
+    width: fit-content;
+    background: #004d40;
+    border-radius: 50px;
+    color: white;
+    font-weight: bold;
+    font-size: 14px;
+    text-decoration: none;
+    margin-left: 15px;
+    padding: 10px 20px;
+}
+</style>
