@@ -151,7 +151,7 @@ const currentPage = ref('Map');
 
       <div class="controls">
         
-        <h4>Auf Ihren Hof klicken</h4>
+        <h4>Distanz wählen</h4>
         <div class="slider-container">
           <input type="range" min="1" max="20" v-model="radius" @input="updateCircle" />
           <span>{{ radius }} km</span>

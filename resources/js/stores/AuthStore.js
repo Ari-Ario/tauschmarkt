@@ -10,6 +10,9 @@ export const useAuthStore = defineStore('AuthStore', {
     return {
         user: JSON.parse(localStorage.getItem("user")),
     }
+    //     return {
+    //     user: null,
+    // }
   },
 
   

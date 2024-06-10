@@ -1,9 +1,16 @@
 <script setup>
-    import LogoutButton from '@/components/LogoutButton.vue';
+import LogoutButton from '@/components/LogoutButton.vue';
+import { useRoute } from 'vue-router';
+import { ref } from 'vue';
+import { useAuthStore } from "../../stores/AuthStore"
+
+const route = useRoute();
+const store = useAuthStore();
+const modalVisible = ref(false);
 </script>
 
 <template>
-    <footer class="footer">
+    <footer v-if="store?.authUser" class="footer">
 
       <div class="footer-item">
         <router-link :to="{ name: 'map'}" class="link">

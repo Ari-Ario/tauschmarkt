@@ -129,7 +129,7 @@
             <h4>Search Page Content</h4>
         </div>
 
-        <div>
+        <div class="footer">
             <FooterUser />
         </div>
     </div>
@@ -243,7 +243,14 @@
     text-decoration: none;
 }
 
+/* .footer {
+    position: sticky;
+} */
+
 @media (max-width: 600px) {
+    .right {
+        padding-left: 10px;
+    }
     .menu-container {
         flex-direction: column;
     }

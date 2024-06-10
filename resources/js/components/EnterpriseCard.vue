@@ -62,6 +62,7 @@ const getProfilePicture = (path) => {
   return path ? `storage/${path}` : 'storage/profile_images/default.png';
 };
 
+
 </script>
 
 <template>
@@ -92,9 +93,15 @@ const getProfilePicture = (path) => {
                     <!-- <p class="published-on description">
                         {{ enterprise.updated_at }}
                     </p> -->
-                <div>
-                    <button class="button" >Besuchen</button>
-                </div>
+                    <div @click="openEnterprise(enterprise.id)" class="enterprise-btn">
+                        <router-link :to="{ name: 'index' , params: { id: enterprise.id } }" customv-slot="{ navigate }">
+                            <div class="link" @click="navigate" role="link">
+                                <div class="link" id="enterpriseButton">
+                                    Besuchen
+                                </div>
+                            </div>
+                        </router-link>                
+                    </div>
                 </div>
             </div>
         </div>
@@ -163,7 +170,13 @@ const getProfilePicture = (path) => {
 p {
     margin: 0;
 }
-
+#enterpriseButton, .btn {
+    border-radius: 5px;
+    background-color:   #004d40;
+    color: white;
+    padding: 10px;
+    font-weight: bold;
+}
 
 .button {
     all: unset;

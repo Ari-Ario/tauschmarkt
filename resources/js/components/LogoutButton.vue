@@ -7,7 +7,7 @@
 
   const logout = async () => {
       await store.logout().then(() => {
-          router.push('/login');
+          router.push('/');
       });
   }
 </script>
@@ -31,7 +31,7 @@
     font-weight: bold;
     font-size: 14px;
     text-decoration: none;
-    margin-left: 15px;
+    margin-left: 30px;
     padding: 10px 20px;
 }
 </style>

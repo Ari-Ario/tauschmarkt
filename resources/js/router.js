@@ -78,13 +78,13 @@ export const routes = [
         //  meta: { requiresAuth: true },
     },
 
-/*     {
-        path:"/create",
-        name:"createPost",
-        component: () => import("./pages/CreateBlog.vue"),
+     {
+        path:"/index/:id",
+        name:"index",
+        component: () => import("./pages/Index.vue"),
         meta: { showLogo: true, allBlogs:false, getStarted: false, home: true}
     },
-    {
+/*    {
         path:"/edit-blog/:id",
         name:"editBlog",
         component: () => import("./pages/EditBlog.vue"),
