@@ -12,7 +12,7 @@ class CategoriesTableSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\Category::factory()->count(10)->create();
+        // \App\Models\Category::factory()->count(10)->create();
         $categories = [
             ['name' => 'Obst & Gemüse', 'description' => ''],
             ['name' => 'Milchprodukte', 'description' => ''],

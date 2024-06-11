@@ -57,16 +57,18 @@ class CartItemController extends Controller
     }
     public function store(Request $request)
     {
+
         $quantity = $request->post('quantity', 1);
         $user = $request->user();
 
         if ($user) {
-            $cartItem = CartItem::where(['user_id' => $request->id, 'product_id' => $request->id])->first();
+            $cartItem = CartItem::where(['user_id' => $user->id, 'product_id' => $request->id, 'seller_id' => $request->seller_id])->first();
             if ($cartItem) {
                 $cartItem->increment('quantity');
             } else {
                 CartItem::create([
                     'user_id' => $user->id,
+                    'seller_id' => $request->seller_id,
                     'product_id' => $request->id,
                     'quantity' => 1,
                 ]);
@@ -85,6 +87,7 @@ class CartItemController extends Controller
             if (!$isProductExists) {
                 $cartItems[] = [
                     'user_id' => null,
+                    'seller_id' => $request->seller_id,
                     'product_id' => $request->id,
                     'quantity' => $quantity,
                     'price' => $request->price,

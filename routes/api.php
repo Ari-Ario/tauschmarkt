@@ -12,6 +12,7 @@ use App\Http\Controllers\FavoritesController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CartItemController;
+use App\Http\Middleware\VerifyCsrfToken;
 
 
 Route::post('/sanctum/token', TokenController::class);

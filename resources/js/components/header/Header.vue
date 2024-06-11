@@ -24,18 +24,20 @@ const toggleModal = () => {
             <Logo></Logo>
                 Tausch
             </div>
-            <router-link :to="{ name: 'dashboard' }" customv-slot="{ navigate }" >
-                        
-                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#004d40"><path d="M240-80q-33 0-56.5-23.5T160-160v-480q0-33 23.5-56.5T240-720h80q0-66 47-113t113-47q66 0 113 47t47 113h80q33 0 56.5 23.5T800-640v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-480h-80v80q0 17-11.5 28.5T600-520q-17 0-28.5-11.5T560-560v-80H400v80q0 17-11.5 28.5T360-520q-17 0-28.5-11.5T320-560v-80h-80v480Zm160-560h160q0-33-23.5-56.5T480-800q-33 0-56.5 23.5T400-720ZM240-160v-480 480Z"/>
-                </svg>
-
-            <!-- <div
-                class="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 border-2 border-white rounded-full -top-2 -right-2 dark:border-gray-900">
-                {{ cart.data.count }}</div> -->
-            </router-link>
+            <div class="center">
+                <router-link :to="{ name: 'dashboard' }" customv-slot="{ navigate }" >
+                            
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#004d40"><path d="M240-80q-33 0-56.5-23.5T160-160v-480q0-33 23.5-56.5T240-720h80q0-66 47-113t113-47q66 0 113 47t47 113h80q33 0 56.5 23.5T800-640v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-480h-80v80q0 17-11.5 28.5T600-520q-17 0-28.5-11.5T560-560v-80H400v80q0 17-11.5 28.5T360-520q-17 0-28.5-11.5T320-560v-80h-80v480Zm160-560h160q0-33-23.5-56.5T480-800q-33 0-56.5 23.5T400-720ZM240-160v-480 480Z"/>
+                    </svg>
+    
+                <!-- <div
+                    class="cart-number">
+                    {{ cart.data.count }}</div> -->
+                </router-link>
+            </div>
             <div v-if="!store?.authUser" class="right">
                 <ul class="menu">
-
+<!-- 
                     <li v-if="!store?.authUser" id="login">
                         <div :class="{ active: currentPage !== 'Map' }, menu-container">
                             <router-link :to="{ name: 'mapUser'}" class="link">
@@ -44,7 +46,7 @@ const toggleModal = () => {
                                 </div>
                             </router-link>
                         </div>
-                    </li>
+                    </li> -->
 
                     <li v-if="!store?.authUser">
                         <router-link :to="{ name: 'home' }" customv-slot="{ navigate }">
@@ -99,13 +101,13 @@ const toggleModal = () => {
             </div>
 
             <div v-if="!store.authUser" class="menu-mobile " >
-                        <div :class="{ active: currentPage !== 'Map' }, menu-container">
+                        <!-- <div :class="{ active: currentPage !== 'Map' }, menu-container">
                             <router-link :to="{ name: 'mapUser'}" class="link">
                                 <div class="switch-container">
                                    📍Karte
                                 </div>
                             </router-link>
-                        </div>
+                        </div> -->
 
                 <svg @click="toggleModal" xmlns="http://www.w3.org/2000/svg" height="33px" viewBox="0 -960 960 960" width="33px" fill="#004d40">
                     <path d="M120-240v-80h720v80H120Zm0-200v-80h720v80H120Zm0-200v-80h720v80H120Z" />
@@ -203,9 +205,14 @@ const toggleModal = () => {
     display:grid;
     align-items: center;
 } */
+ .center {
+    width: 10%;
+    display: flex;
+    justify-content: end;
+ }
 
 .right {
-    width: 60%;
+    width: 50%;
     height: 63px;
     align-items: end;
 }
@@ -300,7 +307,23 @@ const toggleModal = () => {
 .blue {
     background-color: #2196F3;
 }
-@media only screen and (max-width: 680px) {
+
+.cart-number {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 20px;
+    height: 20px;
+    background-color: #1c017e;
+    color: white;
+    border: 2px solid white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+@media only screen and (max-width: 768px) {
 
     .menu {
         display: none;
@@ -318,12 +341,17 @@ const toggleModal = () => {
     display: flex;
     padding-right: 0;
     margin-right: 0;
+    width: 40%;
 
     }
-    /* .left {
+    .left {
         padding-right: 0;
-    } */
+        width: 60%;
+    }
+    .center {
 
+        justify-content: center;
+    }
     #getStartedButton, .btn {
         border-radius: 5px;
         margin-top: 10px;

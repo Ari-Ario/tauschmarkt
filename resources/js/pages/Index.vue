@@ -108,18 +108,23 @@ const props = defineProps({
   products: Array,
   categories: Array
 })
-const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
 // Method for adding product to cart
 const addToCart = (product) => {
-  console.log(product)
-    axios.post(`/api/cart/store/${product}`, {
+  const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+  console.log(enterpriseId);
+    axios.post(`/api/cart/store/${product.id}`, product,  {
+      quantity: product.quantity,
+      price: product.price,
+      seller_id: product.seller_id,
+    }, {
             headers: {
                 'Content-Type': 'multipart/form-data',
                 'X-CSRF-TOKEN': csrfToken,
             },
         }) // Update the endpoint as necessary
         .then(response => {
+          console.log(response)
             const flash = response.data.flash;
             if (flash && flash.success) {
                 Swal.fire({

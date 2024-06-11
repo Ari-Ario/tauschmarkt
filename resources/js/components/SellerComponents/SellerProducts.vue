@@ -529,7 +529,7 @@ p {
   height: 100%;
   border-radius: 5px;
 }
-.delete-icon {
+/* .delete-icon {
   position: absolute;
   top: 5px;
   right: 5px;
@@ -542,7 +542,7 @@ p {
   justify-content: center;
   align-items: center;
   cursor: pointer;
-}
+} */
 form button, .product-buttons {
   padding: 12px 20px;
   font-size: 1rem;

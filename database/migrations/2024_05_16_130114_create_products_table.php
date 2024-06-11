@@ -23,7 +23,7 @@ return new class extends Migration
             $table->decimal('amount', 10, 2);
             $table->integer('quantity')->nullable();
             $table->decimal('price', 10, 2);
-            $table->string('product_picture')->nullable();
+            // $table->string('product_picture')->nullable();
             $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->foreignId('seller_id')->constrained('users')->onDelete('cascade');
 
