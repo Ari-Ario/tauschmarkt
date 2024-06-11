@@ -1,6 +1,6 @@
 <script setup>
 import { useRoute } from 'vue-router';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useAuthStore } from "../../stores/AuthStore"
 import LogoutButton from '@/components/LogoutButton.vue';
 import Logo from './Logo.vue';
@@ -8,6 +8,7 @@ import Logo from './Logo.vue';
 const route = useRoute();
 const store = useAuthStore();
 const modalVisible = ref(false);
+const cart = computed(() => usePage().props.cart);
 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
 const toggleModal = () => {

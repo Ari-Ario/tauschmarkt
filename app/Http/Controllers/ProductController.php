@@ -20,9 +20,9 @@ class ProductController extends Controller
     public function index($id)
     {
     // Check if the user is authenticated
-    if (!Auth::check()) {
-        return response()->json(['error' => 'Unauthenticated'], 401);
-        }
+    // if (!Auth::check()) {
+    //     return response()->json(['error' => 'Unauthenticated'], 401);
+    //     }
 
         // Fetch products by seller_id with category and product images relationships
         $products = Product::with('category', 'product_images')

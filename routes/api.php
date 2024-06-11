@@ -11,18 +11,21 @@ use App\Http\Controllers\EnterpriseController;
 use App\Http\Controllers\FavoritesController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CartItemController;
+
 
 Route::post('/sanctum/token', TokenController::class);
 
 Route::get('/enterprises/{userId}', [EnterpriseController::class, 'latestEnterprises']);
+Route::get('/product/{id}', [ProductController::class, 'index']);
 
-Route::get('/products', [ProductController::class, 'index']);
+// Route::get('/products', [ProductController::class, 'index']);
 
-//routes for products list and filter 
-// Route::prefix('products')->controller(ProductController::class)->group(function ()  {
-//     Route::get('/','index')->name('products.index');
-    
-// });
+//add to cart 
+Route::get('/cart/view', [CartItemController::class, 'view']);
+Route::post('/cart/store/{product}', [CartItemController::class, 'store']);
+Route::patch('/cart/update/{product}', [CartItemController::class, 'update']);
+Route::delete('/delete/update/{product}', [CartItemController::class, 'delete']);
 
 /**
  * AUTH ROUTES
@@ -49,7 +52,6 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Categories and Products APIs
     Route::get('/categories', [CategoryController::class, 'index']);   
     Route::post('/product/add', [ProductController::class, 'create']);
-    Route::get('/product/{id}', [ProductController::class, 'index']);
     //products routes 
     // Route::get('/products', [ProductController::class, 'index'])->name('admin.products.index');
     Route::post('/products/store',[ProductController::class,'store']);
