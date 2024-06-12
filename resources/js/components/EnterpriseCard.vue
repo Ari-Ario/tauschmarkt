@@ -3,24 +3,49 @@
 import AuthService from "@/services/AuthService";
 import { authClient } from '../services/AuthService';
 
-import { ref, onMounted } from "vue";
+import { ref, watch, onMounted } from "vue";
 import axios from "axios";
-
+import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue';
+import { PlusIcon, MinusIcon } from '@heroicons/vue/20/solid';
 import CategoryTags from "./CategoryTags.vue";
 import { RouterLink } from "vue-router";
+import { categories, selectedCategories, updateFilteredProducts } from '../categoryFilterScript';
+
+watch([selectedCategories], updateFilteredProducts);
+
+// export const categories = ref([]);
+// export const selectedCategories = ref([]);
+
+// export async function updateFilteredProducts() {
+//   try {
+//     const response = await axios.get('products', {
+//       params: {
+//         categories: selectedCategories.value
+//       }
+//     });
+//     // Handle the response here
+//   } catch (error) {
+//     console.error('Error updating filtered products:', error);
+//   }
+// }
 
 const store = useAuthStore();
 const userId = store?.authUser?.id;
 const filteredEnterprises = ref([]);
-
 const loadEnterprises = async () => {
     try {
         const response = await axios.get(`api/enterprises/${userId}`);
         filteredEnterprises.value = response.data;
-        // console.log(filteredEnterprises)
+        console.log(filteredEnterprises)
     } catch (error) {
         console.error("Error loading enterprises:", error);
     }
+    try {
+    const response = await axios.get(`/api/product/${1}`);
+    categories.value = response.data.categories;
+  } catch (error) {
+    console.error('Failed to fetch Product:', error);
+  }
 };
 
 const addOrRemoveFavorites = async ( enterprise) => {
@@ -67,6 +92,27 @@ const getProfilePicture = (path) => {
 
 <template>
     <div>
+
+        <Disclosure as="div" class="border-b border-gray-200 py-6" v-slot="{ open }">
+            <h3 class="-my-3 flow-root">
+            <DisclosureButton class="flex w-full items-center justify-between bg-white py-3 text-sm text-gray-400 hover:text-gray-500">
+                <span class="font-medium text-gray-900">Categories</span>
+                <span class="ml-6 flex items-center">
+                <PlusIcon v-if="!open" class="h-5 w-5" aria-hidden="true" />
+                <MinusIcon v-else class="h-5 w-5" aria-hidden="true" />
+                </span>
+            </DisclosureButton>
+            </h3>
+            <DisclosurePanel class="pt-6 dropdown">
+            <div class="space-y-4">
+                <div v-for="category in categories" :key="category.id" class="flex items-center">
+                <input :id="`filter-${category.id}`" :value="category.id" type="checkbox" v-model="selectedCategories"
+                    class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                <label :for="`filter-${category.id}`" class="ml-3 text-sm text-gray-600">{{ category.name }}</label>
+                </div>
+            </div>
+            </DisclosurePanel>
+        </Disclosure>
         
         <div class="card" v-for="enterprise in filteredEnterprises" :key="enterprise.id">
             <div class="Photo">
@@ -192,7 +238,7 @@ p {
     padding: 10px 20px;
 }
 
-/* Responsive styles */
+/* Responsive styles for card*/
 @media only screen and (max-width: 600px) {
     .card {
         width: 90%;
@@ -208,5 +254,143 @@ p {
         margin-top: 30px;
         width: 50%;
     }
+
+    .border-b {
+        margin: 0 24px 0 24px;
+    }
 }
+
+
+
+/* style for categories div */
+
+.border-b {
+  border-bottom-width: 1px;
+  background-color: #ffffff;
+  /* position: relative;
+  display: flex;
+  justify-content: space-between; */
+}
+
+.dropdown {
+    position: absolute ;
+    z-index: 10;
+    background-color: #ffffff;
+    width: 100%;
+
+}
+.border-gray-200 {
+  --tw-border-opacity: 1;
+  border-color: rgba(229, 231, 235, var(--tw-border-opacity));
+}
+
+.py-6 {
+  padding-top: 1.5rem;
+  padding-bottom: 1.5rem;
+}
+
+.-my-3 {
+  margin-top: -0.75rem;
+  margin-bottom: -0.75rem;
+}
+
+.flow-root {
+  display: flow-root;
+}
+
+.flex {
+  display: flex;
+}
+
+.w-full {
+  width: 100%;
+}
+
+.bg-white {
+  --tw-bg-opacity: 1;
+  background-color: rgba(255, 255, 255, var(--tw-bg-opacity));
+}
+
+.py-3 {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+.text-gray-400 {
+  --tw-text-opacity: 1;
+  color: rgba(156, 163, 175, var(--tw-text-opacity));
+}
+
+.hover\:text-gray-500:hover {
+  --tw-text-opacity: 1;
+  color: rgba(107, 114, 128, var(--tw-text-opacity));
+}
+
+.font-medium {
+  font-weight: 500;
+}
+
+.text-gray-900 {
+  --tw-text-opacity: 1;
+  color: rgba(17, 24, 39, var(--tw-text-opacity));
+}
+
+.ml-6 {
+  margin-left: 1.5rem;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.pt-6 {
+  padding-top: 1.5rem;
+}
+
+.space-y-4 > :not([hidden]) ~ :not([hidden]) {
+  --tw-space-y-reverse: 0;
+  margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
+  margin-bottom: calc(1rem * var(--tw-space-y-reverse));
+}
+
+.h-4 {
+  height: 1rem;
+}
+
+.w-4 {
+  width: 1rem;
+}
+
+.rounded {
+  border-radius: 0.25rem;
+}
+
+.border-gray-300 {
+  --tw-border-opacity: 1;
+  border-color: rgba(209, 213, 219, var(--tw-border-opacity));
+}
+
+.text-indigo-600 {
+  --tw-text-opacity: 1;
+  color: rgba(79, 70, 229, var(--tw-text-opacity));
+}
+
+.focus\:ring-indigo-500:focus {
+  --tw-ring-color: rgba(99, 102, 241, var(--tw-ring-opacity));
+}
+
+.ml-3 {
+  margin-left: 0.75rem;
+}
+
+.text-gray-600 {
+  --tw-text-opacity: 1;
+  color: rgba(75, 85, 99, var(--tw-text-opacity));
+}
+
 </style>

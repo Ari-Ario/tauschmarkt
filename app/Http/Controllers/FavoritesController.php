@@ -29,13 +29,13 @@ class FavoritesController extends Controller
                     'firstname' => $user->firstname,
                     'lastname' => $user->lastname,
                     'is_seller' => $user->is_seller,
-                    'profile_picture' => $user->profile_picture
-                        ? asset($user->profile_picture)
-                        : asset('storage/profile_images/default.png'),
+                    'profile_picture' => $user->profile_picture,
+                        // ? asset($user->profile_picture)
+                        // : asset('storage/profile_images/default.png'),
         
-                    'enterprise_picture' => $user->enterprise_picture
-                        ? asset('storage/enterprise_images/' . $user->enterprise_images)
-                        : asset('storage/enterprise_images/default.png'),
+                    'enterprise_picture' => $user->enterprise_picture,
+                        // ? asset('storage/enterprise_images/' . $user->enterprise_images)
+                        // : asset('storage/enterprise_images/default.png'),
                     'street' => $user->street,
                     'house_number' => $user->house_number,
                     'city' => $user->city,

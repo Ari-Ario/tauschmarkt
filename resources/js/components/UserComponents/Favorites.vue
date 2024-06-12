@@ -58,6 +58,14 @@ onMounted(() => {
     favorites;
     loadFavorites(userId);
 });
+
+const getEnterprisePicture = (path) => {
+  return path ? `storage/${path}` : 'storage/enterprise_images/default.png';
+};
+
+const getProfilePicture = (path) => {
+  return path ? `storage/${path}` : 'storage/profile_images/default.png';
+};
 </script>
 
 <template>
@@ -66,7 +74,8 @@ onMounted(() => {
             <div class="Photo">
                 <img
                     class="Photo"
-                    :src="enterprise.enterprise_picture"
+                    v-if="enterprise.enterprise_picture"
+                    :src="getProfilePicture(enterprise.enterprise_picture)"
                     alt=""
                 />
                 <div class="favorite" @click="addOrRemoveFavorites( enterprise)">
@@ -80,7 +89,7 @@ onMounted(() => {
                         <img
                             class="user-photo"
                             v-if="enterprise.profile_picture"
-                            :src="enterprise.profile_picture"
+                            :src="getProfilePicture(enterprise.profile_picture)"
                         />
                     </div>
                     <p class="user-name description">

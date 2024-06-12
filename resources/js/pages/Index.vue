@@ -63,11 +63,11 @@ function getProductImage(product) {
 }
 
 const sortOptions = [
-  { name: 'Most Popular', href: '#', current: true },
-  { name: 'Best Rating', href: '#', current: false },
-  { name: 'Newest', href: '#', current: false },
-  { name: 'Price: Low to High', href: '#', current: false },
-  { name: 'Price: High to Low', href: '#', current: false }
+  { name: 'Popular', href: '#', current: true },
+  { name: 'Gemöcht', href: '#', current: false },
+  { name: 'Neu', href: '#', current: false },
+  { name: 'Preis: Hoch bis niedrig', href: '#', current: false },
+  { name: 'Preis: Niedrig bis hoch', href: '#', current: false }
 ];
 
 const filterPrices = ref({ prices: [0, 100000] });
@@ -160,23 +160,20 @@ const closeMobileFilters = () => {
 <Header></Header>
 
 <div class="bg-white container">
-
     <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="flex items-baseline justify-between border-b border-gray-200 pb-6 pt-24">
-        <h1 class="text-4xl font-bold tracking-tight text-gray-900">Produkte</h1>
-
+        <!-- <h1 class="text-4xl font-bold tracking-tight text-gray-900">Produkte</h1> -->
         <div class="flex items-center">
-          <Menu as="div" class="relative inline-block text-left">
+          <Menu as="div" class="menu text-left">
             <div>
               <MenuButton class="group inline-flex justify-center text-sm font-medium text-gray-700 hover:text-gray-900">
-                Sort
+                Sortiern
                 <ChevronDownIcon class="-mr-1 ml-1 h-5 w-5 flex-shrink-0 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
               </MenuButton>
             </div>
-
             <transition enter-active-class="transition ease-out duration-100" enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100" leave-active-class="transition ease-in duration-75" leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95">
               <MenuItems class="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
-                <div class="py-1">
+                <div class="py-1 dropdown">
                   <MenuItem v-for="option in sortOptions" :key="option.name" v-slot="{ active }">
                     <a :href="option.href" :class="[option.current ? 'font-medium text-gray-900' : 'text-gray-500', active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm']">{{ option.name }}</a>
                   </MenuItem>
@@ -184,11 +181,10 @@ const closeMobileFilters = () => {
               </MenuItems>
             </transition>
           </Menu>
-
-          <button type="button" class="-m-2 ml-4 p-2 text-gray-400 hover:text-gray-500 sm:ml-6 lg:hidden" @click="openMobileFilters">
+          <!-- <button type="button" class="-m-2 ml-4 p-2 text-gray-400 hover:text-gray-500 sm:ml-6 lg:hidden" @click="openMobileFilters">
             <span class="sr-only">Filters</span>
             <FunnelIcon class="h-5 w-5" aria-hidden="true" />
-          </button>
+          </button> -->
         </div>
       </div>
 
@@ -197,53 +193,24 @@ const closeMobileFilters = () => {
         <div class="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-4">
           <!-- Filters -->
           <form class="hidden lg:block">
-            <h3 class="sr-only">Prices</h3>
-            <!-- price filter -->
             <div class="flex items-center justify-between space-x-3">
+              <h3 class="sr-only">Preise</h3>
               <div class="basis-1/3">
-                <label for="filters-price-from" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                  From
-                </label>
-
+                <label for="filters-price-from" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Von</label>
                 <input type="number" id="filters-price-from" placeholder="Min price" v-model="filterPrices.prices[0]" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500" />
               </div>
               <div class="basis-1/3">
-                <label for="filters-price-to" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">
-                  To
-                </label>
-
-                <input type="number" id="filters-price-to" v-model="filterPrices.prices[1]" placeholder="Max price" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500" />
+                <label for="filters-price-to" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Bis</label>
+                <input type="number" id="filters-price-to" placeholder="Max price" v-model="filterPrices.prices[1]" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500" />
               </div>
-              <button class="self-end" @click="priceFilter()">
-                Ok
-              </button>
+              <div class="basis-1/3">
+                <button type="button" @click="filterProductsByPrice" class="mt-6 w-full rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-700">Verwenden</button>
+              </div>
             </div>
-
-            <Disclosure as="div" class="border-b border-gray-200 py-6" v-slot="{ open }">
-                <h3 class="-my-3 flow-root">
-                    <DisclosureButton
-                        class="flex w-full items-center justify-between bg-white py-3 text-sm text-gray-400 hover:text-gray-500">
-                        <span class="font-medium text-gray-900">Categories</span>
-                        <span class="ml-6 flex items-center">
-                            <PlusIcon v-if="!open" class="h-5 w-5" aria-hidden="true" />
-                            <MinusIcon v-else class="h-5 w-5" aria-hidden="true" />
-                        </span>
-                    </DisclosureButton>
-                </h3>
-                <DisclosurePanel class="pt-6">
-                    <div class="space-y-4">
-                        <div v-for="category in categories" :key="category.id"
-                            class="flex items-center">
-                            <input :id="`filter-${category.id}`" :value="category.id" type="checkbox"
-                                v-model="selectedCategories"
-                                class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
-                            <label :for="`filter-${category.id}`" class="ml-3 text-sm text-gray-600">{{
-                                category.name }}</label>
-                        </div>
-                    </div>
-                </DisclosurePanel>
-            </Disclosure>
+            <CategoryFilter></CategoryFilter>
           </form>
+
+          
           </div>
           </section>
           
@@ -770,6 +737,23 @@ p {
 .px-8 {
   padding-right: 2rem !important;
   padding-left: 2rem !important;
+}
+
+.menu {
+  border-bottom-width: 1px;
+  /* position: relative; */
+  background-color: #ffffff;
+  /* display: flex;
+  justify-content: center;
+  align-items: center; */
+}
+
+.dropdown {
+    position: absolute ;
+    z-index: 10;
+    background-color: #ffffff;
+    width: 100%;
+
 }
 
 /* Responsive */

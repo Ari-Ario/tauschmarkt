@@ -112,13 +112,13 @@
                 </button>
             </div>
         </div>
-        
         <div v-if="currentPage === 'Liste'" class="content">
-            <h4 v-if="store.authUser">{{ store.authUser.firstname }} {{ store.authUser.lastname }}</h4>
+            <h4 style="text-align: center;" v-if="store.authUser"> Willkomen {{ store.authUser.firstname }} {{ store.authUser.lastname }}</h4>
             <div class="EnterpriseCardContainer">
                 <EnterpriseCard />
             </div>
         </div>
+        
 
         <div v-else-if="currentPage === 'Map'" class="content">
             <!-- Map page content here -->
