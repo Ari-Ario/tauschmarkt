@@ -1,7 +1,6 @@
 
 <script setup>
-// import UserLayouts from './Layouts/UserLayouts.vue'
-import { ref, onBeforeMount, watch, defineProps } from 'vue'
+import { ref, onBeforeMount, watch, defineProps } from 'vue';
 import {
   Dialog,
   DialogPanel,
@@ -14,42 +13,31 @@ import {
   MenuItems,
   TransitionChild,
   TransitionRoot
-} from '@headlessui/vue'
-import { XMarkIcon } from '@heroicons/vue/24/outline'
-import { ChevronDownIcon, FunnelIcon, MinusIcon, PlusIcon, Squares2X2Icon } from '@heroicons/vue/20/solid'
-// import Products from '../User/Components/Products.vue'
-// import SecondaryButtonVue from '@/Components/SecondaryButton.vue'
+} from '@headlessui/vue';
+import { XMarkIcon } from '@heroicons/vue/24/outline';
+import { ChevronDownIcon, FunnelIcon, MinusIcon, PlusIcon, Squares2X2Icon } from '@heroicons/vue/20/solid';
 import Swal from 'sweetalert2';
-import { defineComponent } from 'vue'
-import { Carousel, Navigation, Pagination, Slide } from 'vue3-carousel'
-import 'vue3-carousel/dist/carousel.css'
-import axios from 'axios'
-
+import axios from 'axios';
+import { useRouter } from 'vue-router';
+import { useCart } from '../store'; // Adjust the path as needed
 import Header from '../components/header/Header.vue';
-import {useRouter} from 'vue-router';
 
 const router = useRouter();
-// import { convertToHtml } from '@/components/Creator.vue';
 const enterpriseId = router.currentRoute.value.params.id;
-// console.log(enterpriseId);
-const enterprise = ref(null)
+const enterprise = ref(null);
 const categories = ref([]);
 const products = ref([]);
 
 const fetchProduct = async () => {
-  // console.log(sellerId);
-
-    try {
-        const response = await axios.get(`/api/product/${enterpriseId}`);
-        categories.value = response.data.categories;
-        products.value = response.data.products.data;
-        // console.log(products.value)
-        // console.log(categories.value)
-
-    } catch (error) {
-        console.error('Failed to fetch Product:', error);
-    }
+  try {
+    const response = await axios.get(`/api/product/${enterpriseId}`);
+    categories.value = response.data.categories;
+    products.value = response.data.products.data;
+  } catch (error) {
+    console.error('Failed to fetch Product:', error);
+  }
 };
+
 onBeforeMount(() => {
   fetchProduct();
 });
@@ -57,16 +45,14 @@ onBeforeMount(() => {
 const product_images = ref([]);
 const imagesMode = ref(false);
 
-const openImagesPopup = async (product) => {
+const openImagesPopup = (product) => {
   product_images.value = product.product_images;
-  // console.log(productImages)
   imagesMode.value = true;
-
-  };
-const closeImagesPopup = () => {
-    imagesMode.value = false;
 };
 
+const closeImagesPopup = () => {
+  imagesMode.value = false;
+};
 
 function getProductImage(product) {
   if (product.product_images && product.product_images.length > 0) {
@@ -82,9 +68,9 @@ const sortOptions = [
   { name: 'Newest', href: '#', current: false },
   { name: 'Price: Low to High', href: '#', current: false },
   { name: 'Price: High to Low', href: '#', current: false }
-]
+];
 
-const filterPrices = ref({ prices: [0, 100000] })
+const filterPrices = ref({ prices: [0, 100000] });
 
 const priceFilter = async () => {
   try {
@@ -95,55 +81,57 @@ const priceFilter = async () => {
           to: filterPrices.value.prices[1]
         }
       }
-    })
+    });
     // Handle the response here
   } catch (error) {
-    console.error('Error filtering prices:', error)
+    console.error('Error filtering prices:', error);
   }
-}
+};
 
-const mobileFiltersOpen = ref(false)
+const mobileFiltersOpen = ref(false);
 
 const props = defineProps({
   products: Array,
   categories: Array
-})
+});
 
-// Method for adding product to cart
-const addToCart = (product) => {
+// Using the cart store
+const { cartItems, addToCart, removeFromCart } = useCart();
+
+const addToCartHandler = (product) => {
   const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-  console.log(enterpriseId);
-    axios.post(`/api/cart/store/${product.id}`, product,  {
-      quantity: product.quantity,
-      price: product.price,
-      seller_id: product.seller_id,
-    }, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                'X-CSRF-TOKEN': csrfToken,
-            },
-        }) // Update the endpoint as necessary
-        .then(response => {
-          console.log(response)
-            const flash = response.data.flash;
-            if (flash && flash.success) {
-                Swal.fire({
-                    toast: true,
-                    icon: "success",
-                    position: "top-end",
-                    showConfirmButton: false,
-                    title: flash.success,
-                    timer: 3000
-                });
-            }
-        })
-        .catch(error => {
-            console.error('Error adding to cart:', error);
-        });
+  axios.post(`/api/cart/store/${product.id}`, product, {
+    quantity: product.quantity,
+    price: product.price,
+    seller_id: product.seller_id,
+  }, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      'X-CSRF-TOKEN': csrfToken,
+    },
+  })
+  .then(response => {
+    const flash = response.data.flash;
+    if (flash && flash.success) {
+      Swal.fire({
+        toast: true,
+        icon: "success",
+        position: "top-end",
+        showConfirmButton: false,
+        title: flash.success,
+        timer: 3000
+      });
+    }
+    addToCart(product); // Add to the reactive store
+  })
+  .catch(error => {
+    console.error('Error adding to cart:', error);
+  });
 };
-const selectedCategories = ref([])
 
-watch([ selectedCategories], updateFilteredProducts)
+const selectedCategories = ref([]);
+
+watch([selectedCategories], updateFilteredProducts);
 
 async function updateFilteredProducts() {
   try {
@@ -151,21 +139,22 @@ async function updateFilteredProducts() {
       params: {
         categories: selectedCategories.value
       }
-    })
+    });
     // Handle the response here
   } catch (error) {
-    console.error('Error updating filtered products:', error)
+    console.error('Error updating filtered products:', error);
   }
 }
 
 const openMobileFilters = () => {
-  mobileFiltersOpen.value = true
-}
+  mobileFiltersOpen.value = true;
+};
 
 const closeMobileFilters = () => {
-  mobileFiltersOpen.value = false
-}
+  mobileFiltersOpen.value = false;
+};
 </script>
+
 
 <template>
 <Header></Header>
@@ -255,7 +244,9 @@ const closeMobileFilters = () => {
                 </DisclosurePanel>
             </Disclosure>
           </form>
-
+          </div>
+          </section>
+          
           <!-- Product grid -->
           <div class="lg:col-span-3">
             <!-- Your content -->
@@ -270,7 +261,7 @@ const closeMobileFilters = () => {
                 <div class="product-actions">
                   <button class="product-buttons" @click="openImagesPopup(product)">
                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z"/></svg>        </button>
-                  <button @click="addToCart(product)">
+                  <button @click="addToCartHandler(product)">
                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="M240-80q-33 0-56.5-23.5T160-160v-480q0-33 23.5-56.5T240-720h80q0-66 47-113t113-47q66 0 113 47t47 113h80q33 0 56.5 23.5T800-640v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-480h-80v80q0 17-11.5 28.5T600-520q-17 0-28.5-11.5T560-560v-80H400v80q0 17-11.5 28.5T360-520q-17 0-28.5-11.5T320-560v-80h-80v480Zm160-560h160q0-33-23.5-56.5T480-800q-33 0-56.5 23.5T400-720ZM240-160v-480 480Z"/></svg>                      
                   </button>
                 </div>
@@ -295,8 +286,6 @@ const closeMobileFilters = () => {
               </div>
             </div>
           </div>
-        </div>
-      </section>
     </main>
 </div>
 </template>

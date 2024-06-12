@@ -67,6 +67,7 @@ const getProfilePicture = (path) => {
 
 <template>
     <div>
+        
         <div class="card" v-for="enterprise in filteredEnterprises" :key="enterprise.id">
             <div class="Photo">
                 <img

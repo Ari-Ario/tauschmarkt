@@ -84,12 +84,12 @@ export const routes = [
         component: () => import("./pages/Index.vue"),
         meta: { showLogo: true, allBlogs:false, getStarted: false, home: true}
     },
-/*    {
-        path:"/edit-blog/:id",
-        name:"editBlog",
-        component: () => import("./pages/EditBlog.vue"),
+    {
+        path:"/cart-list",
+        name:"cartList",
+        component: () => import("./pages/CartList.vue"),
         meta: { showLogo: true, allBlogs:false, getStarted: false, home: true}
-    } */
+    } 
 ];
 
 
