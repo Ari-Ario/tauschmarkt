@@ -3,6 +3,7 @@ import { computed, reactive, defineProps } from 'vue';
 // import UserLayouts from './Layouts/UserLayouts.vue';
 import { useRouter } from 'vue-router';
 import { useCart } from '../store'; // Adjust the path as needed
+import Swal from 'sweetalert2';
 
 const router = useRouter();
 const { cartItems, cartCount, addToCart, removeFromCart, updateQuantity } = useCart();
@@ -35,11 +36,70 @@ const total = computed(() => carts.value.reduce((sum, item) => sum + (item.price
 const itemId = (id) => carts.value.findIndex((item) => item.product_id === id);
 
 const update = (product, quantity) => {
-    updateQuantity(product, quantity);
+    console.log(quantity)
+
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    axios.patch(`/api/cart/update/${product.id}`, {
+    quantity: quantity,
+    // user_id: product.user_id,
+    seller_id: product.seller_id,
+  }, {
+        headers: {
+        'Content-Type': 'multipart/form-data',
+        'X-CSRF-TOKEN': csrfToken,
+        },
+    })
+    .then(response => {
+        const flash = response.data.flash;
+        if (flash && flash.success) {
+        Swal.fire({
+            toast: true,
+            icon: "success",
+            position: "top-end",
+            showConfirmButton: false,
+            title: flash.success,
+            timer: 3000
+        });
+        }
+        // cartCount()
+        // updateQuantity(product, quantity);
+    })
+    .catch(error => {
+        console.error('Error adding to cart:', error);
+    });
 };
 
 const remove = (product) => {
-    removeFromCart(product.id);
+    // removeFromCart(product.id);
+    // console.log(product)
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    axios.delete(`/api/delete/update/${product.id}`, {
+    // id: product.id,
+    // user_id: product.user_id,
+    seller_id: product.seller_id,
+  }, {
+        headers: {
+        'Content-Type': 'multipart/form-data',
+        'X-CSRF-TOKEN': csrfToken,
+        },
+    })
+    .then(response => {
+        const flash = response.data.flash;
+        if (flash && flash.success) {
+        Swal.fire({
+            toast: true,
+            icon: "success",
+            position: "top-end",
+            showConfirmButton: false,
+            title: flash.success,
+            timer: 3000
+        });
+        }
+        removeFromCart(product.id);
+    })
+    .catch(error => {
+        console.error('Error adding to cart:', error);
+    });
 };
 
 function submit() {
@@ -96,7 +156,7 @@ function submit() {
                                             placeholder="1" style="max-width: 40px;" required>
                                         <button @click.prevent="update(product, product.quantity + 1)"
                                             class="btn btn-outline-secondary text-primary" type="button">
-                                            <i class="bi bi-plus">+</i>
+                                            <i class="bi bi-plus">+ {{ product.quantity }}</i>
                                         </button>
                                     </div>
                                 </td>

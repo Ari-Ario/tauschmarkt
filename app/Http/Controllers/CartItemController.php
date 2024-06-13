@@ -98,6 +98,9 @@ class CartItemController extends Controller
 
         return response()->json(['flash' => ['success' => 'Product added to cart successfully!']]);
     }
+
+
+
     public function update(Request $request, Product $product)
     {
         $quantity = $request->integer('quantity');
@@ -115,17 +118,19 @@ class CartItemController extends Controller
             Cart::setCookieCartItems($cartItems);
         }
 
-        return redirect()->back();
+        return  response()->json(['flash' => ['success' => 'Product updated in cart successfully!']]);
     }
+
+
     public function delete(Request $request, Product $product)
     {
         $user = $request->user();
         if ($user) {
-            CartItem::query()->where(['user_id' => $user->id, 'product_id' => $product->id])->first()?->delete();
+            CartItem::query()->where(['user_id' => $user->id, 'product_id' => $product->id, 'seller_id' => $product->seller_id])->first()?->delete();
             if (CartItem::count() <= 0) {
-                return redirect()->route('home')->with('info', 'your cart is empty');
+                return response()->json(['flash' => ['info' => 'Product is not in cart!']]);
             } else {
-                return redirect()->back()->with('success', 'item removed successfully');
+                return response()->json(['flash' => ['success' => 'Product deleted from cart successfully!']]);
             }
         } else {
             $cartItems = Cart::getCookieCartItems();
@@ -137,9 +142,9 @@ class CartItemController extends Controller
             }
             Cart::setCookieCartItems($cartItems);
             if (count($cartItems) <= 0) {
-                return redirect()->route('home')->with('info', 'your cart is empty');
+                return response()->json(['flash' => ['info' => 'Product is not in cart!']]);
             } else {
-                return redirect()->back()->with('success', 'item removed successfully');
+                return response()->json(['flash' => ['success' => 'Product deleted from cart successfully!']]);
             }
         }
     }
