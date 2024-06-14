@@ -4,9 +4,9 @@ import { computed, reactive, defineProps } from 'vue';
 import { useRouter } from 'vue-router';
 import { useCart } from '../store'; // Adjust the path as needed
 import Swal from 'sweetalert2';
+import { loadStripe } from '@stripe/stripe-js';
 
 const router = useRouter();
-const { cartItems, cartCount, addToCart, removeFromCart, updateQuantity } = useCart();
 
 const props = defineProps({
     userAddress: Object
@@ -30,43 +30,74 @@ const formFilled = computed(() => {
         form.type !== null;
 });
 
+
+// Using the cart store
+const { cartItems, cartCount, addToCart, removeItemFromCart, removeFromCart, updateQuantity } = useCart();
 const carts = cartItems;
 const total = computed(() => carts.value.reduce((sum, item) => sum + (item.price * item.quantity), 0));
 
 const itemId = (id) => carts.value.findIndex((item) => item.product_id === id);
 
-const update = (product, quantity) => {
-    console.log(quantity)
-
-    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-    axios.patch(`/api/cart/update/${product.id}`, {
-    quantity: quantity,
-    // user_id: product.user_id,
+const addToCartHandler = (product) => {
+  const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+  axios.post(`/api/cart/store/${product.id}`, product, {
+    quantity: product.quantity,
+    price: product.price,
     seller_id: product.seller_id,
   }, {
-        headers: {
-        'Content-Type': 'multipart/form-data',
-        'X-CSRF-TOKEN': csrfToken,
-        },
-    })
-    .then(response => {
-        const flash = response.data.flash;
-        if (flash && flash.success) {
-        Swal.fire({
-            toast: true,
-            icon: "success",
-            position: "top-end",
-            showConfirmButton: false,
-            title: flash.success,
-            timer: 3000
-        });
-        }
-        // cartCount()
-        // updateQuantity(product, quantity);
-    })
-    .catch(error => {
-        console.error('Error adding to cart:', error);
-    });
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      'X-CSRF-TOKEN': csrfToken,
+    },
+  })
+  .then(response => {
+    const flash = response.data.flash;
+    if (flash && flash.success) {
+      Swal.fire({
+        toast: true,
+        icon: "success",
+        position: "top-end",
+        showConfirmButton: false,
+        title: flash.success,
+        timer: 3000
+      });
+    }
+    addToCart(product); // Add to the reactive store
+  })
+  .catch(error => {
+    console.error('Error adding to cart:', error);
+  });
+};
+
+const removeFromCartHandler = (product) => {
+  const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+  axios.post(`/api/cart/remove/${product.id}`, product, {
+    quantity: product.quantity,
+    price: product.price,
+    seller_id: product.seller_id,
+  }, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+      'X-CSRF-TOKEN': csrfToken,
+    },
+  })
+  .then(response => {
+    const flash = response.data.flash;
+    if (flash) {
+      Swal.fire({
+        toast: true,
+        icon: "success",
+        position: "top-end",
+        showConfirmButton: false,
+        title: flash.success,
+        timer: 3000
+      });
+    }
+    removeItemFromCart(product);
+  })
+  .catch(error => {
+    console.error('Error adding to cart:', error);
+  });
 };
 
 const remove = (product) => {
@@ -102,16 +133,35 @@ const remove = (product) => {
     });
 };
 
-function submit() {
-    router.push({
-        name: 'checkout.store',
-        params: {
-            carts: carts.value,
+const stripePromise = loadStripe(String(import.meta.env.STRIPE_KEY));
+
+async function submit() {
+    console.log(            cartItems.value,
+            // Assuming you have products stored similarly or can derive products from cartItems
+            cartItems.value.map(item => ({
+                id: item.id,
+                name: item.name,
+                price: item.price
+            })),
+            total.value,)
+    try {
+        const response = await axios.post('/api/checkout/order', {
+            carts: cartItems.value,
+            // Assuming you have products stored similarly or can derive products from cartItems
+            products: cartItems.value.map(item => ({
+                id: item.id,
+                name: item.name,
+                price: item.price
+            })),
             total: total.value,
-            address: form
-        },
-        query: {}
-    });
+            //address: form 
+        });
+
+        const checkoutUrl = response.data.url;
+        window.location.href = checkoutUrl; // Redirect to Stripe Checkout
+    } catch (error) {
+        console.error("Error creating checkout session", error);
+    }
 }
 </script>
 
@@ -146,7 +196,7 @@ function submit() {
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <button @click.prevent="update(product, product.quantity - 1)"
+                                        <button @click.prevent="removeFromCartHandler(product)"
                                             :disabled="product.quantity <= 1"
                                             :class="['btn', 'btn-outline-secondary', product.quantity > 1 ? 'text-primary' : 'disabled']"
                                             type="button">
@@ -154,9 +204,9 @@ function submit() {
                                         </button>
                                         <input type="number" v-model="product.quantity" class="form-control qty w-25 mx-2"
                                             placeholder="1" style="max-width: 40px;" required>
-                                        <button @click.prevent="update(product, product.quantity + 1)"
+                                        <button @click.prevent="addToCartHandler(product)"
                                             class="btn btn-outline-secondary text-primary" type="button">
-                                            <i class="bi bi-plus">+ {{ product.quantity }}</i>
+                                            <i class="bi bi-plus">+</i>
                                         </button>
                                     </div>
                                 </td>
@@ -185,7 +235,7 @@ function submit() {
                         <p class="text-muted mb-5">{{ userAddress.address1 }} , {{ userAddress.city }}, {{ userAddress.zipcode }}</p>
                         <p class="text-muted mb-5">or you can add new below</p>
                     </div>
-                    <button v-else type="submit" class="btn btn-secondary">Zur Kasse</button>
+                    <button v-else @click.prevent="submit()" type="submit" class="btn btn-secondary">Zur Kasse</button>
 <!--                     <div v-else>
                         <p class="text-muted mb-5">Add shipping address to continue</p>
                     </div>

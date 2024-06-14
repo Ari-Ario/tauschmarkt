@@ -89,7 +89,15 @@ export const routes = [
         name:"cartList",
         component: () => import("./pages/CartList.vue"),
         meta: { showLogo: true, allBlogs:false, getStarted: false, home: true}
+    }, 
+
+    {
+        path:"/checkout-store",
+        name:"checkoutStore",
+        component: () => import("./pages/CartList.vue"),
+        meta: { showLogo: true, allBlogs:false, getStarted: false, home: true}
     } 
+    
 ];
 
 

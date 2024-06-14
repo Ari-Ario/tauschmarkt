@@ -99,6 +99,40 @@ class CartItemController extends Controller
         return response()->json(['flash' => ['success' => 'Product added to cart successfully!']]);
     }
 
+    public function remove(Request $request)
+    {
+
+        $quantity = $request->post('quantity', -1);
+        $user = $request->user();
+
+        if ($user) {
+            $cartItem = CartItem::where(['user_id' => $user->id, 'product_id' => $request->id, 'seller_id' => $request->seller_id])->first();
+            if ($cartItem && ($cartItem->quantity > 1) ) {
+                $cartItem->decrement('quantity');
+            } else {
+                return response()->json(['flash' => ['info' => 'delete the Item please!']]);
+            }
+        } else {
+            $cartItems = Cart::getCookieCartItems();
+            $isProductExists = false;
+            foreach ($cartItems as $item) {
+                if ($item['product_id'] === $request->id) {
+                    $item['quantity'] -= $quantity;
+                    $isProductExists = true;
+                    break;
+                }
+            }
+
+            if (!$isProductExists) {
+                return response()->json(['flash' => ['fail' => 'the Item does not exist!']]);
+
+            }
+            Cart::setCookieCartItems($cartItems);
+        }
+
+        return response()->json(['flash' => ['success' => 'Product reduced in cart successfully!']]);
+    }
+
 
 
     public function update(Request $request, Product $product)

@@ -13,6 +13,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CartItemController;
 use App\Http\Middleware\VerifyCsrfToken;
+use App\Http\Controllers\CheckoutController;
 
 
 Route::post('/sanctum/token', TokenController::class);
@@ -25,6 +26,8 @@ Route::get('/product/{id}', [ProductController::class, 'index']);
 //add to cart 
 Route::get('/cart/view', [CartItemController::class, 'view']);
 Route::post('/cart/store/{product}', [CartItemController::class, 'store']);
+Route::post('/cart/remove/{product}', [CartItemController::class, 'remove']);
+
 Route::patch('/cart/update/{product}', [CartItemController::class, 'update']);
 Route::delete('/delete/update/{product}', [CartItemController::class, 'delete']);
 
@@ -60,4 +63,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/products/image/{id}',[ProductController::class,'deleteImage']);
     Route::delete('/products/destroy/{id}', [ProductController::class, 'destroy']);
 
+    //chekcout 
+    // Route::post('order',[CheckoutController::class,'store']);
+    // Route::get('success', [CheckoutController::class,'success']);
+    // Route::get('cancel',[CheckoutController::class,'cancel']);
+
 });
+
+Route::prefix('checkout')->controller(CheckoutController::class)->group((function()  {
+    Route::post('order','store')->name('checkout.store');
+    Route::get('success','success')->name('checkout.success');
+    Route::get('cancel','cancel')->name('checkout.cancel');
+}));
