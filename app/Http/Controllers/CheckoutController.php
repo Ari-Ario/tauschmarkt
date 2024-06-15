@@ -36,8 +36,7 @@ class CheckoutController extends Controller
         }
     
         // Stripe payment
-        // \Stripe\Stripe::setApiKey(env('STRIPE_KEY'));
-        $stripe = new \Stripe\StripeClient('');
+        $stripe = new \Stripe\StripeClient('sk_test_51PRVFGCFV0u7TeyeT35q849Bj5Z20yEOr2EoFcRvJyW7ELi7BmxiDfzPhcggYibOAqCIoal1J0vuHX0iJ3RVVFnL00o4IPXSbH');
         $lineItems = [];
         foreach ($mergedData as $item) {
             $lineItems[] = [
@@ -53,10 +52,10 @@ class CheckoutController extends Controller
         }
     
         $checkout_session = $stripe->checkout->sessions->create([
-            'line_items' =>  $lineItems,
+            'line_items' => $lineItems,
             'mode' => 'payment',
-            'success_url' => route('checkout.success') . '?session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url' => route('checkout.cancel'),
+            'success_url' => route('checkout.success', [], true) . '?session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url' => route('checkout.cancel', [], true),
         ]);
     
         // $newAddress = $request->address;
@@ -85,7 +84,14 @@ class CheckoutController extends Controller
         //     $order->user_address_id = $mainAddress->id;
         //     $order->save();
         if ($user) {
-            
+            $order = new Order();
+            $order->status = 'unpaid';
+            $order->total_price = $request->total;
+            $order->session_id = $checkout_session->id;
+            $order->created_by = $user->id;
+            // $order->seller_id = $request->seller_id;
+            // $order->user_address_id = $mainAddress->id;
+            $order->save();
             $cartItems = CartItem::where('user_id', $user->id)->get();
             foreach ($cartItems as $cartItem) {
                 OrderItem::create([
@@ -117,25 +123,26 @@ class CheckoutController extends Controller
 
     public function success(Request $request)
     {
-        \Stripe\Stripe::setApiKey(env('STRIPE_KEY'));
+        \Stripe\Stripe::setApiKey('sk_test_51PRVFGCFV0u7TeyeT35q849Bj5Z20yEOr2EoFcRvJyW7ELi7BmxiDfzPhcggYibOAqCIoal1J0vuHX0iJ3RVVFnL00o4IPXSbH');
         $sessionId = $request->get('session_id');
+
         try {
             $session = \Stripe\Checkout\Session::retrieve($sessionId);
             if (!$session) {
-                throw new NotFoundHttpException;
+                throw new \Exception('Session not found');
             }
             $order = Order::where('session_id', $session->id)->first();
             if (!$order) {
-                throw new NotFoundHttpException();
+                throw new \Exception('Order not found');
             }
             if ($order->status === 'unpaid') {
                 $order->status = 'paid';
                 $order->save();
             }
-    
-            return redirect()->route('dashboard');
+            return redirect('/');
         } catch (\Exception $e) {
-            throw new NotFoundHttpException();
+            \Log::error('Stripe error: ' . $e->getMessage());
+            abort(500, 'Error processing payment.');
         }
     }
 }

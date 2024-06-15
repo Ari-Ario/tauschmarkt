@@ -23,13 +23,6 @@ Route::get('/product/{id}', [ProductController::class, 'index']);
 
 // Route::get('/products', [ProductController::class, 'index']);
 
-//add to cart 
-Route::get('/cart/view', [CartItemController::class, 'view']);
-Route::post('/cart/store/{product}', [CartItemController::class, 'store']);
-Route::post('/cart/remove/{product}', [CartItemController::class, 'remove']);
-
-Route::patch('/cart/update/{product}', [CartItemController::class, 'update']);
-Route::delete('/delete/update/{product}', [CartItemController::class, 'delete']);
 
 /**
  * AUTH ROUTES
@@ -70,8 +63,19 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 });
 
-Route::prefix('checkout')->controller(CheckoutController::class)->group((function()  {
-    Route::post('order','store')->name('checkout.store');
-    Route::get('success','success')->name('checkout.success');
-    Route::get('cancel','cancel')->name('checkout.cancel');
-}));
+//add to cart 
+Route::get('/cart/view', [CartItemController::class, 'view']);
+Route::post('/cart/store/{product}', [CartItemController::class, 'store']);
+Route::post('/cart/remove/{product}', [CartItemController::class, 'remove']);
+
+Route::patch('/cart/update/{product}', [CartItemController::class, 'update']);
+Route::delete('/delete/update/{product}', [CartItemController::class, 'delete']);
+
+
+Route::middleware(['web'])->group(function () {
+    Route::prefix('checkout')->controller(CheckoutController::class)->group((function()  {
+        Route::post('order','store')->name('checkout.store');
+        Route::get('success','success')->name('checkout.success');
+        Route::get('cancel','cancel')->name('checkout.cancel');
+    }));
+});

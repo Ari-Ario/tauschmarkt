@@ -136,33 +136,50 @@ const remove = (product) => {
 const stripePromise = loadStripe(String(import.meta.env.STRIPE_KEY));
 
 async function submit() {
-    console.log(            cartItems.value,
-            // Assuming you have products stored similarly or can derive products from cartItems
-            cartItems.value.map(item => ({
+    // console.log(            
+    //         cartItems.value,
+    //         cartItems.value.map(item => ({
+    //             id: item.id,
+    //             name: item.name,
+    //             price: item.price
+    //         })),
+    //         total.value,)
+    axios.post('/api/checkout/order', {
+        carts: cartItems.value,
+        products: cartItems.value.map(item => ({
                 id: item.id,
                 name: item.name,
                 price: item.price
             })),
-            total.value,)
-    try {
-        const response = await axios.post('/api/checkout/order', {
-            carts: cartItems.value,
-            // Assuming you have products stored similarly or can derive products from cartItems
-            products: cartItems.value.map(item => ({
-                id: item.id,
-                name: item.name,
-                price: item.price
-            })),
-            total: total.value,
-            //address: form 
-        });
-
-        const checkoutUrl = response.data.url;
-        window.location.href = checkoutUrl; // Redirect to Stripe Checkout
-    } catch (error) {
-        console.error("Error creating checkout session", error);
-    }
+        total: total.value,
+        // address: form
+    })
+    .then(response => {
+        if (response.data.url) {
+            // console.log(response.data.url)
+            window.location.href = response.data.url;
+        }
+    })
+    .catch(error => {
+        console.error('There was an error during the checkout process:', error);
+    });
 }
+
+// Call this function when the page loads and the session_id is available in the URL
+const urlParams = new URLSearchParams(window.location.search);
+const sessionId = urlParams.get('session_id');
+if (sessionId) {
+    axios.get('/api/checkout/success', {
+        params: { session_id: sessionId }
+    })
+    .then(response => {
+        router.push('/'); // Redirect to home on successful payment
+    })
+    .catch(error => {
+        console.error('There was an error during the payment success handling:', error);
+    });
+}
+
 </script>
 
 <template>
@@ -175,11 +192,11 @@ async function submit() {
                     <table class="table table-striped">
                         <thead class="thead-dark">
                             <tr>
-                                <th scope="col">Image</th>
-                                <th scope="col">Product</th>
-                                <th scope="col">Qty</th>
-                                <th scope="col">Price</th>
-                                <th scope="col">Action</th>
+                                <th scope="col">Bild</th>
+                                <th scope="col">Produkt</th>
+                                <th scope="col">Menge</th>
+                                <th scope="col">Preis</th>
+                                <th scope="col">Akt</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -227,8 +244,8 @@ async function submit() {
                     <!-- end -->
                 </div>
                 <div class="details md:w-1/2 bg-white flex  mt-8 ">
-                    <h2 class="text-dark mb-4">Summary</h2>
-                    <p class="mb-5 text-muted">Total: ${{ total }}</p>
+                    <h2 class="text-dark mb-4">Zusammenfassung</h2>
+                    <p class="mb-5 text-muted">Gesamt: {{ total }} CHF</p>
 
                     <div v-if="userAddress">
                         <h2 class="text-dark mb-4">Shipping Address</h2>
@@ -443,6 +460,9 @@ async function submit() {
     background-color: transparent;
     background-image: none;
     border-color: #6c757d;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
 }
 
 .btn-outline-secondary:hover {
@@ -536,6 +556,7 @@ async function submit() {
     align-items: center !important;
 }
 
+
 /* Responsive styles */
 @media (max-width: 576px) {
     .container {
@@ -582,11 +603,11 @@ async function submit() {
     .qty {
         min-width: 10px;
     }
-    /* .btn-outline-secondary {
+    .btn-outline-secondary {
         padding: 0;
-        border-radius: 50%;
-        max-width: 5px;
-    } */
+        /* border-radius: 50%; */
+        max-height: 30px;
+    }
 }
 
 @media (max-width: 768px) {
