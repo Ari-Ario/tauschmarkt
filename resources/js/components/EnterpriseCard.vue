@@ -9,6 +9,8 @@ import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue';
 import { PlusIcon, MinusIcon } from '@heroicons/vue/20/solid';
 import CategoryTags from "./CategoryTags.vue";
 import { RouterLink } from "vue-router";
+import { location, distance } from '../locals';
+
 // import { categories, selectedCategories, updateFilteredProducts } from '../categoryFilterScript';
 
 
@@ -19,17 +21,17 @@ const filteredEnterprises = ref([]);
 const categories = ref([]);
 const selectedCategories = ref([]);
 
-const location = { latitude: 46.938749674988486, longitude: 7.459564360522899 }; // Replace with actual location
-const distance = 100; // Distance in kilometers
+//const location = { latitude: 46.938749674988486, longitude: 7.459564360522899 }; // Replace with actual location
+//const distance = 100; // Distance in kilometers
 
 const loadEnterprises = async (latitude, longitude, distance, userId) => {
     try {
         // const response = await axios.get(`api/enterprises/${userId}`);
         const response = await axios.get(`/api/enterprises/${userId}`, {
           params: {
-            latitude: latitude,
-            longitude: longitude,
-            distance: distance,
+            latitude: location.value.latitude,
+            longitude: location.value.longitude,
+            distance: distance.value,
           },
         });
         enterprises.value = response.data;

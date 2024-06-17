@@ -2,19 +2,27 @@
 import { ref, onMounted, watch } from 'vue';
 import { useAuthStore } from '../stores/AuthStore';
 import axios from 'axios';
-
+import { useRouter } from 'vue-router';
 import { GoogleMap, Marker, Circle } from 'vue3-google-map';
-// import VueGoogleAutocomplete from 'vue-google-autocomplete';
+import { location, distance, setLocation, setDistance } from '../locals';
 
 const store = useAuthStore();
+const router = useRouter();
 
 const userLocation = ref(null);
 
 const center = ref({ lat: 46.938749674988486, lng: 7.459564360522899 });
-const location = ref({ latitude: 0, longitude: 0 });
+// const location = ref({ latitude: 0, longitude: 0 });
 const radius = ref(10); // Default radius in km
 const city = ref('');
 const mapRef = ref(null); // Reference to the Google Map instance
+
+const goToDashboard = () => {
+  setLocation(location.value.latitude, location.value.longitude);
+  setDistance(radius.value );
+  console.log(location, distance)
+  router.push({ name: 'dashboard' });
+};
 
 const circleOptions = ref({
   center: center.value,
@@ -162,6 +170,30 @@ const myLocation = onMounted(() => {
 const refreshPage = () => {
   location.reload(); // Reloads the current page
 };
+
+const autocomplete = ref(null);
+
+const initAutocomplete = () => {
+  if (autocomplete.value) return; // Avoid initializing again
+
+  const input = document.getElementById('autocomplete');
+  autocomplete.value = new google.maps.places.Autocomplete(input, {
+    types: ['(cities)'],
+  });
+
+  autocomplete.value.addListener('place_changed', () => {
+    const place = autocomplete.value.getPlace();
+    if (place.geometry) {
+      const lat = place.geometry.location.lat();
+      const lng = place.geometry.location.lng();
+      setLocation(lat, lng);
+      console.log(`City: ${place.formatted_address}`);
+    } else {
+      console.error('Place has no geometry');
+    }
+  });
+};
+
 </script>
 
 <template>
@@ -206,14 +238,19 @@ const refreshPage = () => {
           <span>{{ radius }} km</span>
         </div>
         <input type="text" v-model="city" placeholder="Search for a city" @keypress.enter="searchCity" />
-        <button  @click="searchCity">Show results</button>
+        <button  @click="searchCity">Stadt suchen</button>
         
-        <button @click="useCurrentLocation">Meinen Standort verwenden</button>
+        <button @click="goToDashboard">Suchen</button>
+        <input 
+          id="autocomplete" 
+          type="text" 
+          placeholder="Enter a city or location" 
+          @focus="initAutocomplete"
+        />
       </div>
     </form>
 
   </div>
-
 
 </template>
 
