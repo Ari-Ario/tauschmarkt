@@ -1,15 +1,16 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { useAuthStore } from '../stores/AuthStore';
+import axios from 'axios';
 
 import { GoogleMap, Marker, Circle } from 'vue3-google-map';
-import VueGoogleAutocomplete from 'vue-google-autocomplete';
+// import VueGoogleAutocomplete from 'vue-google-autocomplete';
 
 const store = useAuthStore();
 
 const userLocation = ref(null);
 
-const center = ref({ lat: 46.938749674988486, lng: 7.459564360522899 });
+const center = ref({ latitude: 46.938749674988486, longitude: 7.459564360522899 });
 const radius = ref(10); // Default radius in km
 const city = ref('');
 const mapRef = ref(null); // Reference to the Google Map instance
@@ -42,28 +43,77 @@ const updateCircle = () => {
   fitMapToBounds();
 };
 
-const useCurrentLocation = () => {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition((position) => {
-      center.value = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-      };
+const updateBackend = async () => {
       console.log(center.value);
-      updateCircle();
-    });
+
+      const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+      try {
+        const response = await axios.put(`/api/user/update-location`, center.value, {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+          },
+        });
+        console.log('Location updated:', response.data);
+      } catch (error) {
+        console.error('Error updating profile:', error);
+      }
+    };
+
+    const useCurrentLocation = async () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (position) => {
+          center.value = {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+          };
+          updateCircle();
+          await updateBackend();
+        });
+      } else {
+        alert('Geolocation is not supported by this browser.');
+      }
+    };
+
+    const savePlace = () => {
+      // if (place.geometry) {
+      //   center.value = {
+      //     latitude: place.geometry.location.lat(),
+      //     longitude: place.geometry.location.lng(),
+      //   };
+        // updateCircle();
+        updateBackend();
+      // } else {
+      //   console.error('Place has no geometry');
+      // }
+    };
+
+const searchCity = (place) => {
+  if (place.geometry) {
+    center.value = {
+      lat: place.geometry.location.lat(),
+      lng: place.geometry.location.lng(),
+    };
+    updateCircle();
+
+    const addressComponents = place.address_components;
+    let city = '';
+
+    for (const component of addressComponents) {
+      const types = component.types;
+      if (types.includes('locality')) {
+        city = component.long_name;
+        break;
+      }
+    }
+
+    console.log(`City: ${city}`);
+    // You can use the city variable as needed
   } else {
-    alert('Geolocation is not supported by this browser.');
+    console.error('Place has no geometry');
   }
 };
 
-const searchCity = (place) => {
-  center.value = {
-    lat: place.geometry.location.lat(),
-    lng: place.geometry.location.lng(),
-  };
-  updateCircle();
-};
 
 const showResults = () => {
   alert('Show results within ' + radius.value + ' km');
@@ -94,6 +144,7 @@ const handleMapClick = (event) => {
     lat: event.latLng.lat(),
     lng: event.latLng.lng(),
   };
+    
   console.log(center.value)
   updateCircle();
 };
@@ -136,7 +187,7 @@ const refreshPage = () => {
       @click="handleMapClick"
 
     >
-      <Circle :options="circleOptions" />
+      <Circle v-if="!store.authUser.is_seller" :options="circleOptions" />
       <Marker :options="{ position: center }" />
     </GoogleMap>
     
@@ -150,9 +201,11 @@ const refreshPage = () => {
           <input type="range" min="1" max="20" v-model="radius" @input="updateCircle" />
           <span>{{ radius }} km</span>
         </div>
-        <input type="text" v-model="city" placeholder="Search for a city" @keypress.enter="searchCity" />
-        <button @click="useCurrentLocation">Use my current location</button>
-        <button @click="searchCity">Show results</button>
+        <input v-if="!store.authUser.is_seller" type="text" v-model="city" placeholder="Search for a city" @keypress.enter="searchCity" />
+        <button v-if="!store.authUser.is_seller" @click="searchCity">Show results</button>
+        <button v-if="store.authUser.is_seller" @click="savePlace">Ort speichern</button>
+        
+        <button @click="useCurrentLocation">Meinen Standort verwenden</button>
       </div>
     </form>
 

@@ -83,6 +83,27 @@ class UserController extends Controller
             ]);
         }
 
+        public function updateUserLocation(Request $request)
+        {
+            // return $request;
+
+            $user = Auth::user();
+
+            $request->validate([
+                'latitude' => 'required',
+                'longitude' => 'required',
+            ]);
+
+            $user->update($request->only([
+                'latitude',
+                'longitude',
+            ]));
+    
+            return response()->json([
+                'message' => 'Location updated successfully',
+            ]);
+        }
+
         ////////////////////////////////////////Upload Background- & Profile-Images //////////////////////////////
         public function updateBackgroundImage(Request $request)
         {

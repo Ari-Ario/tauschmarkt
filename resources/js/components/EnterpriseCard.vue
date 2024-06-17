@@ -1,5 +1,5 @@
 <script setup>
-  import { useAuthStore } from '@/stores/AuthStore';
+import { useAuthStore } from '@/stores/AuthStore';
 import AuthService from "@/services/AuthService";
 import { authClient } from '../services/AuthService';
 
@@ -9,34 +9,23 @@ import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue';
 import { PlusIcon, MinusIcon } from '@heroicons/vue/20/solid';
 import CategoryTags from "./CategoryTags.vue";
 import { RouterLink } from "vue-router";
-import { categories, selectedCategories, updateFilteredProducts } from '../categoryFilterScript';
+// import { categories, selectedCategories, updateFilteredProducts } from '../categoryFilterScript';
 
-watch([selectedCategories], updateFilteredProducts);
-
-// export const categories = ref([]);
-// export const selectedCategories = ref([]);
-
-// export async function updateFilteredProducts() {
-//   try {
-//     const response = await axios.get('products', {
-//       params: {
-//         categories: selectedCategories.value
-//       }
-//     });
-//     // Handle the response here
-//   } catch (error) {
-//     console.error('Error updating filtered products:', error);
-//   }
-// }
 
 const store = useAuthStore();
 const userId = store?.authUser?.id;
+const enterprises = ref([]);
 const filteredEnterprises = ref([]);
+const categories = ref([]);
+const selectedCategories = ref([]);
+
+
 const loadEnterprises = async () => {
     try {
         const response = await axios.get(`api/enterprises/${userId}`);
-        filteredEnterprises.value = response.data;
+        enterprises.value = response.data;
         console.log(filteredEnterprises)
+        filterEnterprises()
     } catch (error) {
         console.error("Error loading enterprises:", error);
     }
@@ -47,6 +36,18 @@ const loadEnterprises = async () => {
     console.error('Failed to fetch Product:', error);
   }
 };
+
+const filterEnterprises = () => {
+            if (selectedCategories.value.length === 0) {
+                filteredEnterprises.value = enterprises.value;
+            } else {
+                filteredEnterprises.value = enterprises.value.filter(enterprise =>
+                selectedCategories.value.includes(enterprise.categoryId)
+              );
+              console.log(selectedCategories)
+            }
+        };
+watch(selectedCategories, filterEnterprises);
 
 const addOrRemoveFavorites = async ( enterprise) => {
     
@@ -92,14 +93,15 @@ const getProfilePicture = (path) => {
 
 <template>
     <div>
+        <h1 style="text-align: center; color:#004d40;">Tauschmarkt</h1>
 
         <Disclosure as="div" class="border-b border-gray-200 py-6" v-slot="{ open }">
             <h3 class="-my-3 flow-root">
-            <DisclosureButton class="flex w-full items-center justify-between bg-white py-3 text-sm text-gray-400 hover:text-gray-500">
+            <DisclosureButton class="flex w-full items-center justify-between bg-white py-3 text-sm text-gray-400 hover:text-gray-500" style="height: 40px; display: flex; justify-content: space-between;">
                 <span class="font-medium text-gray-900">Categories</span>
                 <span class="ml-6 flex items-center">
-                <PlusIcon v-if="!open" class="h-5 w-5" aria-hidden="true" />
-                <MinusIcon v-else class="h-5 w-5" aria-hidden="true" />
+                <PlusIcon v-if="!open" class="h-5 w-5" aria-hidden="true" style="height: 40px;" />
+                <MinusIcon v-else class="h-5 w-5" aria-hidden="true" style="height: 40px;" />
                 </span>
             </DisclosureButton>
             </h3>

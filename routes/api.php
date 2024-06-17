@@ -33,6 +33,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     
     Route::get('/user/profile/{id}', [UserController::class, 'getUserProfile']);
     Route::put('/user/update-profile', [UserController::class, 'updateUserProfile']);
+    Route::put('/user/update-location', [UserController::class, 'updateUserLocation']);
+    
     
     //////////////////////////Uploading Profile and Background Images /////////////////////
     Route::post('/bg-picture', [UserController::class, 'updateBackgroundImage']);
