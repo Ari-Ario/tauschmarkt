@@ -139,7 +139,8 @@ class CheckoutController extends Controller
                 $order->status = 'paid';
                 $order->save();
             }
-            return redirect('/');
+            // return redirect('/');
+            return redirect()->route('localhost');
         } catch (\Exception $e) {
             \Log::error('Stripe error: ' . $e->getMessage());
             abort(500, 'Error processing payment.');

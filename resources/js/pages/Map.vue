@@ -10,7 +10,8 @@ const store = useAuthStore();
 
 const userLocation = ref(null);
 
-const center = ref({ latitude: 46.938749674988486, longitude: 7.459564360522899 });
+const center = ref({ lat: 46.938749674988486, lng: 7.459564360522899 });
+const location = ref({ latitude: 0, longitude: 0 });
 const radius = ref(10); // Default radius in km
 const city = ref('');
 const mapRef = ref(null); // Reference to the Google Map instance
@@ -44,49 +45,40 @@ const updateCircle = () => {
 };
 
 const updateBackend = async () => {
-      console.log(center.value);
+  // console.log(center.value);
 
-      const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-      try {
-        const response = await axios.put(`/api/user/update-location`, center.value, {
-          headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': csrfToken,
-          },
-        });
-        console.log('Location updated:', response.data);
-      } catch (error) {
-        console.error('Error updating profile:', error);
-      }
-    };
+  const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+  try {
+    const response = await axios.put(`/api/user/update-location`, location.value, {
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': csrfToken,
+      },
+    });
+    console.log('Location updated:', response.data);
+  } catch (error) {
+    console.error('Error updating profile:', error);
+  }
+};
 
-    const useCurrentLocation = async () => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async (position) => {
-          center.value = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-          };
-          updateCircle();
-          await updateBackend();
-        });
-      } else {
-        alert('Geolocation is not supported by this browser.');
-      }
-    };
+const useCurrentLocation = async () => {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      location.value = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      };
+      updateCircle();
+      await updateBackend();
+    });
+  } else {
+    alert('Geolocation is not supported by this browser.');
+  }
+};
 
-    const savePlace = () => {
-      // if (place.geometry) {
-      //   center.value = {
-      //     latitude: place.geometry.location.lat(),
-      //     longitude: place.geometry.location.lng(),
-      //   };
-        // updateCircle();
-        updateBackend();
-      // } else {
-      //   console.error('Place has no geometry');
-      // }
-    };
+const savePlace = () => {
+    updateBackend();
+};
 
 const searchCity = (place) => {
   if (place.geometry) {
@@ -144,8 +136,12 @@ const handleMapClick = (event) => {
     lat: event.latLng.lat(),
     lng: event.latLng.lng(),
   };
+    location.value = {
+    latitude: event.latLng.lat(),
+    longitude: event.latLng.lng(),
+  };
     
-  console.log(center.value)
+  console.log(location.value)
   updateCircle();
 };
 
@@ -193,17 +189,24 @@ const refreshPage = () => {
     
     <form @submit.prevent="myLocation" class="location-form">
 
-      <div class="controls">
+      <div v-if="store.authUser.is_seller" class="controls">
         
-        <h4 v-if="store.authUser.is_seller">Auf Ihren Hof klicken</h4>
-        <h4 v-else>Distanz wählen</h4>
+        <h4 >Auf Ihren Hof klicken</h4>
+
+        <button v-if="store.authUser.is_seller" @click="savePlace">Ort speichern</button>
+        
+        <button @click="useCurrentLocation">Meinen Standort verwenden</button>
+      </div>
+
+      <div v-else class="controls">
+        
+        <h4>Distanz wählen</h4>
         <div class="slider-container">
           <input type="range" min="1" max="20" v-model="radius" @input="updateCircle" />
           <span>{{ radius }} km</span>
         </div>
-        <input v-if="!store.authUser.is_seller" type="text" v-model="city" placeholder="Search for a city" @keypress.enter="searchCity" />
-        <button v-if="!store.authUser.is_seller" @click="searchCity">Show results</button>
-        <button v-if="store.authUser.is_seller" @click="savePlace">Ort speichern</button>
+        <input type="text" v-model="city" placeholder="Search for a city" @keypress.enter="searchCity" />
+        <button  @click="searchCity">Show results</button>
         
         <button @click="useCurrentLocation">Meinen Standort verwenden</button>
       </div>

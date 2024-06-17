@@ -19,10 +19,19 @@ const filteredEnterprises = ref([]);
 const categories = ref([]);
 const selectedCategories = ref([]);
 
+const location = { latitude: 46.938749674988486, longitude: 7.459564360522899 }; // Replace with actual location
+const distance = 100; // Distance in kilometers
 
-const loadEnterprises = async () => {
+const loadEnterprises = async (latitude, longitude, distance, userId) => {
     try {
-        const response = await axios.get(`api/enterprises/${userId}`);
+        // const response = await axios.get(`api/enterprises/${userId}`);
+        const response = await axios.get(`/api/enterprises/${userId}`, {
+          params: {
+            latitude: latitude,
+            longitude: longitude,
+            distance: distance,
+          },
+        });
         enterprises.value = response.data;
         console.log(filteredEnterprises)
         filterEnterprises()
@@ -77,7 +86,8 @@ const addOrRemoveFavorites = async ( enterprise) => {
 
 onMounted(() => {
     axios.defaults.withCredentials = true;
-    loadEnterprises();
+    loadEnterprises(location.latitude, location.longitude, distance, userId);
+
 });
 
 const getEnterprisePicture = (path) => {
