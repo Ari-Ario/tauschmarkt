@@ -125,7 +125,7 @@ class CheckoutController extends Controller
     {
         \Stripe\Stripe::setApiKey('sk_test_51PRVFGCFV0u7TeyeT35q849Bj5Z20yEOr2EoFcRvJyW7ELi7BmxiDfzPhcggYibOAqCIoal1J0vuHX0iJ3RVVFnL00o4IPXSbH');
         $sessionId = $request->get('session_id');
-
+        dd($sessionId);
         try {
             $session = \Stripe\Checkout\Session::retrieve($sessionId);
             if (!$session) {
@@ -135,12 +135,14 @@ class CheckoutController extends Controller
             if (!$order) {
                 throw new \Exception('Order not found');
             }
-            if ($order->status === 'unpaid') {
-                $order->status = 'paid';
-                $order->save();
-            }
-            // return redirect('/');
-            return redirect()->route('localhost');
+            // if ($order->status === 'unpaid') {
+            //     $order->status = 'paid';
+            //     $order->save();
+            // }
+            return redirect('/');
+            
+            return response()->json('checkedout');
+
         } catch (\Exception $e) {
             \Log::error('Stripe error: ' . $e->getMessage());
             abort(500, 'Error processing payment.');

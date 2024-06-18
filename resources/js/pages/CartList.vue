@@ -157,6 +157,7 @@ async function submit() {
     .then(response => {
         if (response.data.url) {
             // console.log(response.data.url)
+            // router.push('/')
             window.location.href = response.data.url;
         }
     })

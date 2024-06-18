@@ -231,22 +231,22 @@ const initAutocomplete = () => {
       </div>
 
       <div v-else class="controls">
-        
-        <h4>Distanz wählen</h4>
-        <div class="slider-container">
-          <input type="range" min="1" max="20" v-model="radius" @input="updateCircle" />
-          <span>{{ radius }} km</span>
-        </div>
-        <input type="text" v-model="city" placeholder="Search for a city" @keypress.enter="searchCity" />
-        <button  @click="searchCity">Stadt suchen</button>
-        
-        <button @click="goToDashboard">Suchen</button>
         <input 
           id="autocomplete" 
           type="text" 
           placeholder="Enter a city or location" 
           @focus="initAutocomplete"
         />
+        <!-- <input type="text" v-model="city" placeholder="Search for a city" @keypress.enter="searchCity" /> -->
+        <button  @click="searchCity">Stadt suchen</button>
+        <!-- <p>oder</p> -->
+        <h4>Distanz wählen</h4>
+        <div class="slider-container">
+          <input type="range" min="1" max="20" v-model="radius" @input="updateCircle" />
+          <span>{{ radius }} km</span>
+        </div>
+        
+        <button @click="goToDashboard">Suchen</button>
       </div>
     </form>
 

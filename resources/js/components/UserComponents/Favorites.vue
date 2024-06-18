@@ -69,13 +69,12 @@ const getProfilePicture = (path) => {
 </script>
 
 <template>
-    <div class="container">
-        <div class="card" v-for="enterprise in favorites" :key="favorites.id">
+    <div  v-for="enterprise in favorites" :key="favorites.id" class="container">
+        <div v-if="enterprise.is_seller" class="card">
             <div class="Photo">
                 <img
                     class="Photo"
-                    v-if="enterprise.enterprise_picture"
-                    :src="getProfilePicture(enterprise.enterprise_picture)"
+                    :src="getEnterprisePicture(enterprise.enterprise_picture)"
                     alt=""
                 />
                 <div class="favorite" @click="addOrRemoveFavorites( enterprise)">
@@ -88,7 +87,6 @@ const getProfilePicture = (path) => {
                     <div class="user-photo">
                         <img
                             class="user-photo"
-                            v-if="enterprise.profile_picture"
                             :src="getProfilePicture(enterprise.profile_picture)"
                         />
                     </div>

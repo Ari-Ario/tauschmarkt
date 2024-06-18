@@ -44,8 +44,8 @@ class UserController extends Controller
             'house_number' => $user->house_number,
             'city' => $user->city,
             'zip_code' => $user->zip_code,
-            // 'latitude' => $user->latitude,
-            // 'longitude' => $user->longitude,
+            'latitude' => $user->latitude,
+            'longitude' => $user->longitude,
             'created_at' => optional($user->created_at)->format($dateFormat),
             // 'updated_at' => optional($user->updated_at)->format($dateFormat),
         ];

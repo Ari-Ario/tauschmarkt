@@ -35,7 +35,7 @@ const loadEnterprises = async (latitude, longitude, distance, userId) => {
           },
         });
         enterprises.value = response.data;
-        console.log(filteredEnterprises)
+        // console.log(filteredEnterprises)
         filterEnterprises()
     } catch (error) {
         console.error("Error loading enterprises:", error);
