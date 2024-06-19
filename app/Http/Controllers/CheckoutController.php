@@ -141,7 +141,7 @@ class CheckoutController extends Controller
             // }
             return redirect('/');
             
-            return response()->json('checkedout');
+            // return response()->json('checkedout');
 
         } catch (\Exception $e) {
             \Log::error('Stripe error: ' . $e->getMessage());

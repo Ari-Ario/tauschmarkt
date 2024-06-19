@@ -12,7 +12,6 @@ const router = useRouter();
 const userLocation = ref(null);
 
 const center = ref({ lat: 46.938749674988486, lng: 7.459564360522899 });
-// const location = ref({ latitude: 0, longitude: 0 });
 const radius = ref(10); // Default radius in km
 const city = ref('');
 const mapRef = ref(null); // Reference to the Google Map instance
@@ -20,7 +19,7 @@ const mapRef = ref(null); // Reference to the Google Map instance
 const goToDashboard = () => {
   setLocation(location.value.latitude, location.value.longitude);
   setDistance(radius.value );
-  console.log(location, distance)
+  //console.log(location, distance)
   router.push({ name: 'dashboard' });
 };
 
@@ -54,7 +53,6 @@ const updateCircle = () => {
 
 const updateBackend = async () => {
   // console.log(center.value);
-
   const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
   try {
     const response = await axios.put(`/api/user/update-location`, location.value, {
@@ -122,19 +120,17 @@ const showResults = () => {
 const fitMapToBounds = () => {
   if (mapRef.value) {
     const bounds = new google.maps.LatLngBounds();
-    bounds.extend(new google.maps.LatLng(center.value.lat, center.value.lng));
-    const northEast = google.maps.geometry.spherical.computeOffset(
-      new google.maps.LatLng(center.value.lat, center.value.lng),
-      radius.value * 1000, // Convert km to meters
-      45
-    );
-    const southWest = google.maps.geometry.spherical.computeOffset(
-      new google.maps.LatLng(center.value.lat, center.value.lng),
-      radius.value * 1000,
-      225
-    );
+    const circleCenter = new google.maps.LatLng(center.value.lat, center.value.lng);
+    const radiusInMeters = radius.value * 1000;
+
+    // Calculate the bounds of the circle
+    const northEast = google.maps.geometry.spherical.computeOffset(circleCenter, radiusInMeters, 45); // 45 degrees is NE
+    const southWest = google.maps.geometry.spherical.computeOffset(circleCenter, radiusInMeters, 225); // 225 degrees is SW
+
+    bounds.extend(circleCenter);
     bounds.extend(northEast);
     bounds.extend(southWest);
+
     mapRef.value.fitBounds(bounds);
   }
 };
@@ -153,14 +149,36 @@ const handleMapClick = (event) => {
   updateCircle();
 };
 
-const myLocation = onMounted(() => {
+const enterprises = ref({});
+const loadEnterprises = async (latitude, longitude, distance, userId) => {
+  try {
+    const response = await axios.get(`/api/enterprises/${userId}`, {
+      params: {
+        latitude,
+        longitude,
+        distance,
+      },
+    });
+    enterprises.value = response.data;
+    console.log(enterprises)
+  } catch (error) {
+    console.error("Error loading enterprises:", error);
+  }
+};
+
+const myLocation = onMounted(async () => {
   if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition((position) => {
+    navigator.geolocation.getCurrentPosition(async (position) => {
       userLocation.value = {
         lat: position.coords.latitude,
         lng: position.coords.longitude,
       };
       center.value = userLocation.value;
+      location.value = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      };
+      await loadEnterprises(location.value.latitude, location.value.longitude, radius.value * 10, store.authUser.id);
     });
   } else {
     console.error('Geolocation is not supported by this browser.');
@@ -194,6 +212,9 @@ const initAutocomplete = () => {
   });
 };
 
+const openEnterprise = (enterpriseId) => {
+  router.push({ name: 'index', params: { id: enterpriseId } });
+};
 </script>
 
 <template>
@@ -203,7 +224,7 @@ const initAutocomplete = () => {
       </div>
     </router-link>
 
-  <div>{{ store.authUser }}</div>
+  <!-- <div>{{ store.authUser }}</div> -->
 
   <div class="map-container">
     <GoogleMap
@@ -215,9 +236,28 @@ const initAutocomplete = () => {
       @click="handleMapClick"
 
     >
+          <!-- Render small circles for enterprises -->
+      <Circle
+        v-for="enterprise in enterprises"
+        :key="enterprise.id"
+        :options="{
+          center: { lat: parseFloat(enterprise.latitude), lng: parseFloat(enterprise.longitude) },
+          radius: 500,
+          fillColor: '#FF0000',
+          fillOpacity: 0.5,
+          strokeColor: '#FF0000',
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+        }"
+        @click="() => openEnterprise(enterprise.id)"
+      />
       <Circle v-if="!store.authUser.is_seller" :options="circleOptions" />
       <Marker :options="{ position: center }" />
+
     </GoogleMap>
+    <h1 v-for="enterprise in enterprises">
+          {{ enterprise.latitude }}
+      </h1>
     
     <form @submit.prevent="myLocation" class="location-form">
 
