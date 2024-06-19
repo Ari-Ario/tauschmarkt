@@ -10,18 +10,11 @@ const store = useAuthStore();
 const router = useRouter();
 
 const userLocation = ref(null);
-
 const center = ref({ lat: 46.938749674988486, lng: 7.459564360522899 });
 const radius = ref(10); // Default radius in km
 const city = ref('');
 const mapRef = ref(null); // Reference to the Google Map instance
-
-const goToDashboard = () => {
-  setLocation(location.value.latitude, location.value.longitude);
-  setDistance(radius.value );
-  //console.log(location, distance)
-  router.push({ name: 'dashboard' });
-};
+const enterprises = ref([]);
 
 const circleOptions = ref({
   center: center.value,
@@ -52,7 +45,6 @@ const updateCircle = () => {
 };
 
 const updateBackend = async () => {
-  // console.log(center.value);
   const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
   try {
     const response = await axios.put(`/api/user/update-location`, location.value, {
@@ -74,8 +66,13 @@ const useCurrentLocation = async () => {
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
       };
+      center.value = {
+        lat: position.coords.latitude,
+        lng: position.coords.longitude,
+      };
       updateCircle();
       await updateBackend();
+      await loadEnterprises(location.value.latitude, location.value.longitude, radius.value, store.authUser.id);
     });
   } else {
     alert('Geolocation is not supported by this browser.');
@@ -83,7 +80,7 @@ const useCurrentLocation = async () => {
 };
 
 const savePlace = () => {
-    updateBackend();
+  updateBackend();
 };
 
 const searchCity = (place) => {
@@ -91,6 +88,10 @@ const searchCity = (place) => {
     center.value = {
       lat: place.geometry.location.lat(),
       lng: place.geometry.location.lng(),
+    };
+    location.value = {
+      latitude: place.geometry.location.lat(),
+      longitude: place.geometry.location.lng(),
     };
     updateCircle();
 
@@ -106,12 +107,10 @@ const searchCity = (place) => {
     }
 
     console.log(`City: ${city}`);
-    // You can use the city variable as needed
   } else {
     console.error('Place has no geometry');
   }
 };
-
 
 const showResults = () => {
   alert('Show results within ' + radius.value + ' km');
@@ -140,16 +139,13 @@ const handleMapClick = (event) => {
     lat: event.latLng.lat(),
     lng: event.latLng.lng(),
   };
-    location.value = {
+  location.value = {
     latitude: event.latLng.lat(),
     longitude: event.latLng.lng(),
   };
-    
-  console.log(location.value)
   updateCircle();
 };
 
-const enterprises = ref({});
 const loadEnterprises = async (latitude, longitude, distance, userId) => {
   try {
     const response = await axios.get(`/api/enterprises/${userId}`, {
@@ -160,7 +156,6 @@ const loadEnterprises = async (latitude, longitude, distance, userId) => {
       },
     });
     enterprises.value = response.data;
-    console.log(enterprises)
   } catch (error) {
     console.error("Error loading enterprises:", error);
   }
@@ -178,7 +173,7 @@ const myLocation = onMounted(async () => {
         latitude: position.coords.latitude,
         longitude: position.coords.longitude,
       };
-      await loadEnterprises(location.value.latitude, location.value.longitude, radius.value * 10, store.authUser.id);
+      await loadEnterprises(location.value.latitude, location.value.longitude, radius.value, store.authUser.id);
     });
   } else {
     console.error('Geolocation is not supported by this browser.');
@@ -215,16 +210,22 @@ const initAutocomplete = () => {
 const openEnterprise = (enterpriseId) => {
   router.push({ name: 'index', params: { id: enterpriseId } });
 };
+
+const goToDashboard = () => {
+  setLocation(location.value.latitude, location.value.longitude);
+  setDistance(radius.value);
+  router.push({ name: 'dashboard' });
+};
 </script>
 
 <template>
-    <router-link :to="{ name: 'dashboard'}" class="link">
-      <div class="back">
-          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z"/></svg>
-      </div>
-    </router-link>
-
-  <!-- <div>{{ store.authUser }}</div> -->
+  <router-link :to="{ name: 'dashboard'}" class="link">
+    <div class="back">
+      <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46">
+        <path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z"/>
+      </svg>
+    </div>
+  </router-link>
 
   <div class="map-container">
     <GoogleMap
@@ -234,9 +235,8 @@ const openEnterprise = (enterpriseId) => {
       style="width: 100%; height: 100%"
       @load="mapRef.value = $event"
       @click="handleMapClick"
-
     >
-          <!-- Render small circles for enterprises -->
+      <!-- Render small circles for enterprises -->
       <Circle
         v-for="enterprise in enterprises"
         :key="enterprise.id"
@@ -253,20 +253,12 @@ const openEnterprise = (enterpriseId) => {
       />
       <Circle v-if="!store.authUser.is_seller" :options="circleOptions" />
       <Marker :options="{ position: center }" />
-
     </GoogleMap>
-    <h1 v-for="enterprise in enterprises">
-          {{ enterprise.latitude }}
-      </h1>
-    
+
     <form @submit.prevent="myLocation" class="location-form">
-
       <div v-if="store.authUser.is_seller" class="controls">
-        
-        <h4 >Auf Ihren Hof klicken</h4>
-
+        <h4>Auf Ihren Hof klicken</h4>
         <button v-if="store.authUser.is_seller" @click="savePlace">Ort speichern</button>
-        
         <button @click="useCurrentLocation">Meinen Standort verwenden</button>
       </div>
 
@@ -277,22 +269,18 @@ const openEnterprise = (enterpriseId) => {
           placeholder="Enter a city or location" 
           @focus="initAutocomplete"
         />
-        <!-- <input type="text" v-model="city" placeholder="Search for a city" @keypress.enter="searchCity" /> -->
-        <button  @click="searchCity">Stadt suchen</button>
-        <!-- <p>oder</p> -->
+        <button @click="searchCity">Stadt suchen</button>
         <h4>Distanz wählen</h4>
         <div class="slider-container">
           <input type="range" min="1" max="20" v-model="radius" @input="updateCircle" />
           <span>{{ radius }} km</span>
         </div>
-        
         <button @click="goToDashboard">Suchen</button>
       </div>
     </form>
-
   </div>
-
 </template>
+
 
 <style scoped>
 .back {
