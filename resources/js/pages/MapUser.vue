@@ -1,21 +1,19 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { useAuthStore } from '../stores/AuthStore';
-
+import axios from 'axios';
+import { useRouter } from 'vue-router';
 import { GoogleMap, Marker, Circle } from 'vue3-google-map';
-import VueGoogleAutocomplete from 'vue-google-autocomplete';
+import { location, distance, setLocation, setDistance } from '../locals';
 
-import Dashboard from "./Dashboard.vue";
-
-
-const store = useAuthStore();
+const router = useRouter();
 
 const userLocation = ref(null);
-
 const center = ref({ lat: 46.938749674988486, lng: 7.459564360522899 });
 const radius = ref(10); // Default radius in km
 const city = ref('');
 const mapRef = ref(null); // Reference to the Google Map instance
+const enterprises = ref([]);
 
 const circleOptions = ref({
   center: center.value,
@@ -45,27 +43,38 @@ const updateCircle = () => {
   fitMapToBounds();
 };
 
-const useCurrentLocation = () => {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition((position) => {
-      center.value = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-      };
-      console.log(center.value);
-      updateCircle();
-    });
-  } else {
-    alert('Geolocation is not supported by this browser.');
-  }
+
+const savePlace = () => {
+  updateBackend();
 };
 
 const searchCity = (place) => {
-  center.value = {
-    lat: place.geometry.location.lat(),
-    lng: place.geometry.location.lng(),
-  };
-  updateCircle();
+  if (place.geometry) {
+    center.value = {
+      lat: place.geometry.location.lat(),
+      lng: place.geometry.location.lng(),
+    };
+    location.value = {
+      latitude: place.geometry.location.lat(),
+      longitude: place.geometry.location.lng(),
+    };
+    updateCircle();
+
+    const addressComponents = place.address_components;
+    let city = '';
+
+    for (const component of addressComponents) {
+      const types = component.types;
+      if (types.includes('locality')) {
+        city = component.long_name;
+        break;
+      }
+    }
+
+    console.log(`City: ${city}`);
+  } else {
+    console.error('Place has no geometry');
+  }
 };
 
 const showResults = () => {
@@ -75,19 +84,17 @@ const showResults = () => {
 const fitMapToBounds = () => {
   if (mapRef.value) {
     const bounds = new google.maps.LatLngBounds();
-    bounds.extend(new google.maps.LatLng(center.value.lat, center.value.lng));
-    const northEast = google.maps.geometry.spherical.computeOffset(
-      new google.maps.LatLng(center.value.lat, center.value.lng),
-      radius.value * 1000, // Convert km to meters
-      45
-    );
-    const southWest = google.maps.geometry.spherical.computeOffset(
-      new google.maps.LatLng(center.value.lat, center.value.lng),
-      radius.value * 1000,
-      225
-    );
+    const circleCenter = new google.maps.LatLng(center.value.lat, center.value.lng);
+    const radiusInMeters = radius.value * 1000;
+
+    // Calculate the bounds of the circle
+    const northEast = google.maps.geometry.spherical.computeOffset(circleCenter, radiusInMeters, 45); // 45 degrees is NE
+    const southWest = google.maps.geometry.spherical.computeOffset(circleCenter, radiusInMeters, 225); // 225 degrees is SW
+
+    bounds.extend(circleCenter);
     bounds.extend(northEast);
     bounds.extend(southWest);
+
     mapRef.value.fitBounds(bounds);
   }
 };
@@ -97,18 +104,41 @@ const handleMapClick = (event) => {
     lat: event.latLng.lat(),
     lng: event.latLng.lng(),
   };
-  console.log(center.value)
+  location.value = {
+    latitude: event.latLng.lat(),
+    longitude: event.latLng.lng(),
+  };
   updateCircle();
 };
 
-const myLocation = onMounted(() => {
+const loadEnterprises = async (latitude, longitude, distance, userId) => {
+  try {
+    const response = await axios.get(`/api/enterprises/${userId}`, {
+      params: {
+        latitude,
+        longitude,
+        distance,
+      },
+    });
+    enterprises.value = response.data;
+  } catch (error) {
+    console.error("Error loading enterprises:", error);
+  }
+};
+
+const myLocation = onMounted(async () => {
   if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition((position) => {
+    navigator.geolocation.getCurrentPosition(async (position) => {
       userLocation.value = {
         lat: position.coords.latitude,
         lng: position.coords.longitude,
       };
       center.value = userLocation.value;
+      location.value = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      };
+      await loadEnterprises(location.value.latitude, location.value.longitude, radius.value, 1);
     });
   } else {
     console.error('Geolocation is not supported by this browser.');
@@ -118,20 +148,49 @@ const myLocation = onMounted(() => {
 const refreshPage = () => {
   location.reload(); // Reloads the current page
 };
-const currentPage = ref('Map');
-    function switchPage(page) {
-        currentPage.value = page;
+
+const autocomplete = ref(null);
+
+const initAutocomplete = () => {
+  if (autocomplete.value) return; // Avoid initializing again
+
+  const input = document.getElementById('autocomplete');
+  autocomplete.value = new google.maps.places.Autocomplete(input, {
+    types: ['(cities)'],
+  });
+
+  autocomplete.value.addListener('place_changed', () => {
+    const place = autocomplete.value.getPlace();
+    if (place.geometry) {
+      const lat = place.geometry.location.lat();
+      const lng = place.geometry.location.lng();
+      setLocation(lat, lng);
+      console.log(`City: ${place.formatted_address}`);
+    } else {
+      console.error('Place has no geometry');
     }
+  });
+};
+
+const openEnterprise = (enterpriseId) => {
+  router.push({ name: 'index', params: { id: enterpriseId } });
+};
+
+const goToEnterprises = () => {
+  setLocation(location.value.latitude, location.value.longitude);
+  setDistance(radius.value);
+  router.push({ name: 'home' });
+};
 </script>
 
 <template>
-  <router-link :to="{ name: 'dashboard'}" class="link">
-  <div class="back">
-      <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z"/></svg>
-      </div>
-    </router-link>
-
-  <div>{{ store.authUser }}</div>
+  <router-link :to="{ name: 'home'}" class="link">
+    <div class="back">
+      <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46">
+        <path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z"/>
+      </svg>
+    </div>
+  </router-link>
 
   <div class="map-container">
     <GoogleMap
@@ -141,30 +200,46 @@ const currentPage = ref('Map');
       style="width: 100%; height: 100%"
       @load="mapRef.value = $event"
       @click="handleMapClick"
-
     >
+      <!-- Render small circles for enterprises -->
+      <Circle
+        v-for="enterprise in enterprises"
+        :key="enterprise.id"
+        :options="{
+          center: { lat: parseFloat(enterprise.latitude), lng: parseFloat(enterprise.longitude) },
+          radius: 500,
+          fillColor: '#FF0000',
+          fillOpacity: 0.5,
+          strokeColor: '#FF0000',
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+        }"
+        @click="() => openEnterprise(enterprise.id)"
+      />
       <Circle :options="circleOptions" />
       <Marker :options="{ position: center }" />
     </GoogleMap>
-    
+
     <form @submit.prevent="myLocation" class="location-form">
 
+
       <div class="controls">
-        
+        <input 
+          id="autocomplete" 
+          type="text" 
+          placeholder="Enter a city or location" 
+          @focus="initAutocomplete"
+        />
+        <button @click="searchCity">Stadt suchen</button>
         <h4>Distanz wählen</h4>
         <div class="slider-container">
           <input type="range" min="1" max="20" v-model="radius" @input="updateCircle" />
           <span>{{ radius }} km</span>
         </div>
-        <input type="text" v-model="city" placeholder="Search for a city" @keypress.enter="searchCity" />
-        <button @click="useCurrentLocation">Use my current location</button>
-        <button @click="searchCity">Show results</button>
+        <button @click="goToEnterprises">Suchen</button>
       </div>
     </form>
-
   </div>
-
-
 </template>
 
 <style scoped>
