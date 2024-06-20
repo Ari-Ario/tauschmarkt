@@ -10,14 +10,14 @@ import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 
 // Get CSRF token from the meta tag
-const tokenElement = document.querySelector('meta[name="csrf-token"]');
+// const tokenElement = document.querySelector('meta[name="csrf-token"]');
 
-if (tokenElement) {
-  const token = tokenElement.getAttribute('content');
-  axios.defaults.headers.common['X-CSRF-TOKEN'] = token;
-} else {
-  console.error('CSRF token not found in meta tag');
-}
+// if (tokenElement) {
+//   const token = tokenElement.getAttribute('content');
+//   axios.defaults.headers.common['X-CSRF-TOKEN'] = token;
+// } else {
+//   console.error('CSRF token not found in meta tag');
+// }
 
 const app = createApp(App);
 app.config.globalProperties.$axios = axios;

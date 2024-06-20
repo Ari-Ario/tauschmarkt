@@ -35,7 +35,7 @@ export const routes = [
         path: "/map",
         name:"map",
         component: () => import("./pages/Map.vue"),
-        meta: { showLogo: false, allBlogs: true, getStarted: true, home: false},
+        meta: { header: false, allBlogs: true, getStarted: true, home: false},
     },
 
     {
