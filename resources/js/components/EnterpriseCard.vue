@@ -13,7 +13,6 @@ import { location, distance } from '../locals';
 
 // import { categories, selectedCategories, updateFilteredProducts } from '../categoryFilterScript';
 
-
 const store = useAuthStore();
 const userId = store?.authUser?.id;
 const enterprises = ref([]);
@@ -21,12 +20,8 @@ const filteredEnterprises = ref([]);
 const categories = ref([]);
 const selectedCategories = ref([]);
 
-//const location = { latitude: 46.938749674988486, longitude: 7.459564360522899 }; // Replace with actual location
-//const distance = 100; // Distance in kilometers
-
 const loadEnterprises = async (latitude, longitude, distance, userId) => {
     try {
-        // const response = await axios.get(`api/enterprises/${userId}`);
         const response = await axios.get(`/api/enterprises/${userId}`, {
           params: {
             latitude: location.value.latitude,
@@ -35,36 +30,41 @@ const loadEnterprises = async (latitude, longitude, distance, userId) => {
           },
         });
         enterprises.value = response.data;
-        // console.log(filteredEnterprises)
-        filterEnterprises()
+        filterEnterprises();
     } catch (error) {
         console.error("Error loading enterprises:", error);
     }
     try {
-    const response = await axios.get(`/api/product/${1}`);
-    categories.value = response.data.categories;
-  } catch (error) {
-    console.error('Failed to fetch Product:', error);
-  }
+        const response = await axios.get(`/api/product/${1}`);
+        categories.value = response.data.categories;
+        console.log(categories)
+    } catch (error) {
+        console.error('Failed to fetch Product:', error);
+    }
 };
 
 const filterEnterprises = () => {
-            if (selectedCategories.value.length === 0) {
-                filteredEnterprises.value = enterprises.value;
-            } else {
-                filteredEnterprises.value = enterprises.value.filter(enterprise =>
-                selectedCategories.value.includes(enterprise.categoryId)
-              );
-              console.log(selectedCategories)
+    if (selectedCategories.value.length === 0) {
+        filteredEnterprises.value = enterprises.value;
+    } else {
+        filteredEnterprises.value = enterprises.value.filter(enterprise => {
+            if (!enterprise.categories) {
+                console.warn(`Enterprise ${enterprise.id} has no categories`);
+                return false;
             }
-        };
+            return enterprise.categories.some(categoryId =>
+                selectedCategories.value.includes(categoryId)
+            );
+        });
+    }
+};
+
 watch(selectedCategories, filterEnterprises);
 
-const addOrRemoveFavorites = async ( enterprise) => {
-    
+const addOrRemoveFavorites = async (enterprise) => {
     try {
         enterprise.is_favorite = !enterprise.is_favorite;
-        if (enterprise.is_favorite === true) {
+        if (enterprise.is_favorite) {
             let response = await authClient.post("/favorites/add", {
                 enterpriseId: enterprise.id,
                 userId: store.authUser.id,
@@ -79,28 +79,33 @@ const addOrRemoveFavorites = async ( enterprise) => {
             });
             console.log(response);
         }
-
-
     } catch (error) {
         console.error("Error adding to favorites:", error);
     }
 };
 
-onMounted(() => {
-    axios.defaults.withCredentials = true;
-    loadEnterprises(location.latitude, location.longitude, distance, userId);
+const showPopup = ref({}); 
+const togglePopup = (enterpriseId) => {
+    showPopup.value[enterpriseId] = !showPopup.value[enterpriseId];
+};
 
+const getEnterpriseCategories = (enterprise) => {
+    return enterprise.categories.map(categoryId => {
+        return categories.value.find(category => category.id === categoryId)?.name;
+    }).filter(name => name);
+};
+
+onMounted(() => {
+    loadEnterprises(location.latitude, location.longitude, distance, userId);
 });
 
 const getEnterprisePicture = (path) => {
-  return path ? `storage/${path}` : 'storage/enterprise_images/default.png';
+    return path ? `storage/${path}` : 'storage/enterprise_images/default.png';
 };
 
 const getProfilePicture = (path) => {
-  return path ? `storage/${path}` : 'storage/profile_images/default.png';
+    return path ? `storage/${path}` : 'storage/profile_images/default.png';
 };
-
-
 </script>
 
 <template>
@@ -109,32 +114,28 @@ const getProfilePicture = (path) => {
 
         <Disclosure as="div" class="border-b border-gray-200 py-6" v-slot="{ open }">
             <h3 class="-my-3 flow-root">
-            <DisclosureButton class="flex w-full items-center justify-between bg-white py-3 text-sm text-gray-400 hover:text-gray-500" style="height: 40px; display: flex; justify-content: space-between;">
-                <span class="font-medium text-gray-900">Categories</span>
-                <span class="ml-6 flex items-center">
-                <PlusIcon v-if="!open" class="h-5 w-5" aria-hidden="true" style="height: 40px;" />
-                <MinusIcon v-else class="h-5 w-5" aria-hidden="true" style="height: 40px;" />
-                </span>
-            </DisclosureButton>
+                <DisclosureButton class="flex w-full items-center justify-between bg-white py-3 text-sm text-gray-400 hover:text-gray-500" style="height: 40px; display: flex; justify-content: space-between;">
+                    <span class="font-medium text-gray-900">Categories</span>
+                    <span class="ml-6 flex items-center">
+                        <PlusIcon v-if="!open" class="h-5 w-5" aria-hidden="true" style="height: 40px;" />
+                        <MinusIcon v-else class="h-5 w-5" aria-hidden="true" style="height: 40px;" />
+                    </span>
+                </DisclosureButton>
             </h3>
             <DisclosurePanel class="pt-6 dropdown">
-            <div class="space-y-4">
-                <div v-for="category in categories" :key="category.id" class="flex items-center">
-                <input :id="`filter-${category.id}`" :value="category.id" type="checkbox" v-model="selectedCategories"
-                    class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
-                <label :for="`filter-${category.id}`" class="ml-3 text-sm text-gray-600">{{ category.name }}</label>
+                <div class="space-y-4">
+                    <div v-for="category in categories" :key="category.id" class="flex items-center">
+                        <input :id="`filter-${category.id}`" :value="category.id" type="checkbox" v-model="selectedCategories"
+                            class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                        <label :for="`filter-${category.id}`" class="ml-3 text-sm text-gray-600">{{ category.name }}</label>
+                    </div>
                 </div>
-            </div>
             </DisclosurePanel>
         </Disclosure>
-        
+
         <div class="card" v-for="enterprise in filteredEnterprises" :key="enterprise.id">
             <div class="Photo">
-                <img
-                    class="Photo"
-                    :src="getEnterprisePicture(enterprise.enterprise_picture)"
-                    alt=""
-                />
+                <img class="Photo" :src="getEnterprisePicture(enterprise.enterprise_picture)" alt="" />
                 <div v-if="store?.authUser?.is_seller" class="favorite" @click="addOrRemoveFavorites(enterprise)">
                     <svg v-if="enterprise.is_favorite" xmlns="http://www.w3.org/2000/svg" fill="red" viewBox="0 0 24 24" width="24px" height="24px"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                     <svg v-else xmlns="http://www.w3.org/2000/svg" fill="green" viewBox="0 0 24 24" width="24px" height="24px"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
@@ -143,33 +144,53 @@ const getProfilePicture = (path) => {
             <div class="details">
                 <div class="user-details">
                     <div class="user-photo">
-                        <img
-                            class="user-photo"
-                            :src="getProfilePicture(enterprise.profile_picture)"
-                            />
+                        <img class="user-photo" :src="getProfilePicture(enterprise.profile_picture)" />
                     </div>
-                    <p class="user-name description">
+                    <h3 class="user-name description">
                         {{ enterprise.firstname }} {{ enterprise.lastname }} 
-                    </p>
-                    <!-- <p class="published-on description">
-                        {{ enterprise.updated_at }}
-                    </p> -->
-                    <div @click="openEnterprise(enterprise.id)" class="enterprise-btn">
-                        <router-link :to="{ name: 'index' , params: { id: enterprise.id } }" customv-slot="{ navigate }">
-                            <div class="link" @click="navigate" role="link">
-                                <div class="link" id="enterpriseButton">
-                                    Besuchen
-                                </div>
-                            </div>
-                        </router-link>                
+                    </h3>
+                    
+                    <!-- button with a popup at its top by clicking here -->
+                    <label @click="togglePopup(enterprise.id)" v-if="(enterprise.categories.length) !== 0" class="enterprise-btn">
+                      categories
+                      <span v-if="(enterprise.categories.length) > 1">+</span>
+                    </label>
+
+                    <div v-if="showPopup[enterprise.id] && (enterprise.categories.length) > 1" class="popup">
+                        <ul>
+                          <li v-for="category in getEnterpriseCategories(enterprise)" :key="category">
+                                {{ category }}
+                          </li>
+                        </ul>
                     </div>
+
+                  <div @click="openEnterprise(enterprise.id)" class="enterprise-btn">
+                    <router-link :to="{ name: 'index' , params: { id: enterprise.id } }" customv-slot="{ navigate }">
+                        <div class="link" @click="navigate" role="link">
+                            <div class="link" id="enterpriseButton">
+                                Besuchen
+                            </div>
+                        </div>
+                    </router-link>                
+                  </div>
                 </div>
             </div>
         </div>
     </div>
 </template>
 
+
 <style scoped>
+.popup {
+    position: absolute;
+    background: white;
+    border: 1px solid #ddd;
+    padding: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-top: 8px;
+    z-index: 1000;
+}
 .card {
     margin: 20px;
     border-radius: 10px;
