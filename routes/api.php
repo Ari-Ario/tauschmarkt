@@ -10,6 +10,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\EnterpriseController;
 use App\Http\Controllers\FavoritesController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductReviewController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CartItemController;
 use App\Http\Middleware\VerifyCsrfToken;
@@ -20,6 +21,8 @@ Route::post('/sanctum/token', TokenController::class);
 
 Route::get('/enterprises/{userId}', [EnterpriseController::class, 'latestEnterprises']);
 Route::get('/product/{id}', [ProductController::class, 'index']);
+Route::get('/product-review/{id}', [ProductReviewController::class, 'show']);
+
 
 // Route::get('/products', [ProductController::class, 'index']);
 
@@ -63,6 +66,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Route::get('success', [CheckoutController::class,'success']);
     // Route::get('cancel',[CheckoutController::class,'cancel']);
 
+    //Post a review 
+    Route::post('/product-review', [ProductReviewController::class, 'store']);
+
 });
 
 //add to cart 
@@ -77,7 +83,7 @@ Route::delete('/delete/update/{product}', [CartItemController::class, 'delete'])
 Route::middleware(['web'])->group(function () {
     Route::prefix('checkout')->controller(CheckoutController::class)->group((function()  {
         Route::post('order','store')->name('checkout.store');
-        Route::get('success','success');
+        Route::get('success','success')->name('checkout.success');
         Route::get('cancel','cancel')->name('checkout.cancel');
     }));
 });

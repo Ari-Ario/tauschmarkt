@@ -56,5 +56,11 @@ class User extends Authenticatable
         return $this->hasMany(Favorites::class, 'first_user_id');
 
     }
+
+    // Define the relationship with the ProductReview model
+    public function productReviews()
+    {
+        return $this->hasMany(ProductReview::class);
+    }
     
 }

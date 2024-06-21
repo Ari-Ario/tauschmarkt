@@ -37,7 +37,7 @@ const loadEnterprises = async (latitude, longitude, distance, userId) => {
     try {
         const response = await axios.get(`/api/product/${1}`);
         categories.value = response.data.categories;
-        console.log(categories)
+        // console.log(categories)
     } catch (error) {
         console.error('Failed to fetch Product:', error);
     }

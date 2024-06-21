@@ -191,15 +191,23 @@ const saveProduct = async () => {
                   <label for="price-per-gram">Wieviele Grams</label>
                   <input type="number" v-model.number="product.Grams"  class="form-input" required />
                 </div>
+                <div class="form-group" v-if="priceUnit === 'perKilogram'">
+                  <label for="unit-price">Quantität (Kilograms)</label>
+                  <input type="number" name="qty" id="floating_qty" v-model.number="product.quantität" class="form-input" required />
+                </div>
+                <div class="form-group" v-else-if="priceUnit === 'perUnit'">
+                  <label for="unit-price">Quantität (Stuck)</label>
+                  <input type="number" name="qty" id="floating_qty" v-model.number="product.quantität" class="form-input" required />
+                </div>
 
-                <div class="form-group">
-                  <label for="unit-price">Quantität</label>
+                <div class="form-group" v-else>
+                  <label for="unit-price">Quantität (Einheit)</label>
                   <input type="number" name="qty" id="floating_qty" v-model.number="product.quantität" class="form-input" required />
                 </div>
 
                 <div class="form-group">
-                  <label for="unit-price">Prise (Franken)</label>
-                  <input type="number" v-model.number="product.unitPrice" class="form-input" required />
+                  <label for="unit-price">Preis (Franken)</label>
+                  <input type="number" v-model="product.unitPrice" class="form-input" required />
                 </div>
                 <div class="form-group" style="display: flex; justify-content: space-between;">
                   <button type="submit">Speichern</button>
