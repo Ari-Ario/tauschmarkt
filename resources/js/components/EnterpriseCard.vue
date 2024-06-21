@@ -150,19 +150,24 @@ const getProfilePicture = (path) => {
                         {{ enterprise.firstname }} {{ enterprise.lastname }} 
                     </h3>
                     
-                    <!-- button with a popup at its top by clicking here -->
-                    <label @click="togglePopup(enterprise.id)" v-if="(enterprise.categories.length) !== 0" class="enterprise-btn">
-                      categories
-                      <span v-if="(enterprise.categories.length) > 1">+</span>
+                  <!-- label with a popup at its top by clicking here -->
+                   <div v-if="(enterprise.categories.length) > 0" >
+                    <label @click="togglePopup(enterprise.id)" class="category-label">
+                      {{ getEnterpriseCategories(enterprise)[0] }}
+                      <span v-if="(enterprise.categories.length) > 1">
+                        <!-- <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#004d40"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg> -->
+                        +
+                      </span>
                     </label>
+                  </div>
 
-                    <div v-if="showPopup[enterprise.id] && (enterprise.categories.length) > 1" class="popup">
-                        <ul>
-                          <li v-for="category in getEnterpriseCategories(enterprise)" :key="category">
-                                {{ category }}
-                          </li>
-                        </ul>
-                    </div>
+                  <div v-if="showPopup[enterprise.id] && (enterprise.categories.length) > 1" class="popup">
+                    <ul>
+                      <li v-for="category in getEnterpriseCategories(enterprise).slice(1)" :key="category">
+                        {{ category }}
+                      </li>
+                    </ul>
+                  </div>
 
                   <div @click="openEnterprise(enterprise.id)" class="enterprise-btn">
                     <router-link :to="{ name: 'index' , params: { id: enterprise.id } }" customv-slot="{ navigate }">
@@ -181,16 +186,54 @@ const getProfilePicture = (path) => {
 
 
 <style scoped>
-.popup {
-    position: absolute;
-    background: white;
-    border: 1px solid #ddd;
-    padding: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    margin-top: 8px;
-    z-index: 1000;
+
+/* category popup style */
+.category-label{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  color: #004d40;
+  font-weight: bold;
+  display: inline-block;
+  padding: 8px;
+  position: relative;
+  border-radius: 8px;
+  border: 1px solid #004d40;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
+
+.popup {
+  position: absolute;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  z-index: 1001;
+  border: 1px solid #004d40;
+  padding: 5px;
+  width: 200px;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.popup ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  color: #004d40;
+}
+
+.popup li {
+  padding: 5px 0;
+  border-bottom: 1px solid #004d40;
+}
+
+.popup li:last-child {
+  border-bottom: none;
+}
+
+/* card style */
 .card {
     margin: 20px;
     border-radius: 10px;

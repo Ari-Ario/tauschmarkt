@@ -1,49 +1,34 @@
-
 <script setup>
-import { ref, onBeforeMount, watch, defineProps } from 'vue';
-import {
-  Dialog,
-  DialogPanel,
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuItems,
-  TransitionChild,
-  TransitionRoot
-} from '@headlessui/vue';
-import { XMarkIcon } from '@heroicons/vue/24/outline';
-import { ChevronDownIcon, FunnelIcon, MinusIcon, PlusIcon, Squares2X2Icon } from '@heroicons/vue/20/solid';
-import Swal from 'sweetalert2';
+import { ref, onBeforeMount, defineProps } from 'vue';
 import axios from 'axios';
+import Swal from 'sweetalert2';
+import Header from '../components/header/Header.vue';
 import { useRouter } from 'vue-router';
 import { useCart } from '../store'; // Adjust the path as needed
-import Header from '../components/header/Header.vue';
 
 const router = useRouter();
 const enterpriseId = router.currentRoute.value.params.id;
-const enterprise = ref(null);
-const categories = ref([]);
 const products = ref([]);
+const filteredProducts = ref([]);
+const filterPrices = ref({ prices: [0, 10000] });
+const mobileFiltersOpen = ref(false);
+const imagesMode = ref(false);
+const product_images = ref([]);
 
 const fetchProduct = async () => {
   try {
     const response = await axios.get(`/api/product/${enterpriseId}`);
-    categories.value = response.data.categories;
     products.value = response.data.products.data;
+    filterProductsByPrice(); // Initial filter
   } catch (error) {
     console.error('Failed to fetch Product:', error);
   }
 };
 
-onBeforeMount(() => {
-  fetchProduct();
-});
-
-const product_images = ref([]);
-const imagesMode = ref(false);
+const filterProductsByPrice = () => {
+  const [minPrice, maxPrice] = filterPrices.value.prices;
+  filteredProducts.value = products.value.filter(product => product.price >= minPrice && product.price <= maxPrice);
+};
 
 const openImagesPopup = (product) => {
   product_images.value = product.product_images;
@@ -62,41 +47,16 @@ function getProductImage(product) {
   }
 }
 
-const sortOptions = [
-  { name: 'Popular', href: '#', current: true },
-  { name: 'Gemöcht', href: '#', current: false },
-  { name: 'Neu', href: '#', current: false },
-  { name: 'Preis: Hoch bis niedrig', href: '#', current: false },
-  { name: 'Preis: Niedrig bis hoch', href: '#', current: false }
-];
-
-const filterPrices = ref({ prices: [0, 100000] });
-
-const priceFilter = async () => {
-  try {
-    const response = await axios.get('products', {
-      params: {
-        prices: {
-          from: filterPrices.value.prices[0],
-          to: filterPrices.value.prices[1]
-        }
-      }
-    });
-    // Handle the response here
-  } catch (error) {
-    console.error('Error filtering prices:', error);
-  }
-};
-
-const mobileFiltersOpen = ref(false);
+onBeforeMount(() => {
+  fetchProduct();
+});
 
 const props = defineProps({
   products: Array,
-  categories: Array
 });
 
 // Using the cart store
-const { cartItems, addToCart, removeFromCart } = useCart();
+const { addToCart } = useCart();
 
 const addToCartHandler = (product) => {
   const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
@@ -129,23 +89,6 @@ const addToCartHandler = (product) => {
   });
 };
 
-const selectedCategories = ref([]);
-
-watch([selectedCategories], updateFilteredProducts);
-
-async function updateFilteredProducts() {
-  try {
-    const response = await axios.get('products', {
-      params: {
-        categories: selectedCategories.value
-      }
-    });
-    // Handle the response here
-  } catch (error) {
-    console.error('Error updating filtered products:', error);
-  }
-}
-
 const openMobileFilters = () => {
   mobileFiltersOpen.value = true;
 };
@@ -155,105 +98,76 @@ const closeMobileFilters = () => {
 };
 </script>
 
-
 <template>
 <Header></Header>
 
 <div class="bg-white container">
-    <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="flex items-baseline justify-between border-b border-gray-200 pb-6 pt-24">
-        <!-- <h1 class="text-4xl font-bold tracking-tight text-gray-900">Produkte</h1> -->
-        <div class="flex items-center">
-          <Menu as="div" class="menu text-left">
-            <div>
-              <MenuButton class="group inline-flex justify-center text-sm font-medium text-gray-700 hover:text-gray-900">
-                Sortiern
-                <ChevronDownIcon class="-mr-1 ml-1 h-5 w-5 flex-shrink-0 text-gray-400 group-hover:text-gray-500" aria-hidden="true" />
-              </MenuButton>
+  <main class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <section aria-labelledby="products-heading" class="pb-24 pt-6">
+      <div class="prise-form">
+        <!-- Filters -->
+        <form class="hidden lg:block">
+          <div class="flex items-center justify-between space-x-3">
+            <h3 class="sr-only">Preis:</h3>
+            <div class="basis-1/3">
+              <label for="filters-price-from" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Von</label>
+              <input type="number" id="filters-price-from" placeholder="Min price" v-model="filterPrices.prices[0]" class="block w-full rounded-lg border border-gray-300 " />
             </div>
-            <transition enter-active-class="transition ease-out duration-100" enter-from-class="transform opacity-0 scale-95" enter-to-class="transform opacity-100 scale-100" leave-active-class="transition ease-in duration-75" leave-from-class="transform opacity-100 scale-100" leave-to-class="transform opacity-0 scale-95">
-              <MenuItems class="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
-                <div class="py-1 dropdown">
-                  <MenuItem v-for="option in sortOptions" :key="option.name" v-slot="{ active }">
-                    <a :href="option.href" :class="[option.current ? 'font-medium text-gray-900' : 'text-gray-500', active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm']">{{ option.name }}</a>
-                  </MenuItem>
-                </div>
-              </MenuItems>
-            </transition>
-          </Menu>
-          <!-- <button type="button" class="-m-2 ml-4 p-2 text-gray-400 hover:text-gray-500 sm:ml-6 lg:hidden" @click="openMobileFilters">
-            <span class="sr-only">Filters</span>
-            <FunnelIcon class="h-5 w-5" aria-hidden="true" />
-          </button> -->
+            <div class="basis-1/3">
+              <label for="filters-price-to" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Bis</label>
+              <input type="number" id="filters-price-to" placeholder="Max price" v-model="filterPrices.prices[1]" class="block w-full rounded-lg border border-gray-300 " />
+            </div>
+            <div class="basis-1/3">
+                <button type="button" @click="filterProductsByPrice" class="bt-1 mt-6 w-full rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-700">Verwenden</button>
+              </div>
+          </div>
+        </form>
+      </div>
+    </section>
+    
+    <!-- Product grid -->
+    <div class="lg:col-span-3">
+      <div class="product-list">
+        <div v-for="product in filteredProducts" :key="product.id" class="product-card">
+          <div class="product-info">
+            <p>{{ product.name }}</p>
+            <p>Quantität: {{ product.quantity }}</p>
+            <p>Preis: {{ product.price }}</p>
+          </div>
+          <img :src="getProductImage(product)" alt="Product Image" class="product-image" />
+          <div class="product-actions">
+            <button class="product-buttons" @click="openImagesPopup(product)">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46">
+                <path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z"/>
+              </svg>
+            </button>
+            <button @click="addToCartHandler(product)">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46">
+                <path d="M240-80q-33 0-56.5-23.5T160-160v-480q0-33 23.5-56.5T240-720h80q0-66 47-113t113-47q66 0 113 47t47 113h80q33 0 56.5 23.5T800-640v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-480h-80v80q0 17-11.5 28.5T600-520q-17 0-28.5-11.5T560-560v-80H400v80q0 17-11.5 28.5T360-520q-17 0-28.5-11.5T320-560v-80h-80v480Zm160-560h160q0-33-23.5-56.5T480-800q-33 0-56.5 23.5T400-720ZM240-160v-480 480Z"/>
+              </svg>                      
+            </button>
+          </div>
+
+          <div v-if="imagesMode" class="popupImages" @click.self="closeImagesPopup()">
+            <div class="broadcast">
+              <Carousel>
+                <Slide v-for="(pimage, index) in product_images" :key="pimage.id">
+                  <div class="carousel__item">
+                    <img :src="`/${pimage.image}`" alt="Product Image" class="slider-image" />
+                  </div>
+                </Slide>
+                <template #addons>
+                  <Navigation />
+                  <Pagination />
+                </template>
+              </Carousel>
+            </div>
+          </div>
+
         </div>
       </div>
-
-      <section aria-labelledby="products-heading" class="pb-24 pt-6">
-
-        <div class="grid grid-cols-1 gap-x-8 gap-y-10 lg:grid-cols-4">
-          <!-- Filters -->
-          <form class="hidden lg:block">
-            <div class="flex items-center justify-between space-x-3">
-              <h3 class="sr-only">Preise</h3>
-              <div class="basis-1/3">
-                <label for="filters-price-from" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Von</label>
-                <input type="number" id="filters-price-from" placeholder="Min price" v-model="filterPrices.prices[0]" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500" />
-              </div>
-              <div class="basis-1/3">
-                <label for="filters-price-to" class="mb-2 block text-sm font-medium text-gray-900 dark:text-white">Bis</label>
-                <input type="number" id="filters-price-to" placeholder="Max price" v-model="filterPrices.prices[1]" class="block w-full rounded-lg border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-primary-500 dark:focus:ring-primary-500" />
-              </div>
-              <div class="basis-1/3">
-                <button type="button" @click="filterProductsByPrice" class="mt-6 w-full rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-700">Verwenden</button>
-              </div>
-            </div>
-            <CategoryFilter></CategoryFilter>
-          </form>
-
-          
-          </div>
-          </section>
-          
-          <!-- Product grid -->
-          <div class="lg:col-span-3">
-            <!-- Your content -->
-            <!-- <Products :products="products.data" /> -->
-            <div class="product-list">
-              <div v-for="product in products" :key="product.id" class="product-card">
-                <div class="product-info">
-                  <p>{{ product.name }}</p>
-                  <p>Quantität: {{ product.quantity }}</p>
-                </div>
-                <img :src="getProductImage(product)" alt="Product Image" class="product-image" />
-                <div class="product-actions">
-                  <button class="product-buttons" @click="openImagesPopup(product)">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="M480-320q75 0 127.5-52.5T660-500q0-75-52.5-127.5T480-680q-75 0-127.5 52.5T300-500q0 75 52.5 127.5T480-320Zm0-72q-45 0-76.5-31.5T372-500q0-45 31.5-76.5T480-608q45 0 76.5 31.5T588-500q0 45-31.5 76.5T480-392Zm0 192q-146 0-266-81.5T40-500q54-137 174-218.5T480-800q146 0 266 81.5T920-500q-54 137-174 218.5T480-200Zm0-300Zm0 220q113 0 207.5-59.5T832-500q-50-101-144.5-160.5T480-720q-113 0-207.5 59.5T128-500q50 101 144.5 160.5T480-280Z"/></svg>        </button>
-                  <button @click="addToCartHandler(product)">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="M240-80q-33 0-56.5-23.5T160-160v-480q0-33 23.5-56.5T240-720h80q0-66 47-113t113-47q66 0 113 47t47 113h80q33 0 56.5 23.5T800-640v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-480h-80v80q0 17-11.5 28.5T600-520q-17 0-28.5-11.5T560-560v-80H400v80q0 17-11.5 28.5T360-520q-17 0-28.5-11.5T320-560v-80h-80v480Zm160-560h160q0-33-23.5-56.5T480-800q-33 0-56.5 23.5T400-720ZM240-160v-480 480Z"/></svg>                      
-                  </button>
-                </div>
-
-                <div v-if="imagesMode" class="popupImages" @click.self="closeImagesPopup()">
-                  <div class="broadcast">
-                    <Carousel>
-                      <Slide v-for="(pimage, index) in product_images" :key="pimage.id">
-                        <div class="carousel__item">
-                          <img :src="`/${pimage.image}`" alt="Product Image" class="slider-image" />
-
-                        </div>
-                      </Slide>
-                      <template #addons>
-                        <Navigation />
-                        <Pagination />
-                      </template>
-                    </Carousel>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-          </div>
-    </main>
+    </div>
+  </main>
 </div>
 </template>
 
@@ -263,6 +177,7 @@ const closeMobileFilters = () => {
   max-width: 100%;
   padding-right: 1rem;
   padding-left: 1rem;
+  margin-top: 100px;
   margin-right: auto;
   margin-left: auto;
 }
@@ -678,6 +593,9 @@ p {
 
 .w-full {
   width: 100% !important;
+  font-weight: bold;
+  color: #004d40;
+
 }
 
 .w-1\3 {
@@ -757,7 +675,7 @@ p {
 }
 
 /* Responsive */
-@media (min-width: 768px) {
+@media (min-width: 769px) {
   .sm\:px-6 {
     padding-right: 1.5rem !important;
     padding-left: 1.5rem !important;
@@ -773,6 +691,47 @@ p {
 
   .lg\:grid-cols-4 {
     grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+
+  .lg\:hidden {
+    display: none !important;
+  }
+
+  .lg\:block {
+    display: block !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .w-full {
+    width: 100% !important;
+    /* text-align: center; */
+  }
+  .bt-1 {
+    display: flex;
+    justify-content: center;
+    max-height: 30px;
+    margin-top: 24px;
+    text-align: center;
+  }
+
+  .sr-only{
+    display: none;
+  }
+  .w-full {
+  width: 80% !important;
+}
+  .sm\:px-6 {
+    padding-right: 1.5rem !important;
+    padding-left: 1.5rem !important;
+  }
+
+  .lg\:col-span-3 {
+    grid-column: span 3 / span 3 !important;
+  }
+
+  .lg\:grid-cols-4 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
   }
 
   .lg\:hidden {
