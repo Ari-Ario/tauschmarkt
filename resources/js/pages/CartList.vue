@@ -130,20 +130,20 @@ const remove = (product) => {
     })
     .catch(error => {
         console.error('Error adding to cart:', error);
+        Swal.fire({
+          toast: true,
+          icon: 'error',
+          position: 'top-end',
+          showConfirmButton: false,
+          title: 'Produkt wurde nicht gepostet!'
+      });
     });
 };
 
 const stripePromise = loadStripe(String(import.meta.env.STRIPE_KEY));
 
 async function submit() {
-    // console.log(            
-    //         cartItems.value,
-    //         cartItems.value.map(item => ({
-    //             id: item.id,
-    //             name: item.name,
-    //             price: item.price
-    //         })),
-    //         total.value,)
+    // console.log(            )
     axios.post('/api/checkout/order', {
         carts: cartItems.value,
         products: cartItems.value.map(item => ({
@@ -160,9 +160,24 @@ async function submit() {
             // router.push('/')
             window.location.href = response.data.url;
         }
+        Swal.fire({
+        toast: true,
+        icon: "success",
+        position: "top-end",
+        showConfirmButton: false,
+        title: "Zahlung erfolgreich!",
+        timer: 3000
+      })
     })
     .catch(error => {
         console.error('There was an error during the checkout process:', error);
+        Swal.fire({
+          toast: true,
+          icon: 'error',
+          position: 'top-end',
+          showConfirmButton: false,
+          title: 'Ups, fehler.Versuchen Sie noch einmal!'
+      });
     });
 }
 
@@ -202,7 +217,7 @@ if (sessionId) {
                         </thead>
                         <tbody>
                             <tr v-for="product in carts" :key="product.id">
-                                <td class="w-32 p-4">
+                                <td class="product-image w-32 p-4">
                                     <img v-if="product.product_images && product.product_images.length > 0"
                                         :src="`/${product.product_images[0].image}`" alt="Product Image" class="img-thumbnail">
                                     <img v-else
@@ -210,7 +225,7 @@ if (sessionId) {
                                         alt="No Image Available" class="img-thumbnail">
                                 </td>
                                 <td class="font-weight-bold text-dark">
-                                    {{ product.title }}
+                                    {{ product.name }}
                                 </td>
                                 <td>
                                     <div class="d-flex align-items-center">
@@ -528,7 +543,9 @@ if (sessionId) {
     padding: 1.5rem !important;
 }
 
-
+.product-image {
+    width: 300px;
+}
 
 .px-5 {
     padding-left: 1.5rem !important;

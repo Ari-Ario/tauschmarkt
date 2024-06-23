@@ -49,7 +49,7 @@ const product = ref({
     photo: null,
     published: false,
     inStock: false,
-    quantity: 1
+    quantity: null
 });
 const priceUnit = ref('perGram');
 const selectedCategory = ref('');
@@ -103,7 +103,7 @@ const saveProduct = async () => {
     formData.append('description', product.value.description);
     formData.append('published', true);
     formData.append('inStock', true);
-    formData.append('quantity', 1);
+    formData.append('quantity', product.value.quantity);
 
 
     if (priceUnit.value === 'perGram') {
@@ -120,12 +120,7 @@ const saveProduct = async () => {
     // console.log(product.value);
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    const response = await authClient.post('/product/add', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        'X-CSRF-TOKEN': csrfToken,
-      },
-    });
+    const response = await authClient.post('/product/add', formData);
 
     console.log('Product added successfully:', response.data);
     selectedCategories.value.add(product.value.name);
@@ -193,21 +188,21 @@ const saveProduct = async () => {
                 </div>
                 <div class="form-group" v-if="priceUnit === 'perKilogram'">
                   <label for="unit-price">Quantität (Kilograms)</label>
-                  <input type="number" name="qty" id="floating_qty" v-model.number="product.quantität" class="form-input" required />
+                  <input type="number" name="qty" id="floating_qty" v-model.number="product.quantity" class="form-input" required />
                 </div>
                 <div class="form-group" v-else-if="priceUnit === 'perUnit'">
                   <label for="unit-price">Quantität (Stuck)</label>
-                  <input type="number" name="qty" id="floating_qty" v-model.number="product.quantität" class="form-input" required />
+                  <input type="number" name="qty" id="floating_qty" v-model.number="product.quantity" class="form-input" required />
                 </div>
 
                 <div class="form-group" v-else>
                   <label for="unit-price">Quantität (Einheit)</label>
-                  <input type="number" name="qty" id="floating_qty" v-model.number="product.quantität" class="form-input" required />
+                  <input type="number" name="qty" id="floating_qty" v-model.number="product.quantity" class="form-input" required />
                 </div>
 
                 <div class="form-group">
                   <label for="unit-price">Preis (Franken)</label>
-                  <input type="number" v-model="product.unitPrice" class="form-input" required />
+                  <input type="number" v-model="product.unitPrice" class="form-input" step="0.01" required />
                 </div>
                 <div class="form-group" style="display: flex; justify-content: space-between;">
                   <button type="submit">Speichern</button>

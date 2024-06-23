@@ -155,12 +155,7 @@ const submitComment = async (product) => {
       product_id: product.id,
       comment: newComment.value,
       rating: newRating.value
-    }, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-      'X-CSRF-TOKEN': csrfToken,
-    },
-  });
+    });
 
     // Fetch the updated reviews
      newComment.value = "";
@@ -176,8 +171,43 @@ const submitComment = async (product) => {
       })
   } catch (error) {
     console.error('Failed to submit comment:', error);
+    Swal.fire({
+          toast: true,
+          icon: 'error',
+          position: 'top-end',
+          showConfirmButton: false,
+          title: 'Komment wurde nicht gepostet!'
+      });
   }
 };
+
+const deleteComment = async (review) => {
+  try {
+    await axios.delete(`/api/product-review/${review.id}`);
+    // Handle successful deletion, e.g., refresh comments list
+    Swal.fire({
+        toast: true,
+        icon: "success",
+        position: "top-end",
+        showConfirmButton: false,
+        title: "Ihre Komment wurde gelöscht!",
+        timer: 3000
+      })
+      // product.value.id = review.product_id;
+    await openReviewPopup(currentProduct);
+
+  } catch (error) {
+      console.error('Failed to delete comment:', error);
+      // Handle the error
+      Swal.fire({
+          toast: true,
+          icon: 'error',
+          position: 'top-end',
+          showConfirmButton: false,
+          title: 'Komment wurde nicht gelöscht!'
+      });
+}
+}
 
 const updateRating = (star) => {
   newRating.value = star;
@@ -260,7 +290,7 @@ const updateRating = (star) => {
                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
                   </div>
                   <div class="stars">
-                    <span v-for="star in 5" :key="star" class="star" :class="{ filled: star <= averageRating }" @click="updateRating(star)">&#9733;</span>
+                    <span v-for="star in 5" :key="star" class="star" :class="{ filled: star <= averageRating }">&#9733;</span>
                   </div>
                   <img :src="getProductImage(product)" alt="Product Image" class="product-image" />
                   <div class="review-header">
@@ -278,10 +308,15 @@ const updateRating = (star) => {
                   </div>
                   <div class="comments-list">
                     <div v-for="review in reviews" :key="review.id" class="comment">
-                      <p><strong>{{ review.user.firstname }}:</strong> {{ review.comment }}</p>
-                      <p>Bewertung: {{ review.rating }}</p>
+                      <div class="comment-part">
+                        <p><strong>{{ review.user.firstname }}:</strong> {{ review.comment }}</p>
+                        <p>Bewertung: {{ review.rating }}</p>
+                        <!-- <p> {{ review }}</p> -->
+                      </div>
+                      <div class="bin" v-if="review.user.id === store.authUser.id" @click="deleteComment(review)">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#EA3323"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>                    </div>
                     </div>
-                  </div>
+                    </div>
                 </div>
               </div>
             </div>
@@ -955,10 +990,15 @@ p {
 }
 
 .comment {
+  display: flex;
+  justify-content: space-between;
   padding: 10px;
   border-bottom: 1px solid #ccc;
 }
 
+.bin {
+  cursor: pointer;
+}
 .close-label {
   cursor: pointer;
   text-align: end;

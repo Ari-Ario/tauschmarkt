@@ -68,6 +68,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     //Post a review 
     Route::post('/product-review', [ProductReviewController::class, 'store']);
+    Route::delete('/product-review/{productReview}', [ProductReviewController::class, 'destroy']);
 
 });
 

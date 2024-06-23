@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\ProductReview;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 class ProductReviewController extends Controller
@@ -106,6 +107,29 @@ class ProductReviewController extends Controller
      */
     public function destroy(ProductReview $productReview)
     {
-        //
+        // Check if the authenticated user is the owner of the comment
+        if (Auth::id() !== $productReview->user_id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not authorized to delete this comment'
+            ], 403);
+        }
+
+        try {
+            // Delete the comment
+            $productReview->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Comment deleted successfully'
+            ], 200);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while deleting the comment',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 }
