@@ -16,6 +16,7 @@ use App\Http\Controllers\CartItemController;
 use App\Http\Middleware\VerifyCsrfToken;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\OrderController;
 
 
 Route::post('/sanctum/token', TokenController::class);
@@ -63,7 +64,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::delete('/products/destroy/{id}', [ProductController::class, 'destroy']);
 
     //Orders/Payments
-    Route::get('/payment/orders/{id}', [PaymentController::class, 'getOrdersSeller']);
+    Route::get('/sellerorder/{id}', [OrderController::class, 'getOrdersSeller']);
+    Route::get('/userorder/{id}', [OrderController::class, 'getOrdersUser']);
+    Route::put('/orders/markAsCollected', [OrderController::class, 'markAsCollected']);
 
     //Post a review 
     Route::post('/product-review', [ProductReviewController::class, 'store']);

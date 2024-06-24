@@ -24,4 +24,10 @@ class Order extends Model
     {
         return $this->belongsTo(User::class);
     }
+    
+    // Define the relationship with the User model for the seller
+    public function seller()
+    {
+        return $this->belongsTo(User::class, 'seller_id');
+    }
 }

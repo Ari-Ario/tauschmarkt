@@ -70,14 +70,14 @@ const addOrRemoveFavorites = async (enterprise) => {
                 userId: store.authUser.id,
                 isFavorite: enterprise.is_favorite
             });
-            console.log(response);
+            // console.log(response);
         } else {
             let response = await authClient.post("/favorites/remove", {
                 enterpriseId: enterprise.id,
                 userId: store.authUser.id,
                 isFavorite: enterprise.is_favorite
             });
-            console.log(response);
+            // console.log(response);
         }
     } catch (error) {
         console.error("Error adding to favorites:", error);

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('seller_id')->constrained('users')->onDelete('cascade');
             $table->decimal('total_price', 10, 2);
-            $table->time('pickup')->nullable(); // the picki-up time column
+            $table->datetime('pickup')->nullable(); // the picki-up time column
             $table->timestamps();
         });
     }

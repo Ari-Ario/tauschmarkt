@@ -1,50 +1,46 @@
 <script setup>
-import FooterSeller from '../components/footer/FooterSeller.vue';
 import { useAuthStore } from '@/stores/AuthStore';
 import { ref , onMounted } from 'vue';
 import axios from 'axios';
+import FooterUser from '../components/footer/FooterUser.vue';
+import FooterSeller from '../components/footer/FooterSeller.vue';
+import EnterpriseCard from "../components/EnterpriseCard.vue";
+import Header from '../components/header/Header.vue';
+import Swal from 'sweetalert2';
+
 
 const store = useAuthStore();
 const userId = store.authUser.id;
 // Sample data for orders
-const orders = ref([
-  {
-    id: null,
-    firstname: 'Harfe ',
-    lastname: 'Roteerlin',
-    address: 'Oranienstraße 13, 10999 Berlin',
-    pickupTime: '31-08-2016 16:00 - 16:30',
-    orderDate: '31-08-2016 14:34',
-    image: '/path/to/image1.jpg',
-    price: '3.00',
-    picked: false,
-    orderCode: 'EYM8FHTW8MXB0'
-  },
-  {
-    id: '2',
-    firstname: ' Berlin',
-    lastname: 'Rot Berlin',   
-    address: 'Manteuffelstr 1, 12103 Berlin',
-    pickupTime: '31-08-2016 16:00 - 16:30',
-    orderDate: '31-08-2016 14:34',
-    image: '/path/to/image2.jpg',
-    price: '3.00',
-    picked: false,
-    orderCode: 'ABC123XYZ456'
-  },
-  // Add more orders as needed
-]);
+const orders = ref([]);
 
-onMounted(async () => {
+const sellerOrders = async () => {
       try {
-        const response = await axios.get(`/api/payment/orders/${userId}`); // Adjust the URL as needed
+        const response = await axios.get(`/api/sellerorder/${userId}`); // Adjust the URL as needed
         orders.value = response.data;
-        console.log(orders);
+        // console.log(orders);
       } catch (error) {
         console.error('Failed to fetch orders:', error);
       }
-    });
+    };
 
+const userOrders = async () => {
+      try {
+        const response = await axios.get(`/api/userorder/${userId}`); // Adjust the URL as needed
+        orders.value = response.data;
+        // console.log(orders);
+      } catch (error) {
+        console.error('Failed to fetch orders:', error);
+      }
+    };
+
+onMounted(() => {
+  if (store.authUser.is_seller) {
+    sellerOrders();
+  } else {
+    userOrders();
+  }
+});
 const selectedOrder = ref(null);
 
 const selectOrder = (order) => {
@@ -61,20 +57,38 @@ const markAsCollected = async (order) => {
     order.picked = true;
 
     // Send a request to update the status in the database
-    await axios.post('/api/orders/markAsCollected', {
+    await axios.put('/api/orders/markAsCollected', {
       orderId: order.id
     });
 
     // Close the details popup after marking as collected
     closeDetails();
+    Swal.fire({
+        toast: true,
+        icon: "success",
+        position: "top-end",
+        showConfirmButton: false,
+        title: "Abholen erfolgreich!",
+        timer: 3000
+    })
   } catch (error) {
     console.error('Error marking order as collected:', error);
   }
 };
 
+const getEnterprisePicture = (path) => {
+    return path ? `storage/${path}` : 'storage/enterprise_images/default.png';
+};
+
+const getProfilePicture = (path) => {
+    return path ? `storage/${path}` : 'storage/profile_images/default.png';
+};
 </script>
 
 <template>
+      <header>
+        <Header />
+      </header>
   <div class="orders-page">
     <div class="order-details">
         <h3>Bestellungen</h3>
@@ -86,40 +100,41 @@ const markAsCollected = async (order) => {
         class="order-item" 
         @click="selectOrder(order)"
       >
-        <img :src="order.image" alt="Order Image" />
+        <img :src="getProfilePicture(order.profile_image)" alt="Profil Image" />
         <div>
-          <h3>{{ order.name }}</h3>
-          <p>{{ order.address }}</p>
+          <h3>{{ order.firstname }} {{ order.lastname }}</h3>
+          <p>{{ order.street }} {{ order.house_number }}, {{ order.zip_code }} {{ order.city }}</p>
         </div>
       </div>
     </div>
     <div class="backdrop" v-if="selectedOrder" @click="closeDetails"></div>
     <div class="order-details-popup" v-if="selectedOrder">
       <div class="details-header">
-        <h2>{{ selectedOrder.name }}</h2>
+        <h2>{{ selectedOrder.name }} {{ selectedOrder.name }}</h2>
         <button @click="closeDetails">Close</button>
       </div>
-      <img :src="selectedOrder.image" alt="Order Image" />
-      <p><strong>Address:</strong> {{ selectedOrder.address }}</p>
-      <p><strong>Pickup Time:</strong> {{ selectedOrder.pickupTime }}</p>
-      <p><strong>Order Date:</strong> {{ selectedOrder.orderDate }}</p>
-      <p><strong>Order ID:</strong> {{ selectedOrder.id }}</p>
-      <p><strong>Price:</strong> {{ selectedOrder.price }} EUR</p>
-      <div>
-        <label for="picked">Picked Up:</label>
-        <input type="checkbox" id="picked" v-model="selectedOrder.picked" />
+      <img :src="getEnterprisePicture(selectedOrder.enterprise_image)" alt="Image" />
+      <p><strong>Strasse:</strong> {{ selectedOrder.address }}</p>
+      <p><strong>Abholungszeit:</strong> von {{ selectedOrder.opening }} bis {{ selectedOrder.closing }} </p>
+      <p><strong>Bestellungsdatum:</strong> {{ selectedOrder.orderDate }}</p>
+      <p><strong>Bestellungsnummer:</strong> {{ selectedOrder.id }}</p>
+      <p><strong>Preis:</strong> {{ selectedOrder.price }} CHF</p>
+
+      <div v-if="selectedOrder.picked">
+        <p><strong>Abgeholt:</strong> {{ selectedOrder.picked }} </p>
       </div>
-      <div class="collect-section">
-        <h3>Order to be collected</h3>
+
+      <div class="collect-section" v-if="!selectedOrder.picked">
+        <h3>Bestellung zum Abholen</h3>
         <div class="collect-info">
           <div class="quantity">
             <div class="circle">1x</div>
             <p>Surprise Bag</p>
           </div>
-          <p>{{ selectedOrder.name }}</p>
+          <p>{{ selectedOrder.firstname }}</p>
           <div class="order-code">{{ selectedOrder.orderCode }}</div>
         </div>
-        <p>Swipe below and show the order to the staff. Make sure to swipe only when you're in the store ready to collect your meal.</p>
+        <p>Drücken Sie den Button zum Abholen. Verkäfer und Käufer beachten.</p>
         <button class="swipe-to-collect" @click="markAsCollected(selectedOrder)">
           <span class="swipe-icon">➔</span>
           Abholen
@@ -130,12 +145,19 @@ const markAsCollected = async (order) => {
         <FooterSeller />
     </div>
   </div>
+
+  <footer v-if="store.authUser.is_seller">
+    <FooterSeller />
+  </footer>
+  <footer v-else>
+    <FooterUser />
+  </footer>
 </template>
 
 <style scoped>
 .orders-page {
   max-width: 600px;
-  margin: 0 auto;
+  margin: 64px auto;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -309,9 +331,7 @@ const markAsCollected = async (order) => {
 }
 
 .swipe-to-collect {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  text-align: center;
   background-color: #42b983;
   color: white;
   padding: 10px;
