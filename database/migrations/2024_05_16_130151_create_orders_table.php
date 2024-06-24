@@ -17,8 +17,7 @@ return new class extends Migration
             $table->string('status', 45)->nullable();
             $table->string('session_id', 255);
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('seller_id')->constrained()->onDelete('cascade');
-
+            $table->foreignId('seller_id')->constrained('users')->onDelete('cascade');
             $table->decimal('total_price', 10, 2);
             $table->time('pickup')->nullable(); // the picki-up time column
             $table->timestamps();

@@ -142,8 +142,35 @@ const remove = (product) => {
 
 const stripePromise = loadStripe(String(import.meta.env.STRIPE_KEY));
 
+function validateCartItems() {
+
+
+
+}
+
 async function submit() {
-    // console.log(            )
+    //console.log( )
+    const items = cartItems.value;
+    const message = null;
+    if (items.length === 0) return;
+
+    let previousSellerId = items[0].seller_id;
+
+    for (let i = 1; i < items.length; i++) {
+        if (items[i].seller_id !== previousSellerId) {
+            console.log(`Seller ID mismatch: ${items[i].seller_id} is not equal to ${previousSellerId}`);
+            Swal.fire({
+            toast: true,
+            icon: 'error',
+            position: 'top-end',
+            showConfirmButton: false,
+            title: 'Ups, fehler. Sie können jedes Mal nur bei einem Stand kaufen!'
+        });
+            mesage = "IdMissmatch";
+        }
+    }
+    if (message && message === "IdMissmatch") { return }
+
     axios.post('/api/checkout/order', {
         carts: cartItems.value,
         products: cartItems.value.map(item => ({
@@ -152,6 +179,8 @@ async function submit() {
                 price: item.price
             })),
         total: total.value,
+        seller_id: cartItems.value[0].seller_id,
+
         // address: form
     })
     .then(response => {

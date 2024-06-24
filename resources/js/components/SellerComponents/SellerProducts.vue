@@ -160,12 +160,7 @@ const updateProduct = async () => {
     // console.log('CSRF Token:', csrfToken);
     // for (const value of formData.values()) { console.log(value) }
     try {
-        const response = await authClient.post(`products/update/${id.value}`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-                'X-CSRF-TOKEN': csrfToken,
-            },
-        });
+        const response = await authClient.post(`products/update/${id.value}`, formData);
         console.log(response);
         dialogVisible.value = false;
         resetFormData();

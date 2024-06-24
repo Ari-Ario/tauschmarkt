@@ -1,14 +1,17 @@
 <script setup>
 import FooterSeller from '../components/footer/FooterSeller.vue';
-
-import { ref } from 'vue';
+import { useAuthStore } from '@/stores/AuthStore';
+import { ref , onMounted } from 'vue';
 import axios from 'axios';
 
+const store = useAuthStore();
+const userId = store.authUser.id;
 // Sample data for orders
 const orders = ref([
   {
-    id: '1',
-    name: 'Rote Harfe - Berlin',
+    id: null,
+    firstname: 'Harfe ',
+    lastname: 'Roteerlin',
     address: 'Oranienstraße 13, 10999 Berlin',
     pickupTime: '31-08-2016 16:00 - 16:30',
     orderDate: '31-08-2016 14:34',
@@ -19,7 +22,8 @@ const orders = ref([
   },
   {
     id: '2',
-    name: 'Café Kirsch & Karamell - Berlin',
+    firstname: ' Berlin',
+    lastname: 'Rot Berlin',   
     address: 'Manteuffelstr 1, 12103 Berlin',
     pickupTime: '31-08-2016 16:00 - 16:30',
     orderDate: '31-08-2016 14:34',
@@ -30,6 +34,16 @@ const orders = ref([
   },
   // Add more orders as needed
 ]);
+
+onMounted(async () => {
+      try {
+        const response = await axios.get(`/api/payment/orders/${userId}`); // Adjust the URL as needed
+        orders.value = response.data;
+        console.log(orders);
+      } catch (error) {
+        console.error('Failed to fetch orders:', error);
+      }
+    });
 
 const selectedOrder = ref(null);
 

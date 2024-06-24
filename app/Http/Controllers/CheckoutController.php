@@ -24,6 +24,7 @@ class CheckoutController extends Controller
         $user = $request->user();
         $carts = $request->carts;
         $products = $request->products;
+        $sellerId = $request->seller_id;
         $mergedData = [];
     
         // Loop through the "carts" array and merge with "products" data
@@ -83,6 +84,7 @@ class CheckoutController extends Controller
             $order->total_price = $request->total;
             $order->session_id = $checkout_session->id;
             $order->user_id = $user->id;
+            $order->seller_id = $sellerId;
 
             // $order->created_by = $user->id;
             // If a main address with isMain = 1 exists, set its id as customer_address_id
@@ -118,6 +120,7 @@ class CheckoutController extends Controller
                 'type' => 'stripe',
                 'created_by' => $user->id,
                 'updated_by' => $user->id,
+                'seller_id' => $sellerId,
                 // 'session_id' => $session->id
             ];
 
@@ -129,6 +132,7 @@ class CheckoutController extends Controller
             $order->total_price = $request->total;
             $order->session_id = $checkout_session->id;
             $order->user_id = 1; // Default user ID for guests
+            $order->seller_id = $sellerId;
 
             $order->save();
             $cartItems = CartItem::where(['user_id' => 1])->get();
@@ -164,6 +168,7 @@ class CheckoutController extends Controller
                 'type' => 'stripe',
                 'created_by' => 1, // Default user ID for guests
                 'updated_by' => 1, // Default user ID for guests
+                'seller_id' => $sellerId,
             ];
 
             Payment::create($paymentData);
