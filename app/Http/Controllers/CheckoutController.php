@@ -15,6 +15,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 
 class CheckoutController extends Controller
 {
@@ -22,6 +24,9 @@ class CheckoutController extends Controller
     public function store(Request $request)
     {
         $user = $request->user();
+        if ($user) {
+
+        }
         $carts = $request->carts;
         $products = $request->products;
         $sellerId = $request->seller_id;
@@ -133,9 +138,10 @@ class CheckoutController extends Controller
             $order->session_id = $checkout_session->id;
             $order->user_id = 1; // Default user ID for guests
             $order->seller_id = $sellerId;
-
             $order->save();
-            $cartItems = CartItem::where(['user_id' => 1])->get();
+
+            $cartItems = CartItem::where(['user_id' => '1'])->get();
+
             foreach ($cartItems as $cartItem) {
                 OrderItem::create([
                     'order_id' => $order->id,
@@ -204,10 +210,18 @@ class CheckoutController extends Controller
                 $order->save();
             }
             if ($user) {
-            return redirect('/dashboard');
-
+                return redirect('/dashboard');
             } else {
-                return redirect('/');
+                $items = $user ? CartItem::where('user_id', $user->id)->get() : Cart::getCookieCartItems();
+
+                // Generate PDF
+                $pdf = Pdf::loadView('pdf.bill', ['order' => $order, 'items' => $items]);
+                $pdfPath = 'bills/bill_' . $order->id . '.pdf';
+                Storage::put('public/' . $pdfPath, $pdf->output());
+
+                $pdfUrl = Storage::url($pdfPath);
+
+                return redirect($pdfUrl);
             }
             
             // return response()->json('checkedout');

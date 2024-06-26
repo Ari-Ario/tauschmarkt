@@ -40,6 +40,7 @@ const itemId = (id) => carts.value.findIndex((item) => item.product_id === id);
 
 const addToCartHandler = (product) => {
   const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+  console.log(product)
   axios.post(`/api/cart/store/${product.id}`, product, {
     quantity: product.quantity,
     price: product.price,
