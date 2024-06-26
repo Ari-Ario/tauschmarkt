@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('firstname');
             $table->string('lastname');
             $table->string('email')->unique();
+            $table->string('stripe_account_id')->nullable();
             $table->integer('cellphone')->unique()->nullable();
             $table->boolean('is_seller')->default(false);
             $table->timestamp('email_verified_at')->nullable();

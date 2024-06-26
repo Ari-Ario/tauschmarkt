@@ -57,7 +57,7 @@ class UserController extends Controller
         public function updateUserProfile(Request $request)
         {
             $user = Auth::user();
-    
+        
             $request->validate([
                 'firstname' => 'required|string|max:255',
                 'lastname' => 'required|string|max:255',
@@ -68,7 +68,7 @@ class UserController extends Controller
                 'city' => 'nullable|string|max:255',
                 'payment' => 'nullable|string', // Assuming 'payment' is the IBAN
             ]);
-    
+        
             // Update user profile
             $user->update($request->only([
                 'firstname',
@@ -78,56 +78,69 @@ class UserController extends Controller
                 'house_number',
                 'zip_code',
                 'city',
-                'payment',
+                'payment'
             ]));
-    
+        
             // Check if IBAN (payment) is provided
             if ($request->has('payment') && !empty($request->payment)) {
-                // Instantiate Stripe client
-                // $stripe = new StripeClient(env('STRIPE_SECRET'));
-                $stripe = new \Stripe\StripeClient('sk_test_51PRVFGCFV0u7TeyeT35q849Bj5Z20yEOr2EoFcRvJyW7ELi7BmxiDfzPhcggYibOAqCIoal1J0vuHX0iJ3RVVFnL00o4IPXSbH');
-    
+                $stripe = new StripeClient('sk_test_51PRVFGCFV0u7TeyeT35q849Bj5Z20yEOr2EoFcRvJyW7ELi7BmxiDfzPhcggYibOAqCIoal1J0vuHX0iJ3RVVFnL00o4IPXSbH');
+        
                 try {
-                    // Create or update Stripe account
                     if (!$user->stripe_account_id) {
                         // Create a new Stripe account
                         $account = $stripe->accounts->create([
                             'type' => 'custom',
-                            'country' => 'US',
+                            'country' => 'CH', // Switzerland
                             'email' => $user->email,
+                            'business_type' => 'individual', // Assuming individual, you can change to company if needed
+                            'individual' => [
+                                'first_name' => $user->firstname,
+                                'last_name' => $user->lastname,
+                                'email' => $user->email,
+                                'address' => [
+                                    'line1' => $user->street . ' ' . $user->house_number,
+                                    'postal_code' => $user->zip_code,
+                                    'city' => $user->city,
+                                    'country' => 'CH'
+                                ]
+                            ],
                             'capabilities' => [
                                 'transfers' => ['requested' => true],
                             ],
                         ]);
-    
+        
                         $user->stripe_account_id = $account->id;
+                        $user->save(); // Save the stripe_account_id immediately
                     } else {
                         // Retrieve existing Stripe account
                         $account = $stripe->accounts->retrieve($user->stripe_account_id);
                     }
-    
+        
                     // Update account with IBAN
-                    $stripe->accounts->createExternalAccount(
+                    $externalAccount = $stripe->accounts->createExternalAccount(
                         $user->stripe_account_id,
                         [
                             'external_account' => [
                                 'object' => 'bank_account',
-                                'country' => 'US',
-                                'currency' => 'usd',
+                                'country' => 'CH', // Switzerland
+                                'currency' => 'chf', // Swiss Franc
                                 'account_holder_name' => $user->firstname . ' ' . $user->lastname,
                                 'account_holder_type' => 'individual',
-                                'routing_number' => '110000000', // Example routing number
                                 'account_number' => $request->payment,
                             ],
                         ]
                     );
-    
+        
+                    // Debugging output
+                    info('External account created:', ['external_account' => $externalAccount]);
+        
+                    // Save the Stripe account ID in the stripe_account_id field
                     $user->save();
                 } catch (ApiErrorException $e) {
                     return response()->json(['message' => 'Error linking Stripe account: ' . $e->getMessage()], 500);
                 }
             }
-    
+        
             return response()->json([
                 'message' => 'User updated successfully',
                 'user' => $user,

@@ -99,24 +99,22 @@ class OrderController extends Controller
         // Retrieve the seller's Stripe account ID
         $seller = User::findOrFail($order->seller_id); // Assuming seller_id is a column in the orders table
 
-        if (!$seller->payment) {
+        if (!$seller || empty($seller->stripe_account_id || !$seller->payment)) {
             return response()->json(['message' => 'Seller does not have a Stripe account linked.'], 400);
         }
 
         // Set your Stripe secret key
-        // Stripe::setApiKey('sk_test_51PRVFGCFV0u7TeyeT35q849Bj5Z20yEOr2EoFcRvJyW7ELi7BmxiDfzPhcggYibOAqCIoal1J0vuHX0iJ3RVVFnL00o4IPXSbH');
+        $stripe = new StripeClient('sk_test_51PRVFGCFV0u7TeyeT35q849Bj5Z20yEOr2EoFcRvJyW7ELi7BmxiDfzPhcggYibOAqCIoal1J0vuHX0iJ3RVVFnL00o4IPXSbH');
 
         try {
-            // Create a transfer to the seller's Stripe account
-            // $transfer = Transfer::create([
-            //     'amount' => $order->total_price * 100, // Amount in cents
-            //     'currency' => 'chf',
-            //     'destination' => $seller->payment,
-            //     'description' => 'Payout for order ID: ' . $order->id,
-            // ]);
-
-            // Update the pickup column with the current date and time
-            $order->pickup = Carbon::now()->toDateTimeString();
+            $transfer = $stripe->transfers->create([
+                'amount' => $order->total_price * 100, // amount in cents
+                'currency' => 'chf',
+                'destination' => $seller->stripe_account_id,
+                'transfer_group' => 'ORDER_' . $order->id,
+            ]);
+    
+            $order->pickup = now();
             $order->save();
 
             return response()->json(['message' => 'Order marked as collected and payout successful.'], 200);
