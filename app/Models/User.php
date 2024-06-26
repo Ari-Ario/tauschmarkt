@@ -27,6 +27,7 @@ class User extends Authenticatable
         'house_number',
         'zip_code',
         'city',
+        'payment',
         'latitude',
         'longitude',
     ];

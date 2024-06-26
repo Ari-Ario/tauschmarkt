@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
-
+use Stripe\StripeClient;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
 
@@ -44,6 +44,7 @@ class UserController extends Controller
             'house_number' => $user->house_number,
             'city' => $user->city,
             'zip_code' => $user->zip_code,
+            'payment' => $user->payment,
             'latitude' => $user->latitude,
             'longitude' => $user->longitude,
             'created_at' => optional($user->created_at)->format($dateFormat),
@@ -56,17 +57,19 @@ class UserController extends Controller
         public function updateUserProfile(Request $request)
         {
             $user = Auth::user();
-
+    
             $request->validate([
                 'firstname' => 'required|string|max:255',
                 'lastname' => 'required|string|max:255',
                 'email' => 'required|email|max:255|unique:users,email,' . $user->id,
-                'street' => 'string|max:255',
-                'house_number' => 'string|max:255',
-                'zip_code' => 'string|max:20',
-                'city' => 'string|max:255',
+                'street' => 'nullable|string|max:255',
+                'house_number' => 'nullable|string|max:255',
+                'zip_code' => 'nullable|string|max:20',
+                'city' => 'nullable|string|max:255',
+                'payment' => 'nullable|string', // Assuming 'payment' is the IBAN
             ]);
     
+            // Update user profile
             $user->update($request->only([
                 'firstname',
                 'lastname',
@@ -75,7 +78,55 @@ class UserController extends Controller
                 'house_number',
                 'zip_code',
                 'city',
+                'payment',
             ]));
+    
+            // Check if IBAN (payment) is provided
+            if ($request->has('payment') && !empty($request->payment)) {
+                // Instantiate Stripe client
+                // $stripe = new StripeClient(env('STRIPE_SECRET'));
+                $stripe = new \Stripe\StripeClient('sk_test_51PRVFGCFV0u7TeyeT35q849Bj5Z20yEOr2EoFcRvJyW7ELi7BmxiDfzPhcggYibOAqCIoal1J0vuHX0iJ3RVVFnL00o4IPXSbH');
+    
+                try {
+                    // Create or update Stripe account
+                    if (!$user->stripe_account_id) {
+                        // Create a new Stripe account
+                        $account = $stripe->accounts->create([
+                            'type' => 'custom',
+                            'country' => 'US',
+                            'email' => $user->email,
+                            'capabilities' => [
+                                'transfers' => ['requested' => true],
+                            ],
+                        ]);
+    
+                        $user->stripe_account_id = $account->id;
+                    } else {
+                        // Retrieve existing Stripe account
+                        $account = $stripe->accounts->retrieve($user->stripe_account_id);
+                    }
+    
+                    // Update account with IBAN
+                    $stripe->accounts->createExternalAccount(
+                        $user->stripe_account_id,
+                        [
+                            'external_account' => [
+                                'object' => 'bank_account',
+                                'country' => 'US',
+                                'currency' => 'usd',
+                                'account_holder_name' => $user->firstname . ' ' . $user->lastname,
+                                'account_holder_type' => 'individual',
+                                'routing_number' => '110000000', // Example routing number
+                                'account_number' => $request->payment,
+                            ],
+                        ]
+                    );
+    
+                    $user->save();
+                } catch (ApiErrorException $e) {
+                    return response()->json(['message' => 'Error linking Stripe account: ' . $e->getMessage()], 500);
+                }
+            }
     
             return response()->json([
                 'message' => 'User updated successfully',

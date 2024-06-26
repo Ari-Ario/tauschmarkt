@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\CartItem;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\User;
+use Stripe\StripeClient;
 // use App\Models\UserAddress;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -94,12 +96,34 @@ class OrderController extends Controller
         // Find the order by ID
         $order = Order::findOrFail($request->orderId);
 
-        // Update the pickup column with the current time
-        $order->pickup = now();
-        $order->save();
+        // Retrieve the seller's Stripe account ID
+        $seller = User::findOrFail($order->seller_id); // Assuming seller_id is a column in the orders table
 
-        // Return a success response
-        return response()->json(['message' => 'Order marked as collected successfully.'], 200);
+        if (!$seller->payment) {
+            return response()->json(['message' => 'Seller does not have a Stripe account linked.'], 400);
+        }
+
+        // Set your Stripe secret key
+        // Stripe::setApiKey('sk_test_51PRVFGCFV0u7TeyeT35q849Bj5Z20yEOr2EoFcRvJyW7ELi7BmxiDfzPhcggYibOAqCIoal1J0vuHX0iJ3RVVFnL00o4IPXSbH');
+
+        try {
+            // Create a transfer to the seller's Stripe account
+            // $transfer = Transfer::create([
+            //     'amount' => $order->total_price * 100, // Amount in cents
+            //     'currency' => 'chf',
+            //     'destination' => $seller->payment,
+            //     'description' => 'Payout for order ID: ' . $order->id,
+            // ]);
+
+            // Update the pickup column with the current date and time
+            $order->pickup = Carbon::now()->toDateTimeString();
+            $order->save();
+
+            return response()->json(['message' => 'Order marked as collected and payout successful.'], 200);
+
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Error processing payout: ' . $e->getMessage()], 500);
+        }
     }
 
     /**

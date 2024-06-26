@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('zip_code')->nullable();
             $table->string('city')->nullable();
             $table->string('bio')->nullable();
-            $table->integer('payment')->nullable();
+            $table->string('payment')->nullable();
             $table->decimal('latitude', 10, 7)->nullable();
             $table->decimal('longitude', 10, 7)->nullable();
             $table->string('profile_picture')->nullable();

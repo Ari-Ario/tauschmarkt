@@ -17,6 +17,7 @@ class OrdersTableSeeder extends Seeder
         //
         Order::factory()->count(10)->create([
             'user_id' => User::inRandomOrder()->first()->id,
+            'seller_id' => User::inRandomOrder()->first()->id,
         ]);
     }
 }

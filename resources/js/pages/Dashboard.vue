@@ -46,8 +46,6 @@
 <template>
     <header>
         <Header />
-
-        <!-- <LogoutButton /> -->
     </header>
 
 

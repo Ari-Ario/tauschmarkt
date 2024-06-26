@@ -16,8 +16,8 @@ class DatabaseSeeder extends Seeder
        
         \App\Models\User::create([
             'firstname' => 'Gest',
-            'lastname' => 'User',
-            'email' => 'gest@user.ch',
+            'lastname' => 'Gast',
+            'email' => 'gest@info.ch',
             'email_verified_at' => now(),
             'password' => Hash::make('password'),
         ]);
