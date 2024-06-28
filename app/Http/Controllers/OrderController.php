@@ -35,6 +35,7 @@ class OrderController extends Controller
         $formattedOrders = $orders->map(function ($order) {
             return [
                 'id' => $order->id,
+                'user_id' => $order->user->id,
                 'firstname' => $order->user->firstname,
                 'lastname' => $order->user->lastname,
                 'street' => $order->user->street,

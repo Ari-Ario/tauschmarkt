@@ -18,7 +18,7 @@ const sellerOrders = async () => {
       try {
         const response = await axios.get(`/api/sellerorder/${userId}`); // Adjust the URL as needed
         orders.value = response.data;
-        // console.log(orders);
+        console.log(orders);
       } catch (error) {
         console.error('Failed to fetch orders:', error);
       }
@@ -73,6 +73,14 @@ const markAsCollected = async (order) => {
     })
   } catch (error) {
     console.error('Error marking order as collected:', error);
+    Swal.fire({
+          toast: true,
+          icon: 'error',
+          position: 'top-end',
+          showConfirmButton: false,
+          title: 'Nicht Aktualisiert! Versuchen Sie wieder'
+      });
+    order.picked = false;
   }
 };
 
@@ -124,7 +132,7 @@ const getProfilePicture = (path) => {
         <p><strong>Abgeholt:</strong> {{ selectedOrder.picked }} </p>
       </div>
 
-      <div class="collect-section" v-if="!selectedOrder.picked">
+      <div class="collect-section" v-if="!selectedOrder.picked && (selectedOrder.user_id === 1)">
         <h3>Bestellung zum Abholen</h3>
         <div class="collect-info">
           <div class="quantity">

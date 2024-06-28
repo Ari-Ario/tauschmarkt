@@ -17,6 +17,8 @@ use Inertia\Inertia;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Cookie;
+
 
 class CheckoutController extends Controller
 {
@@ -24,10 +26,9 @@ class CheckoutController extends Controller
     public function store(Request $request)
     {
         $user = $request->user();
-        if ($user) {
-
-        }
         $carts = $request->carts;
+        // Save carts in the cookies with name 'items'
+        Cookie::queue('items', json_encode($carts), 60*24*30);
         $products = $request->products;
         $sellerId = $request->seller_id;
         $mergedData = [];
@@ -140,31 +141,15 @@ class CheckoutController extends Controller
             $order->seller_id = $sellerId;
             $order->save();
 
-            $cartItems = CartItem::where(['user_id' => '1'])->get();
+            // $cartItems = CartItem::where(['user_id' => '1'])->get();
 
-            foreach ($cartItems as $cartItem) {
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $cartItem->product_id,
-                    'quantity' => $cartItem->quantity,
-                    'unit_price' => $cartItem->product->price,
-                ]);
+            foreach ($carts as $cartItem) {
 
                 // Update product quantity
-                $product = Product::findOrFail($cartItem->product_id);
-                $totalQuantity = $product->quantity;
-                $product->quantity = $totalQuantity - $cartItem->quantity;
+                $product = Product::findOrFail($cartItem['id']);
+                $totalQuantity = $product['quantity'];
+                $product['quantity'] = $totalQuantity - $cartItem['quantity'];
                 $product->save();
-
-                $cartItem->delete();
-
-                // Remove cart items from cookies
-                $cartItems = Cart::getCookieCartItems();
-                foreach ($cartItems as $item) {
-                    unset($item);
-                }
-                array_splice($cartItems, 0, count($cartItems));
-                Cart::setCookieCartItems($cartItems);
             }
 
             $paymentData = [
@@ -209,19 +194,23 @@ class CheckoutController extends Controller
                 $order->status = 'paid';
                 $order->save();
             }
+
+            // Retrieve cart items from cookies
+            $cartItems = json_decode(Cookie::get('items', '[]'), true);
+            Cookie::queue(Cookie::forget('items'));
+            // dd($cartItems);
+
             if ($user) {
                 return redirect('/dashboard');
             } else {
-                $items = $user ? CartItem::where('user_id', $user->id)->get() : Cart::getCookieCartItems();
+            // Generate PDF for guest user
+            $pdf = Pdf::loadView('pdf.bill', ['order' => $order, 'items' => $cartItems]);
+            $pdfPath = 'bills/bill_' . $order->id . '.pdf';
+            Storage::put('public/' . $pdfPath, $pdf->output());
 
-                // Generate PDF
-                $pdf = Pdf::loadView('pdf.bill', ['order' => $order, 'items' => $items]);
-                $pdfPath = 'bills/bill_' . $order->id . '.pdf';
-                Storage::put('public/' . $pdfPath, $pdf->output());
+            $pdfUrl = Storage::url($pdfPath);
 
-                $pdfUrl = Storage::url($pdfPath);
-
-                return redirect($pdfUrl);
+            return redirect($pdfUrl);
             }
             
             // return response()->json('checkedout');

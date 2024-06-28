@@ -167,7 +167,7 @@ async function submit() {
             showConfirmButton: false,
             title: 'Ups, fehler. Sie können jedes Mal nur bei einem Stand kaufen!'
         });
-            mesage = "IdMissmatch";
+            message = "IdMissmatch";
         }
     }
     if (message && message === "IdMissmatch") { return }
