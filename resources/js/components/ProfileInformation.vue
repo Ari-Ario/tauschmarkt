@@ -26,8 +26,10 @@ const frontendKeys = {
   street: 'Strasse',
   house_number: 'Hausnummer',
   city: 'Stadt',
-  zip_code: 'zip_code',
-  payment: 'Bankkonto'
+  zip_code: 'Postleitzahl',
+  opening: 'öffnungszeit',
+  closing: 'Betriebsschluss',
+  payment: 'Bankkonto',
 };
 
 // Fetch user profile data on mount
@@ -35,18 +37,20 @@ const store = useAuthStore();
 let route = useRoute();
 const userId = store?.authUser?.id;
 
-const loadUser = async () => {
+const loadSeller = async () => {
     try {
         const response = await axios.get(`api/user/profile/${userId}`);
         const data = await response.data;
         user.value = {
           Vorname: data.firstname,
           Nachname: data.lastname,
-          Email: data.email,
+          // Email: data.email,
           Strasse: data.street,
           Hausnummer: data.house_number,
           Stadt: data.city,
           Postleitzahl: data.zip_code,
+          öffnungszeit: data.opening,
+          Betriebsschluss: data.closing,
           Bankkonto: data.payment,
           // add more
         };
@@ -59,10 +63,34 @@ const loadUser = async () => {
         console.error("Error loading blogs:", error);
     }
 };
-
+const loadUser = async () => {
+    try {
+        const response = await axios.get(`api/user/profile/${userId}`);
+        const data = await response.data;
+        user.value = {
+          Vorname: data.firstname,
+          Nachname: data.lastname,
+          // Email: data.email,
+          Strasse: data.street,
+          Hausnummer: data.house_number,
+          Stadt: data.city,
+          Postleitzahl: data.zip_code,
+          // öffnungszeit: data.opening,
+          // Betriebsschluss: data.closing,
+          // Bankkonto: data.payment,
+          // add more
+        };
+    } catch (error) {
+        console.error("Error loading blogs:", error);
+    }
+};
 
 onMounted(() => {
-    loadUser();
+    if (store?.authUser?.is_seller){
+      loadSeller();
+    } else {
+      loadUser();
+    }
 });
 
 const editItem = (item, key) => {
@@ -89,7 +117,7 @@ const saveChanges = async () => {
           value,
         ])
       );
-      // console.log(payload);
+      console.log(payload);
       
       // Save changes to the server using Laravel Fortify's API
       try {
@@ -107,6 +135,14 @@ const cancelEdit = () => {
   isEditing.value = false;
   editingItem.value = {};
   editingValue.value = '';
+};
+
+// Method to format time to HH:MM:SS
+const formatTime = (time) => {
+  if (time.split(':').length === 2) {
+    return `${time}:00`;
+  }
+  return time;
 };
 
 </script>
@@ -151,7 +187,22 @@ const cancelEdit = () => {
       <div v-if="isEditing" class="edit-popup">
         <form @submit.prevent="saveChanges">
           <label :for="editingItem">{{ editingItem }}</label>
-          <input type="text" v-model="editingValue" :id="editingItem.key" required />
+          <!-- Change only this input to time-input if opening or closing -->
+          <input
+            v-if="editingItem === 'öffnungszeit' || editingItem === 'Betriebsschluss'"
+            type="time"
+            v-model="editingValue"
+            :id="editingItem"
+            required
+            @change="editingValue = formatTime($event.target.value)"
+          />
+          <input
+            v-else
+            type="text"
+            v-model="editingValue"
+            :id="editingItem"
+            required
+          />
           <button type="submit" style="margin-bottom: 10px;">Speichern</button>
           <button type="button" @click="cancelEdit">Ablehnen</button>
         </form>
@@ -188,6 +239,8 @@ align-items: center;
 
 .account-details {
   text-align: center;
+  padding: 0%;
+  margin: 0%;
 }
 
 .profile-item {
@@ -269,6 +322,13 @@ button[type="button"] {
   .edit-popup {
     position: fixed;
     top: 50%;
+  }
+  .profile-section {
+    /* border-bottom: 1px solid #ddd; */
+    margin-bottom: 0;
+  }
+  .profile-item {
+  padding: 9px 0;
   }
 }
 </style>

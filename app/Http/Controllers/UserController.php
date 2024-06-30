@@ -45,6 +45,8 @@ class UserController extends Controller
             'city' => $user->city,
             'zip_code' => $user->zip_code,
             'payment' => $user->payment,
+            'opening' => $user->opening,
+            'closing' => $user->closing,
             'latitude' => $user->latitude,
             'longitude' => $user->longitude,
             'created_at' => optional($user->created_at)->format($dateFormat),
@@ -61,13 +63,23 @@ class UserController extends Controller
             $request->validate([
                 'firstname' => 'required|string|max:255',
                 'lastname' => 'required|string|max:255',
-                'email' => 'required|email|max:255|unique:users,email,' . $user->id,
+                'email' => 'nullable|email|max:255|unique:users,email,' . $user->id,
                 'street' => 'nullable|string|max:255',
                 'house_number' => 'nullable|string|max:255',
                 'zip_code' => 'nullable|string|max:20',
                 'city' => 'nullable|string|max:255',
                 'payment' => 'nullable|string', // Assuming 'payment' is the IBAN
+                'opening' => ['nullable', 'regex:/^(?:2[0-3]|[01][0-9]):[0-5][0-9](?::[0-5][0-9])?$/'], // HH:MM format
+                'closing' => ['nullable', 'regex:/^(?:2[0-3]|[01][0-9]):[0-5][0-9](?::[0-5][0-9])?$/'],
             ]);
+        
+            // Convert HH:MM to HH:MM:SS format before updating
+            // if ($request->has('opening')) {
+            //     $request->merge(['opening' => $request->input('opening') . ':00']);
+            // }
+            // if ($request->has('closing')) {
+            //     $request->merge(['closing' => $request->input('closing') . ':00']);
+            // }
         
             // Update user profile
             $user->update($request->only([
@@ -78,7 +90,8 @@ class UserController extends Controller
                 'house_number',
                 'zip_code',
                 'city',
-                'payment'
+                'opening',
+                'closing',
             ]));
         
             // Check if IBAN (payment) is provided

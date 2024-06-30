@@ -18,7 +18,7 @@ const sellerOrders = async () => {
       try {
         const response = await axios.get(`/api/sellerorder/${userId}`); // Adjust the URL as needed
         orders.value = response.data;
-        console.log(orders);
+        // console.log(orders);
       } catch (error) {
         console.error('Failed to fetch orders:', error);
       }
@@ -84,6 +84,20 @@ const markAsCollected = async (order) => {
   }
 };
 
+const generatePDF = async (orderId) => {
+  // console.log(orderId)
+  try {
+    const response = await axios.post(`/api/orders/pdf/${orderId}`);
+    if (response.data.pdfUrl) {
+      window.location.href = response.data.pdfUrl;
+    } else {
+      console.error('PDF URL not found in response:', response);
+    }
+  } catch (error) {
+    console.error('Error generating PDF:', error);
+  }
+};
+
 const getEnterprisePicture = (path) => {
     return path ? `storage/${path}` : 'storage/enterprise_images/default.png';
 };
@@ -118,11 +132,15 @@ const getProfilePicture = (path) => {
     <div class="backdrop" v-if="selectedOrder" @click="closeDetails"></div>
     <div class="order-details-popup" v-if="selectedOrder">
       <div class="details-header">
-        <h2>{{ selectedOrder.name }} {{ selectedOrder.name }}</h2>
+        <h2>{{ selectedOrder.firstname }} {{ selectedOrder.lastname }}</h2>
         <button @click="closeDetails">Close</button>
       </div>
-      <img :src="getEnterprisePicture(selectedOrder.enterprise_image)" alt="Image" />
-      <p><strong>Strasse:</strong> {{ selectedOrder.address }}</p>
+      <div class="details-header">
+        <img :src="getEnterprisePicture(selectedOrder.enterprise_image)" alt="Image" />
+        <p @click="generatePDF(selectedOrder.id )"><strong>PDF</strong> <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="m242-200 200-280-200-280h98l200 280-200 280h-98Zm238 0 200-280-200-280h98l200 280-200 280h-98Z"/></svg></p>
+      </div>
+
+      <p><strong>Address:</strong> {{ selectedOrder.street }} {{ selectedOrder.house_number }}, {{ selectedOrder.zip_code }} {{ selectedOrder.city }}</p>
       <p><strong>Abholungszeit:</strong> von {{ selectedOrder.opening }} bis {{ selectedOrder.closing }} </p>
       <p><strong>Bestellungsdatum:</strong> {{ selectedOrder.orderDate }}</p>
       <p><strong>Bestellungsnummer:</strong> {{ selectedOrder.id }}</p>
@@ -132,7 +150,24 @@ const getProfilePicture = (path) => {
         <p><strong>Abgeholt:</strong> {{ selectedOrder.picked }} </p>
       </div>
 
-      <div class="collect-section" v-if="!selectedOrder.picked && (selectedOrder.user_id === 1)">
+      <div class="collect-section" v-if="!selectedOrder.picked && (selectedOrder.user_id === 1) && store.authUser.is_seller">
+        <h3>Bestellung zum Abholen</h3>
+        <div class="collect-info">
+          <div class="quantity">
+            <div class="circle">1x</div>
+            <p>Surprise Bag</p>
+          </div>
+          <p>{{ selectedOrder.firstname }}</p>
+          <div class="order-code">{{ selectedOrder.orderCode }}</div>
+        </div>
+        <p>Drücken Sie den Button zum Abholen. Verkäfer und Käufer beachten.</p>
+        <button class="swipe-to-collect" @click="markAsCollected(selectedOrder)">
+          <span class="swipe-icon">➔</span>
+          Abholen
+        </button>
+      </div>
+
+      <div class="collect-section" v-else-if="!selectedOrder.picked && !store.authUser.is_seller">
         <h3>Bestellung zum Abholen</h3>
         <div class="collect-info">
           <div class="quantity">
@@ -149,9 +184,7 @@ const getProfilePicture = (path) => {
         </button>
       </div>
     </div>
-    <div v-show="currentPage !== 'Map'">
-        <FooterSeller />
-    </div>
+
   </div>
 
   <footer v-if="store.authUser.is_seller">

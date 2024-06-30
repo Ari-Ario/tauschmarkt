@@ -12,6 +12,8 @@ use Stripe\StripeClient;
 // use App\Models\UserAddress;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 
 class OrderController extends Controller
 {
@@ -123,6 +125,38 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => 'Error processing payout: ' . $e->getMessage()], 500);
         }
+    }
+
+    public function generatePdf($orderId)
+    {
+        $order = Order::find($orderId);
+        if (!$order) {
+            return response()->json(['error' => 'Order not found'], 404);
+        }
+
+        // Eager load the products related to the order items
+        $cartItems = OrderItem::where('order_id', $order->id)->with('product:id,name,price')->get();
+
+        // Transform cartItems to include product details directly
+        $cartItems = $cartItems->map(function ($item) {
+            return [
+                'quantity' => $item->quantity,
+                'product_id' => $item->product_id,
+                'unit_price' => $item->unit_price,
+                'name' => $item->product->name,
+                'price' => $item->product->price,
+            ];
+        });        
+        // return($cartItems);
+
+        // Generate PDF
+        $pdf = PDF::loadView('pdf.bill', ['order' => $order, 'items' => $cartItems]);
+        $pdfPath = 'bills/bill_' . $order->id . '.pdf';
+        Storage::put('public/' . $pdfPath, $pdf->output());
+
+        $pdfUrl = Storage::url($pdfPath);
+
+        return response()->json(['pdfUrl' => $pdfUrl]);
     }
 
     /**

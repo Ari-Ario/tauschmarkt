@@ -67,6 +67,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/sellerorder/{id}', [OrderController::class, 'getOrdersSeller']);
     Route::get('/userorder/{id}', [OrderController::class, 'getOrdersUser']);
     Route::put('/orders/markAsCollected', [OrderController::class, 'markAsCollected']);
+    Route::post('/orders/pdf/{id}', [OrderController::class, 'generatePdf']);
+
 
     //Post a review 
     Route::post('/product-review', [ProductReviewController::class, 'store']);

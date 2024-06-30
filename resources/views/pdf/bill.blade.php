@@ -4,15 +4,81 @@
     <meta charset="utf-8">
     <title>Rechnung</title>
     <style>
-        body { font-family: Arial, sans-serif; }
-        .container { width: 100%; max-width: 800px; margin: 0 auto; padding: 20px; }
-        .header, .footer { text-align: center; margin-bottom: 20px; }
-        .footer { margin-top: 20px; }
-        .content { margin-bottom: 20px; }
-        .table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
-        .table th, .table td { border: 1px solid #000; padding: 8px; text-align: left; }
-        .table th { background-color: #f2f2f2; }
-        .tauschmarkt { color: #004d40; }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .header, .footer {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .footer {
+            margin-top: 20px;
+        }
+
+        .content {
+            margin-bottom: 20px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .table th, .table td {
+            border: 1px solid #000;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .table th {
+            background-color: #f2f2f2;
+        }
+
+        .tauschmarkt {
+            color: #004d40;
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .table th, .table td {
+                padding: 6px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header, .footer, .content {
+                text-align: left;
+            }
+
+            .table th, .table td {
+                padding: 4px;
+            }
+
+            .table th, .table td {
+                font-size: 14px;
+            }
+
+            .table {
+                font-size: 12px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -39,7 +105,7 @@
         <div class="content">
             <p><strong>Bestellungsnummer:</strong> {{ $order->id }}</p>
             <p><strong>Datum:</strong> {{ $order->created_at->format('Y-m-d') }}</p>
-            <p><strong>Gesamt Preis:</strong> CHF {{ number_format($order->total_price, 2) }}</p>
+            <p><strong>Gesamt Preis:</strong>  {{ number_format($order->total_price, 2) }} CHF</p>
             <table class="table">
                 <thead>
                     <tr>
@@ -54,8 +120,8 @@
                     <tr>
                         <td>{{ $item['name'] }}</td>
                         <td>{{ $item['quantity'] }}</td>
-                        <td>CHF {{ number_format($item['price'], 2) }}</td>
-                        <td>CHF {{ number_format($item['quantity'] * $item['price'], 2) }}</td>
+                        <td> {{ number_format($item['price'], 2) }} CHF</td>
+                        <td> {{ number_format($item['quantity'] * $item['price'], 2)}} CHF</td>
                     </tr>
                     @endforeach
                 </tbody>

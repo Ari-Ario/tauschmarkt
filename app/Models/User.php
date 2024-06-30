@@ -29,6 +29,8 @@ class User extends Authenticatable
         'city',
         'payment',
         'stripe_account_id',
+        'opening',
+        'closing',
         'latitude',
         'longitude',
     ];

@@ -109,7 +109,7 @@ const getProfilePicture = (path) => {
 </script>
 
 <template>
-    <div>
+    <div class="enterprises">
         <h1 style="text-align: center; color:#004d40;">Tauschmarkt</h1>
 
         <Disclosure as="div" class="border-b border-gray-200 py-6" v-slot="{ open }">
@@ -136,7 +136,7 @@ const getProfilePicture = (path) => {
         <div class="card" v-for="enterprise in filteredEnterprises" :key="enterprise.id">
             <div class="Photo">
                 <img class="Photo" :src="getEnterprisePicture(enterprise.enterprise_picture)" alt="" />
-                <div v-if="store?.authUser?.is_seller" class="favorite" @click="addOrRemoveFavorites(enterprise)">
+                <div v-if="!store?.authUser?.is_seller" class="favorite" @click="addOrRemoveFavorites(enterprise)">
                     <svg v-if="enterprise.is_favorite" xmlns="http://www.w3.org/2000/svg" fill="red" viewBox="0 0 24 24" width="24px" height="24px"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                     <svg v-else xmlns="http://www.w3.org/2000/svg" fill="green" viewBox="0 0 24 24" width="24px" height="24px"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
                 </div>
@@ -321,6 +321,9 @@ p {
 
 /* Responsive styles for card*/
 @media only screen and (max-width: 600px) {
+  .enterprises {
+    margin-bottom: 45px;
+  }
     .card {
         width: 90%;
         height: fit-content;
@@ -338,6 +341,12 @@ p {
 
     .border-b {
         margin: 0 24px 0 24px;
+    }
+    .user-name {
+      display: none;
+    }
+    .category-label , .enterprise-btn {
+      font-size: smaller;
     }
 }
 

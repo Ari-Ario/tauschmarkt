@@ -143,12 +143,6 @@ const remove = (product) => {
 
 const stripePromise = loadStripe(String(import.meta.env.STRIPE_KEY));
 
-function validateCartItems() {
-
-
-
-}
-
 async function submit() {
     //console.log( )
     const items = cartItems.value;
@@ -185,8 +179,8 @@ async function submit() {
         // address: form
     })
     .then(response => {
+        // console.log(response.data)
         if (response.data.url) {
-            // console.log(response.data.url)
             // router.push('/')
             window.location.href = response.data.url;
         }

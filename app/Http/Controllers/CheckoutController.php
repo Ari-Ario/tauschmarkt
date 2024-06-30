@@ -27,6 +27,7 @@ class CheckoutController extends Controller
     {
         $user = $request->user();
         $carts = $request->carts;
+        // return($carts);
         // Save carts in the cookies with name 'items'
         Cookie::queue('items', json_encode($carts), 60*24*30);
         $products = $request->products;
@@ -141,9 +142,13 @@ class CheckoutController extends Controller
             $order->seller_id = $sellerId;
             $order->save();
 
-            // $cartItems = CartItem::where(['user_id' => '1'])->get();
-
             foreach ($carts as $cartItem) {
+                OrderItem::create([
+                    'order_id' => $order->id, // ID of the newly created order
+                    'product_id' => $cartItem['id'],
+                    'quantity' => $cartItem['quantity'],
+                    'unit_price' => $cartItem['price'], 
+                ]);
 
                 // Update product quantity
                 $product = Product::findOrFail($cartItem['id']);
