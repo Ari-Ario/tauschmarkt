@@ -1,7 +1,7 @@
 <script setup>
 import FooterSeller from '../../components/footer/FooterSeller.vue';
 import { storeToRefs } from 'pinia';
-import { reactive, ref, onMounted } from 'vue';
+import { reactive, ref, onMounted, watch } from 'vue';
 import { authClient } from "@/services/AuthService";
 import { useAuthStore } from '@/stores/AuthStore';
 import axios from 'axios';
@@ -49,10 +49,15 @@ const product = ref({
     photo: null,
     published: false,
     inStock: false,
-    quantity: null
+    quantity: null,
+    mass_unit:''
 });
 const priceUnit = ref('perGram');
 const selectedCategory = ref('');
+const setMassUnit = (unit) => {
+      product.value.mass_unit = unit;
+      return unit;
+    };
 
 // Open form
 function openForm(category, CategoryId) {
@@ -104,7 +109,7 @@ const saveProduct = async () => {
     formData.append('published', true);
     formData.append('inStock', true);
     formData.append('quantity', product.value.quantity);
-
+    formData.append('mass_unit', product.value.mass_unit);
 
     if (priceUnit.value === 'perGram') {
       formData.append('amount', product.value.Grams);
@@ -117,7 +122,7 @@ const saveProduct = async () => {
     if (product.value.photo) {
       formData.append('product_picture', product.value.photo);
     }
-    // console.log(product.value);
+    console.log(product.value);
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
     const response = await authClient.post('/product/add', formData);
@@ -130,10 +135,18 @@ const saveProduct = async () => {
             icon: 'success',
             position: 'top-end',
             showConfirmButton: false,
+            timer: 3000,
             title: 'Produkt wurde hizugefügt!',
         });
   } catch (error) {
     console.error('Error adding product:', error);
+    Swal.fire({
+          toast: true,
+          icon: 'error',
+          position: 'top-end',
+          showConfirmButton: false,
+          title: 'Ups. Fehler, versuchen Sie wieder!'
+      });
   }
 };
 
@@ -187,17 +200,20 @@ const saveProduct = async () => {
                   <input type="number" v-model.number="product.Grams"  class="form-input" required />
                 </div>
                 <div class="form-group" v-if="priceUnit === 'perKilogram'">
-                  <label for="unit-price">Quantität (Kilograms)</label>
+                  <label for="unit-price">Quantität (in Kilograms)</label>
                   <input type="number" name="qty" id="floating_qty" v-model.number="product.quantity" class="form-input" required />
+                  <input type="hidden" :value="setMassUnit('KG')" />
                 </div>
                 <div class="form-group" v-else-if="priceUnit === 'perUnit'">
-                  <label for="unit-price">Quantität (Stuck)</label>
+                  <label for="unit-price">Quantität (in Stuck)</label>
                   <input type="number" name="qty" id="floating_qty" v-model.number="product.quantity" class="form-input" required />
+                  <input type="hidden" :value="setMassUnit('Stuck')" />
                 </div>
 
                 <div class="form-group" v-else>
-                  <label for="unit-price">Quantität (Einheit)</label>
+                  <label for="unit-price">Quantität (zahl der Einheiten)</label>
                   <input type="number" name="qty" id="floating_qty" v-model.number="product.quantity" class="form-input" required />
+                  <input type="hidden" :value="setMassUnit('Grams')" />
                 </div>
 
                 <div class="form-group">

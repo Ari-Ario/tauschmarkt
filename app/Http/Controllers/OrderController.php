@@ -159,6 +159,17 @@ class OrderController extends Controller
         return response()->json(['pdfUrl' => $pdfUrl]);
     }
 
+    public function getOrderCountByUser($user_id)
+    {
+        // Count the number of orders for the user
+        $orderCount = Order::where('seller_id', $user_id)->count();
+
+        return response()->json([
+            'orderCount' => $orderCount
+        ]);
+    }
+
+
     /**
      * Show the form for creating a new resource.
      */

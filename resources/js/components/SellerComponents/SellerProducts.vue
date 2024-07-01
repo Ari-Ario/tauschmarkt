@@ -244,10 +244,14 @@ onMounted(() => {
 <template>
   <div class="product-list">
     <div v-for="product in products" :key="product.id" class="product-card">
-      <div class="product-info">
+      <div class="product-info" v-if="product.quantity >= 1">
         <p>{{ product.name }}</p>
         <p>Quantität: {{ product.quantity }}</p>
       </div>
+      <div class="product-info" v-if="product.quantity < 1" style="background-color: red; opacity: 0.7;">
+        <h1>Aktualisieren Sie den Produkt!</h1>
+      </div>
+
       <img :src="getProductImage(product)" alt="Product Image" class="product-image" />
       <div class="product-actions">
         <button class="product-buttons" @click="openEditPopup(product)">

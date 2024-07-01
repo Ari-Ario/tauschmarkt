@@ -247,8 +247,10 @@ const updateRating = (star) => {
             <div v-for="product in filteredProducts" :key="product.id" class="product-card">
               <div class="product-info">
                 <p>{{ product.name }}</p>
-                <p>Quantität: {{ product.quantity }}</p>
-                <p>Preis: {{ product.price }}</p>
+                <p>{{ product.quantity }} übrig</p>
+                <p v-if="product.amount">{{ product.price }}CHF /{{ product.amount }}{{ product.mass_unit }} </p>
+                <p v-else>{{ product.price }}CHF /{{ product.mass_unit }} </p>
+
               </div>
               <img :src="getProductImage(product)" alt="Product Image" class="product-image" />
               <div class="product-actions">

@@ -2,51 +2,64 @@
 import { ref, onMounted } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAuthStore } from '../../stores/AuthStore';
+import axios from 'axios';
 
 // Fetch user profile data on mount
-const store = storeToRefs(useAuthStore());
-const sellerId = store?.authUser?.value.id;
-const products = ref([]);
-const categories = ref([]);
+const store = useAuthStore();
+const { authUser } = storeToRefs(store);
+const sellerId = authUser?.value.id;
+const productReviews = ref([]);
+const averageRating = ref(null);
+const orderCount = ref(0);
 
 const statistics = ref({
   totalSales: 500,
   positiveReviews: 95,
-  totalProducts: 20
+  totalProductReview: 20
 });
 
-const fetchProduct = async () => {
-  // console.log(sellerId);
-
-    try {
-        const response = await axios.get(`/api/product/${sellerId}`);
-        // categories.value = response.data.categories;
-        products.value = response.data.products.data;
-        console.log(products.value)
-        // console.log(categories.value)
-
-    } catch (error) {
-        console.error('Failed to fetch Product:', error);
-    }
+const fetchProductReviews = async () => {
+  try {
+    const response = await axios.get(`/api/productreview/${sellerId}`);
+    productReviews.value = response.data;
+    // orderCount.value = response.data.orderCount;
+    // console.log(productReviews.value)
+  } catch (error) {
+    console.error('Failed to fetch product reviews:', error);
+  }
 };
+
+const fetchOrderCount = async () => {
+  try {
+    const response = await axios.get(`/api/order/average-rating/${sellerId}`);
+    orderCount.value = response.data;
+    console.log(orderCount.value)
+
+  } catch (error) {
+    console.error('Failed to fetch average rating:', error);
+  }
+};
+
 onMounted(() => {
-    fetchProduct();
+  fetchProductReviews();
+  fetchOrderCount();
 });
 </script>
+
 
 <template>
   <div class="seller-statistics">
     <div class="stat">
-      <h4>Total Sales</h4>
-      <p>{{ statistics.totalSales }}</p>
+      <h4>Gesamte Verkafe</h4>
+      <p>{{ orderCount.orderCount }}</p>
     </div>
     <div class="stat">
-      <h4>Positive Reviews</h4>
-      <p>{{ statistics.positiveReviews }}%</p>
+      <h4>Bewertung der Produkte</h4>
+      <p>{{ productReviews.averageRating }}%</p>
     </div>
     <div class="stat">
-      <h4>Total Products</h4>
-      <p>{{ statistics.totalProducts }}</p>
+      <h4>Alle Bewertungen</h4>
+      <p>{{  productReviews.allProducts}}</p>
     </div>
   </div>
 </template>

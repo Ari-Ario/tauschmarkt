@@ -73,6 +73,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     //Post a review 
     Route::post('/product-review', [ProductReviewController::class, 'store']);
     Route::delete('/product-review/{productReview}', [ProductReviewController::class, 'destroy']);
+    // Statistics
+    Route::get('/productreview/{seller_id}', [ProductReviewController::class, 'getProductReviewsBySeller']);
+    Route::get('/order/average-rating/{user_id}', [OrderController::class, 'getOrderCountByUser']);
 
 });
 

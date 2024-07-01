@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ProductReview;
+use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,6 +25,25 @@ class ProductReviewController extends Controller
     public function create()
     {
         //
+    }
+
+    public function getProductReviewsBySeller($seller_id)
+    {
+        // Fetch all products by seller ID
+        $products = Product::where('seller_id', $seller_id)->get();
+
+        // Extract product IDs
+        $productIds = $products->pluck('id');
+
+        // Fetch product reviews for the products by product IDs
+        $fetchProducts = ProductReview::whereIn('product_id', $productIds)->get();
+        $allProducts = $fetchProducts->count();
+        $averageRating = $fetchProducts->average('rating');
+
+        return response()->json([
+            'allProducts' => $allProducts,
+            'averageRating' => $averageRating
+        ]);
     }
 
     /**

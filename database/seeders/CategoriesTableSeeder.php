@@ -18,7 +18,7 @@ class CategoriesTableSeeder extends Seeder
             ['name' => 'Milchprodukte', 'description' => ''],
             ['name' => 'Vollkornprodukte', 'description' => ''],
             ['name' => 'Honigprodukte', 'description' => ''],
-            ['name' => 'Fleisch & Geflügel', 'description' => ''],
+            ['name' => 'Fleisch & Fisch', 'description' => ''],
             ['name' => 'Getränke und Wein', 'description' => ''],
             ['name' => 'Blumen & Gärtnerei', 'description' => ''],
             ['name' => 'Überraschungspäckli', 'description' => ''],

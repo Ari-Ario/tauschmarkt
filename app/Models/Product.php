@@ -17,6 +17,7 @@ class Product extends Model
         'description',
         'amount',
         'price',
+        'mass_unit'
         // 'published',
         // 'product_picture',
         // 'deleted_by',

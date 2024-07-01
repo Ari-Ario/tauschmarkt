@@ -19,10 +19,10 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->boolean('published')->default(0);
             $table->boolean('inStock')->default(0);
-            $table->decimal('amount', 10, 2);
+            $table->integer('amount')->nullable();
             $table->integer('quantity')->nullable();
             $table->decimal('price', 10, 2);
-            // $table->string('product_picture')->nullable();
+            $table->string('mass_unit')->nullable();
             $table->foreignId('category_id')->constrained()->onDelete('cascade');
             $table->foreignId('seller_id')->constrained('users')->onDelete('cascade');
 

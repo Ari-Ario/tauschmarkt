@@ -56,6 +56,8 @@ class ProductController extends Controller
             'price' => 'nullable|numeric',
             'product_picture' => 'nullable|image|max:2048',
             'published' => 'nullable',
+            'mass_unit' => 'required|string',
+
             // 'inStock' => 'nullable',
             // 'quantity' => 'nullable',
             // 'amount' => 'nullable',
@@ -74,7 +76,7 @@ class ProductController extends Controller
         $product->price = $request->price;
         $product->amount = $request->amount;
         $product->quantity = $request->quantity;
-
+        $product->mass_unit = $request->mass_unit;
         $product->save();
         
         try {
