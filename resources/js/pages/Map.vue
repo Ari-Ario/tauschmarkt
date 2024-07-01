@@ -47,12 +47,7 @@ const updateCircle = () => {
 const updateBackend = async () => {
   const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
   try {
-    const response = await axios.put(`/api/user/update-location`, location.value, {
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRF-TOKEN': csrfToken,
-      },
-    });
+    const response = await axios.put(`/api/user/update-location`, location.value);
     console.log('Location updated:', response.data);
   } catch (error) {
     console.error('Error updating profile:', error);

@@ -1,10 +1,36 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
+import { storeToRefs } from 'pinia';
+import { useAuthStore } from '../../stores/AuthStore';
+
+// Fetch user profile data on mount
+const store = storeToRefs(useAuthStore());
+const sellerId = store?.authUser?.value.id;
+const products = ref([]);
+const categories = ref([]);
 
 const statistics = ref({
   totalSales: 500,
   positiveReviews: 95,
   totalProducts: 20
+});
+
+const fetchProduct = async () => {
+  // console.log(sellerId);
+
+    try {
+        const response = await axios.get(`/api/product/${sellerId}`);
+        // categories.value = response.data.categories;
+        products.value = response.data.products.data;
+        console.log(products.value)
+        // console.log(categories.value)
+
+    } catch (error) {
+        console.error('Failed to fetch Product:', error);
+    }
+};
+onMounted(() => {
+    fetchProduct();
 });
 </script>
 
