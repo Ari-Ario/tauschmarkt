@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeMount } from 'vue';
 import { storeToRefs } from 'pinia';
 import { useAuthStore } from '../../stores/AuthStore';
 import axios from 'axios';
@@ -12,18 +12,12 @@ const productReviews = ref([]);
 const averageRating = ref(null);
 const orderCount = ref(0);
 
-const statistics = ref({
-  totalSales: 500,
-  positiveReviews: 95,
-  totalProductReview: 20
-});
-
 const fetchProductReviews = async () => {
   try {
     const response = await axios.get(`/api/productreview/${sellerId}`);
     productReviews.value = response.data;
-    // orderCount.value = response.data.orderCount;
-    // console.log(productReviews.value)
+    averageRating.value = productReviews.value.averageRating.toString().slice(0, 4)
+    // console.log(averageRating.value)
   } catch (error) {
     console.error('Failed to fetch product reviews:', error);
   }
@@ -33,33 +27,41 @@ const fetchOrderCount = async () => {
   try {
     const response = await axios.get(`/api/order/average-rating/${sellerId}`);
     orderCount.value = response.data;
-    console.log(orderCount.value)
+    // console.log(orderCount.value)
 
   } catch (error) {
     console.error('Failed to fetch average rating:', error);
   }
 };
 
-onMounted(() => {
+onBeforeMount(() => {
   fetchProductReviews();
   fetchOrderCount();
 });
+
+const twoDecimals= (value) => {
+  return value.toString().slice(0, 4)
+}
+
 </script>
 
 
 <template>
   <div class="seller-statistics">
     <div class="stat">
-      <h4>Gesamte Verkafe</h4>
+      <h4>Gesamte Verkäufe</h4>
       <p>{{ orderCount.orderCount }}</p>
     </div>
     <div class="stat">
-      <h4>Bewertung der Produkte</h4>
-      <p>{{ productReviews.averageRating }}%</p>
+      <h4>Durchschnitliche Bewertung </h4>
+      <p> {{ averageRating }} </p>
+      <div class="stars">
+        <span v-for="star in 5" :key="star" class="star" :class="{ filled: star <= productReviews.averageRating }">&#9733;</span>
+      </div>
     </div>
     <div class="stat">
-      <h4>Alle Bewertungen</h4>
-      <p>{{  productReviews.allProducts}}</p>
+      <h4> Gesamte Bewertungen </h4>
+      <p>{{  productReviews.allProducts }}</p>
     </div>
   </div>
 </template>
@@ -74,7 +76,30 @@ onMounted(() => {
   text-align: center;
   background-color: #f0f0f0;
   padding: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.272);
   border-radius: 10px;
   width: 30%;
+}
+
+.stars {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  /* border: 1px solid black; */
+}
+
+.star {
+  font-size: 24px;
+  color: #ccc;
+  cursor: pointer;
+}
+.star-rating {
+  font-size: 48px;
+
+}
+
+.star.filled {
+  color: #ffb400;
 }
 </style>

@@ -24,6 +24,18 @@ app.config.globalProperties.$axios = axios;
 app.use(createPinia());
 const store = useAuthStore();
 
+// Set up Axios interceptor
+axios.interceptors.response.use(
+  response => response,
+  async error => {
+    if (error.response && error.response.status === 401) {
+      // Token has expired or user is not authenticated
+      await store.logout();
+      router.push('/');
+    }
+    return Promise.reject(error);
+  }
+);
 
 const router = createRouter({
     history: createWebHistory(),

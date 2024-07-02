@@ -312,12 +312,17 @@ const updateRating = (star) => {
                     <div v-for="review in reviews" :key="review.id" class="comment">
                       <div class="comment-part">
                         <p><strong>{{ review.user.firstname }}:</strong> {{ review.comment }}</p>
-                        <p>Bewertung: {{ review.rating }}</p>
-                        <!-- <p> {{ review }}</p> -->
+                        <p style="text-align: left;">Bewertung: {{ review.rating }} </p>
+                          <!-- <div class="stars">
+                            <span v-for="star in 5" :key="star" class="star" :class="{ filled: star <= review.rating }" @click="updateRating(star)">
+                              &#9733;
+                            </span>
+                          </div> -->
                       </div>
-                      <div class="bin" v-if="review.user.id === store.authUser.id" @click="deleteComment(review)">
-                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#EA3323"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>                    </div>
-                    </div>
+                        <div class="bin" v-if="review.user_id && store.authUser" @click="deleteComment(review)">
+                          <svg v-if="review.user_id == store.authUser.id" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#EA3323"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>                    </div>
+                        </div> 
+
                     </div>
                 </div>
               </div>

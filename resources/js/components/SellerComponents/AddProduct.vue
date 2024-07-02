@@ -6,7 +6,7 @@ import { authClient } from "@/services/AuthService";
 import { useAuthStore } from '@/stores/AuthStore';
 import axios from 'axios';
 import Swal from 'sweetalert2';
-
+import { WebCamUI } from 'vue-camera-lib';
 import {useRouter} from 'vue-router';
 
 const router = useRouter();
@@ -122,12 +122,12 @@ const saveProduct = async () => {
     if (product.value.photo) {
       formData.append('product_picture', product.value.photo);
     }
-    console.log(product.value);
+    // console.log(product.value);
     const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
     const response = await authClient.post('/product/add', formData);
 
-    console.log('Product added successfully:', response.data);
+    // console.log('Product added successfully:', response.data);
     selectedCategories.value.add(product.value.name);
     closeForm();
     Swal.fire({
@@ -150,6 +150,32 @@ const saveProduct = async () => {
   }
 };
 
+const webCamVisible = ref(false); // Control the visibility of WebCamUI
+
+const showWebCam = () => {
+  webCamVisible.value = !webCamVisible.value;
+};
+const hideWebCam = () => {
+  webCamVisible.value = false;
+};
+
+const photoTaken = (data) => {
+  console.log('image blob: ', data.blob);
+  console.log('image data url', data.image_data_url);
+
+  // Create a new File object from the blob to simulate a file upload event
+  const file = new File([data.blob], 'photo.jpg', { type: 'image/jpeg' });
+
+  // Create a fake event to pass to handleFileUpload
+  const fakeEvent = {
+    target: {
+      files: [file],
+    },
+  };
+
+  handleFileUpload(fakeEvent);
+  webCamVisible.value = false; // Hide the WebCamUI after taking the photo
+};
 </script>
 
 <template>
@@ -181,10 +207,29 @@ const saveProduct = async () => {
                   <textarea v-model="product.description"  class="form-input" required></textarea>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" style="display: flex;">
                   <label for="photo">Foto von Ware</label>
                   <input type="file" @change="handleFileUpload" ref="backgroundImageInput"  class="form-input" accept="image/*" capture="environment" />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    height="24px"
+                    viewBox="0 -960 960 960"
+                    width="24px"
+                    fill="#298E46"
+                    @click="showWebCam"
+                    style="cursor: pointer;"
+                  >
+                    <path
+                      d="M440-440ZM120-120q-33 0-56.5-23.5T40-200v-480q0-33 23.5-56.5T120-760h126l74-80h240v80H355l-73 80H120v480h640v-360h80v360q0 33-23.5 56.5T760-120H120Zm640-560v-80h-80v-80h80v-80h80v80h80v80h-80v80h-80ZM440-260q75 0 127.5-52.5T620-440q0-75-52.5-127.5T440-620q-75 0-127.5 52.5T260-440q0 75 52.5 127.5T440-260Zm0-80q-42 0-71-29t-29-71q0-42 29-71t71-29q42 0 71 29t29 71q0 42-29 71t-71 29Z"
+                    />
+                  </svg>
                 </div>
+                <WebCamUI
+                  v-if="webCamVisible"
+                  :fullscreenState="false"
+                  @photoTaken="photoTaken"
+                  ref="webCam"
+                />
 
                 <div class="form-group">
                   <label for="price-unit">Prise Einheit</label>

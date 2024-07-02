@@ -6,7 +6,7 @@ import AuthService from "@/services/AuthService";
 export const useAuthStore = defineStore('AuthStore', {
   
   state: () => {
-    id: "user"
+    // id: "user"
     return {
         user: JSON.parse(localStorage.getItem("user")),
     }
@@ -34,6 +34,7 @@ export const useAuthStore = defineStore('AuthStore', {
     async logout(){
       return AuthService.logout().then(() => {
         this.user = null;
+        localStorage.removeItem("user");
       });
     }
 
