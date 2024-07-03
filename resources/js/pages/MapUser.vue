@@ -15,6 +15,9 @@ const city = ref('');
 const mapRef = ref(null); // Reference to the Google Map instance
 const enterprises = ref([]);
 
+// Fetch the API key from the environment variables
+const apiKey = import.meta.env.VUE_APP_GOOGLE_MAP_API_KEY;
+
 const circleOptions = ref({
   center: center.value,
   radius: radius.value * 1000, // Convert km to meters
@@ -194,7 +197,7 @@ const goToEnterprises = () => {
 
   <div class="map-container">
     <GoogleMap
-      api-key="AIzaSyDVsZaS67NSKA-13blSRq7X0vvfhdlKX2Y"
+      :api-key="apiKey"
       :center="center"
       :zoom="10"
       style="width: 100%; height: 100%"

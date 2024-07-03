@@ -45,7 +45,7 @@ class CheckoutController extends Controller
         }
     
         // Stripe payment
-        $stripe = new \Stripe\StripeClient('sk_test_51PRVFGCFV0u7TeyeT35q849Bj5Z20yEOr2EoFcRvJyW7ELi7BmxiDfzPhcggYibOAqCIoal1J0vuHX0iJ3RVVFnL00o4IPXSbH');
+        $stripe = new \Stripe\StripeClient(config('services.stripe.secret'));
         $lineItems = [];
         foreach ($mergedData as $item) {
             $lineItems[] = [
@@ -177,7 +177,7 @@ class CheckoutController extends Controller
 
     public function success(Request $request)
     {
-        \Stripe\Stripe::setApiKey('sk_test_51PRVFGCFV0u7TeyeT35q849Bj5Z20yEOr2EoFcRvJyW7ELi7BmxiDfzPhcggYibOAqCIoal1J0vuHX0iJ3RVVFnL00o4IPXSbH');
+        \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
         $sessionId = $request->get('session_id');
         $user = $request->user();
 
