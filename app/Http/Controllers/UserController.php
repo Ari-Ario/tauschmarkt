@@ -188,7 +188,6 @@ class UserController extends Controller
                 'enterprise_picture' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             ]);
             $user = auth()->user();
-
             $oldImage = $user->enterprise_picture;
             // $oldImagePath->delete();
 
