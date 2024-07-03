@@ -107,7 +107,7 @@ class OrderController extends Controller
         }
 
         // Set your Stripe secret key
-        $stripe = new StripeClient('sk_test_51PRVFGCFV0u7TeyeT35q849Bj5Z20yEOr2EoFcRvJyW7ELi7BmxiDfzPhcggYibOAqCIoal1J0vuHX0iJ3RVVFnL00o4IPXSbH');
+        $stripe = new StripeClient(config('services.stripe.secret'));
 
         try {
             $transfer = $stripe->transfers->create([

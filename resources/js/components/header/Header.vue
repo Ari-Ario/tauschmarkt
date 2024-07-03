@@ -124,15 +124,12 @@ const toggleModal = () => {
 
             <div v-else class="">
                 <ul class="menu-login">
-
                     <li v-if="store?.authUser" id="logout">
                         <div>
                             <LogoutButton>Abmelden</LogoutButton>
                         </div>
-
                     </li>
                 </ul>
-
             </div>
 
         </div>
