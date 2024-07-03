@@ -234,7 +234,7 @@ onMounted(() => {
 
 .profile-camera-icons {
   bottom: 10px;
-  right: 10px;
+  right: 0px;
 }
 
 .camera-icon + .camera-icon {

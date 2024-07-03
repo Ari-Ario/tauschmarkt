@@ -14,8 +14,19 @@ const user = ref({
     password : ''
 });
 
+const validateEmail = () => {
+    const re = /^(([^<>()\[\]\\.,;:\s@"]+(.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if (!re.test(user.value.email)) {
+        alert('Bitte geben Sie eine gültige E-Mail-Adresse ein.');
+        return false;
+    }
+    return true;
+};
 
 const login = async() => {
+    if (!validateEmail()) {
+        return;
+    }
 
     try {
 
@@ -40,7 +51,7 @@ const login = async() => {
     <Header/>
     <!-- Form for login -->
     <div class="form-container">
-        <form @submit.prevent="login" class="login-form">
+        <form @submit.prevent="login" class="login-form" action="POST">
             <div>
                 <router-link to="/">
                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="M400-80 0-480l400-400 71 71-329 329 329 329-71 71Z"/></svg>
