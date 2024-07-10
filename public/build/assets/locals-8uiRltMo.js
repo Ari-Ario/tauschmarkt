@@ -1,0 +1,1 @@
+import{r as s}from"./app-DriULaIE.js";const a=s({latitude:47.37633235605227,longitude:8.540486878401508}),o=s(20),i=(t,e)=>{a.value.latitude=t,a.value.longitude=e},l=t=>{o.value=t};export{l as a,o as d,a as l,i as s};
