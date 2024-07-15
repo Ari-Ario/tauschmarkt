@@ -185,7 +185,7 @@ class UserController extends Controller
         public function updateBackgroundImage(Request $request)
         {
             $request->validate([
-                'enterprise_picture' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+                'enterprise_picture' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp,bmp,tiff|max:10240',
             ]);
             $user = auth()->user();
             $oldImage = $user->enterprise_picture;
@@ -212,7 +212,7 @@ class UserController extends Controller
         public function updateProfileImage(Request $request)
         {
             $request->validate([
-                'profile_picture' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+                'profile_picture' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp,bmp,tiff|max:10240',
             ]);
             $user = auth()->user();
             $oldImage = $user->profile_picture;
