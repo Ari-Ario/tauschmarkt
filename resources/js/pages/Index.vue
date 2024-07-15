@@ -3,6 +3,7 @@ import { ref, onBeforeMount, defineProps } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import Header from '../components/header/Header.vue';
+import FooterUser from '../components/footer/FooterUser.vue';
 import { useRouter } from 'vue-router';
 import { useCart } from '../store'; // Adjust the path as needed
 import { useAuthStore } from '@/stores/AuthStore';
@@ -331,6 +332,9 @@ const updateRating = (star) => {
         </div>
 
     </main>
+  </div>
+  <div class="footer">
+      <FooterUser />
   </div>
 </template>
 

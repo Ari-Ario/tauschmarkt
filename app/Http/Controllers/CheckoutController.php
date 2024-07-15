@@ -211,9 +211,27 @@ class CheckoutController extends Controller
             // Generate PDF for guest user
             $pdf = Pdf::loadView('pdf.bill', ['order' => $order, 'items' => $cartItems]);
             $pdfPath = 'bills/bill_' . $order->id . '.pdf';
-            Storage::put('public/' . $pdfPath, $pdf->output());
+            
+            // Check if PDF output is correctly generated
+            $pdfOutput = $pdf->output();
+            \Log::info('PDF Output Length: ' . strlen($pdfOutput));
+
+            // Ensure storage path exists and is writable
+            if (!Storage::exists('public/bills')) {
+                Storage::makeDirectory('public/bills');
+            }
+
+            // Save the PDF to storage
+            Storage::put('public/' . $pdfPath, $pdfOutput);
+            \Log::info('PDF stored at: ' . 'public/' . $pdfPath);
+
+            // Check if PDF was successfully saved
+            if (!Storage::exists('public/' . $pdfPath)) {
+                throw new \Exception('Failed to save PDF to storage');
+            }
 
             $pdfUrl = Storage::url($pdfPath);
+            \Log::info('PDF URL: ' . $pdfUrl);
 
             return redirect($pdfUrl);
             }

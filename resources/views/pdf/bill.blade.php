@@ -99,7 +99,7 @@
                 </svg>
             </div>
 
-            <h1 class="tauschmarkt">Tauschmarkt</h1>
+            <h1 class="tauschmarkt">Kleinhaendler</h1>
             <h1>Rechnung</h1>
         </div>
         <div class="content">
