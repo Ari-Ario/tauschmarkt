@@ -172,14 +172,15 @@ onMounted(() => {
 
 <template>
   <div class="seller-profile">
-    <input type="file" ref="profileImageInput" @change="onProfileImageChange" style="display: none;" />
-    <input type="file" ref="backgroundImageInput" @change="onBackgroundImageChange" style="display: none;" />
+    <input type="file" ref="profileImageInput" @change="onProfileImageChange" accept="image/*" capture="environment"  style="visibility: hidden; position: absolute;" />
+    <input type="file" ref="backgroundImageInput" @change="onBackgroundImageChange" accept="image/*" capture="environment"  style="visibility: hidden; position: absolute;" />
 
     <div class="background-container">
       <WebCamUI v-if="webCamVisible" :fullscreenState="false" @photoTaken="photoTaken" ref="webCam" class="webCam" />
       <img :src="seller.enterprise_picture || defaultImage" alt="Background Image" class="background-image" />
 
       <div class="camera-icons bg-camera-icons">
+
         <div class="camera-icon bg-camera" @click="changeBackgroundImage">
           <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="M160-80v-80h640v80H160Zm200-160v-280H200l280-360 280 360H600v280H360Zm80-80h80v-280h76L480-750 364-600h76v280Zm40-280Z"/></svg>
         </div>

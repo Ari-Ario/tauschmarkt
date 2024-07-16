@@ -211,15 +211,15 @@ const triggerFileInput = () => {
                   <textarea v-model="product.description"  class="form-input" required></textarea>
                 </div>
 
+                <label for="photo">Foto von Ware</label>
                 <div class="form-group" style="display: flex;">
-                  <label for="photo">Foto von Ware</label>
-                  <input type="file" @change="handleFileUpload" ref="backgroundImageInput"  class="form-input" accept="image/*" capture="environment" />
+                  <input type="file" @change="handleFileUpload" ref="backgroundImageInput"  class="form-input" accept="image/*" capture="environment" style="position: absolute;" />
                   
-                  <!-- <div class="form-input file-input-container" @click="triggerFileInput">
+                  <div class="form-input file-input-container" @click="triggerFileInput">
                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46">
                       <path d="M160-80v-80h640v80H160Zm200-160v-280H200l280-360 280 360H600v280H360Zm80-80h80v-280h76L480-750 364-600h76v280Zm40-280Z"/>
                     </svg>
-                  </div> -->
+                  </div>
 
                   <div class="camera-icon bg-camera cam" @click="showWebCam" style="cursor: pointer;">
                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46">
