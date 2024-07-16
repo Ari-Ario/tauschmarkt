@@ -54,7 +54,7 @@ class ProductController extends Controller
             'seller_id' => 'required|integer|exists:users,id',
             'description' => 'nullable|string',
             'price' => 'nullable|numeric',
-            'product_picture' => 'nullable|image|max:10240', // 10 MB
+            'product_picture' => 'nullable|image|max:20480', // 20 MB
             'published' => 'nullable',
             'mass_unit' => 'required|string',
 
@@ -173,7 +173,7 @@ class ProductController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'price' => 'nullable|numeric',
-            'product_images.*' => 'nullable|image|max:10240', // 10 MB
+            'product_images.*' => 'nullable|image|max:20480', // 20 MB
             'quantity' => 'nullable|integer',
         ]);
     
