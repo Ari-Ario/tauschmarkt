@@ -29,7 +29,7 @@ const fetchProduct = async () => {
         const response = await axios.get(`/api/product/${sellerId}`);
         categories.value = response.data.categories;
         products.value = response.data.products.data;
-        // console.log(products.value)
+        console.log(products.value)
         // console.log(categories.value)
 
     } catch (error) {
@@ -244,12 +244,12 @@ onMounted(() => {
 <template>
   <div class="product-list">
     <div v-for="product in products" :key="product.id" class="product-card">
-      <div class="product-info" v-if="product.quantity >= 1">
+      <div class="product-info" v-if="product.quantity > 1">
         <p>{{ product.name }}</p>
         <p>Quantität: {{ product.quantity }}</p>
       </div>
-      <div class="product-info" v-if="product.quantity < 1" style="background-color: red; opacity: 0.7;">
-        <h1>Aktualisieren Sie den Produkt!</h1>
+      <div class="product-info" v-else style="background-color: red; opacity: 0.7;">
+        <h2>Aktualisieren Sie den Produkt! (Quantität: {{ product.quantity }})</h2>
       </div>
 
       <img :src="getProductImage(product)" alt="Product Image" class="product-image" />

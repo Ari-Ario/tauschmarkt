@@ -38,15 +38,16 @@ const addOrRemoveFavorites = async ( enterprise) => {
                 userId: store.authUser.id,
                 isFavorite: enterprise.is_favorite
             });
-            console.log(response);
+            // console.log(response);
         } else {
             let response = await authClient.post("/favorites/remove", {
                 enterpriseId: enterprise.id,
                 userId: store.authUser.id,
                 isFavorite: enterprise.is_favorite
             });
-            console.log(response);
+            // console.log(response);
         }
+        loadFavorites(userId);
 
     } catch (error) {
         console.error("Error adding to favorites:", error);
@@ -69,7 +70,8 @@ const getProfilePicture = (path) => {
 </script>
 
 <template>
-    <div  v-for="enterprise in favorites" :key="favorites.id" class="container">
+
+    <div v-if="favorites" v-for="enterprise in favorites" :key="favorites.id" class="container">
         <div v-if="enterprise.is_seller" class="card">
             <div class="Photo">
                 <img
@@ -96,9 +98,24 @@ const getProfilePicture = (path) => {
                     <p class="published-on description">
                         {{ enterprise.updated_at }}
                     </p>
+                    <div @click="openEnterprise(enterprise.id)" class="enterprise-btn">
+                    <router-link :to="{ name: 'index' , params: { id: enterprise.id } }" customv-slot="{ navigate }">
+                        <div class="link" @click="navigate" role="link">
+                            <div class="link" id="enterpriseButton">
+                                Besuchen
+                            </div>
+                        </div>
+                    </router-link> 
+                    </div>
                 </div>
             </div>
         </div>
+        <div>
+            <FooterUser />
+        </div>
+    </div>
+    <div v-if="!favorites.length" class="container">
+        <h3>Sie haben noch keine Favorites hinzugefügt.</h3>
         <div>
             <FooterUser />
         </div>
@@ -164,9 +181,10 @@ const getProfilePicture = (path) => {
 }
 
 .user-details {
-    width: 350px;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
+
+    /* justify-content: space-between; */
     align-items: center;
 }
 
@@ -175,17 +193,12 @@ p {
 }
 
 
-.button {
-    all: unset;
-    width: fit-content;
-    background: black;
-    border-radius: 50px;
+#enterpriseButton, .btn {
+    border-radius: 5px;
+    background-color:   #004d40;
     color: white;
+    padding: 10px;
     font-weight: bold;
-    font-size: 14px;
-    text-decoration: none;
-    margin-left: 15px;
-    padding: 10px 20px;
 }
 
 /* Responsive styles */

@@ -63,6 +63,18 @@ const props = defineProps({
 const { addToCart } = useCart();
 
 const addToCartHandler = (product) => {
+  if (product.quantity <= 2) {
+    Swal.fire({
+        toast: true,
+        icon: "info",
+        position: "top-end",
+        showConfirmButton: false,
+        title: "Beachten Sie übrige Quantität: ",
+        timer: 6000
+      });
+  } else if ( product.quantity < 1 ) {
+    return;
+  }
   const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
   axios.post(`/api/cart/store/${product.id}`, product, {
     quantity: product.quantity,
@@ -76,7 +88,7 @@ const addToCartHandler = (product) => {
   })
   .then(response => {
     const flash = response.data.flash;
-    if (flash && flash.success) {
+    if (product.quantity > 2 && flash && flash.success) {
       Swal.fire({
         toast: true,
         icon: "success",
@@ -264,7 +276,7 @@ const updateRating = (star) => {
                   <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="m363-390 117-71 117 71-31-133 104-90-137-11-53-126-53 126-137 11 104 90-31 133ZM80-80v-720q0-33 23.5-56.5T160-880h640q33 0 56.5 23.5T880-800v480q0 33-23.5 56.5T800-240H240L80-80Zm126-240h594v-480H160v525l46-45Zm-46 0v-480 480Z"/></svg>                    
                         
                 </button>
-                <button @click="addToCartHandler(product)">
+                <button @click="addToCartHandler(product)" :disabled="product.quantity < 1">
                   <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46">
                     <path d="M240-80q-33 0-56.5-23.5T160-160v-480q0-33 23.5-56.5T240-720h80q0-66 47-113t113-47q66 0 113 47t47 113h80q33 0 56.5 23.5T800-640v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-480h-80v80q0 17-11.5 28.5T600-520q-17 0-28.5-11.5T560-560v-80H400v80q0 17-11.5 28.5T360-520q-17 0-28.5-11.5T320-560v-80h-80v480Zm160-560h160q0-33-23.5-56.5T480-800q-33 0-56.5 23.5T400-720ZM240-160v-480 480Z"/>
                   </svg>                      

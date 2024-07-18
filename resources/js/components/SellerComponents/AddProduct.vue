@@ -23,7 +23,7 @@ const loadCategories = async () => {
       
         const response = await axios.get(`api/categories`);
         categories.value = response.data;
-        console.log(categories)
+        // console.log(categories)
     } catch (error) {
         console.error("Error loading enterprises:", error);
     }
@@ -294,6 +294,7 @@ const triggerFileInput = () => {
   display: flex;
   justify-content: center;
   align-items: center;
+  padding-bottom: 68px;
 }
 .categories-selector {
   max-width: 600px;

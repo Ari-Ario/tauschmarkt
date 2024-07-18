@@ -159,7 +159,7 @@ const loadUser = async () => {
         const response = await axios.get(`/api/user/profile/${sellerId}`);
         seller.value = response.data;
 
-        console.log(seller.value);
+        // console.log(seller.value);
     } catch (error) {
         console.error("Error loading user profile:", error);
     }

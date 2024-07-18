@@ -27,7 +27,7 @@ class ProductController extends Controller
         // Fetch products by seller_id with category and product images relationships
         $products = Product::with('category', 'product_images')
             ->where('seller_id', $id)
-            ->where('quantity', '>=', 1)
+            ->where('quantity', '>=', 0)
             ->paginate(100);
 
         // Fetch all categories

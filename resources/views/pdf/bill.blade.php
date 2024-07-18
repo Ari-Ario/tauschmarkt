@@ -103,15 +103,15 @@
             <h1>Rechnung</h1>
         </div>
         <div class="content">
-            <p><strong>Bestellungsnummer:</strong> {{ $order->id }}</p>
             <p><strong>Datum:</strong> {{ $order->created_at->format('Y-m-d') }}</p>
-            <p><strong>Gesamt Preis:</strong>  {{ number_format($order->total_price, 2) }} CHF</p>
+            <p><strong>Bestellungsnummer:</strong> {{ $order->id }}</p>
+            <p><strong>Einkaufspreis:</strong>  {{ number_format($order->total_price, 2) }} CHF</p>
             <table class="table">
                 <thead>
                     <tr>
                         <th>Produkt</th>
                         <th>Quantität</th>
-                        <th>Preis pro Einheit</th>
+                        <th>Einheitspreis</th>
                         <th>Gesamt</th>
                     </tr>
                 </thead>

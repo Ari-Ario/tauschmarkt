@@ -2,6 +2,7 @@
 <script setup>
 import FooterUser from '../components/footer/FooterUser.vue';
 import FooterSeller from '../components/footer/FooterSeller.vue';
+import Header from '../components/header/Header.vue';
 
 import { useAuthStore } from '../stores/AuthStore';
 // import authClient from "@/services/AuthService";
@@ -58,7 +59,7 @@ const loadSeller = async () => {
           latitude: data.latitude,
           longitude: data.longitude,
         };
-        console.log(data);
+        // console.log(data);
     } catch (error) {
         console.error("Error loading blogs:", error);
     }
@@ -117,7 +118,7 @@ const saveChanges = async () => {
           value,
         ])
       );
-      console.log(payload);
+      // console.log(payload);
       
       // Save changes to the server using Laravel Fortify's API
       try {
@@ -148,6 +149,9 @@ const formatTime = (time) => {
 </script>
 
 <template>
+        <header>
+        <Header />
+      </header>
   <div class="container">
     <div class="profile-page">
 
@@ -217,6 +221,7 @@ const formatTime = (time) => {
 display: flex;
 justify-content: center;
 align-items: center;
+padding-bottom: 68px;
 }
 
 .profile-page {
