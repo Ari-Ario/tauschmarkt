@@ -17,7 +17,10 @@ use App\Http\Middleware\VerifyCsrfToken;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\OrderController;
-
+use App\Http\Controllers\VerificationController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use App\Http\Controllers\PasswordResetController;
+use App\Http\Controllers\SpaController;
 
 Route::post('/sanctum/token', TokenController::class);
 
@@ -32,9 +35,24 @@ Route::get('/product-review/{id}', [ProductReviewController::class, 'show']);
 /**
  * AUTH ROUTES
  */
+Route::middleware(['web'])->group(function () {
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'showResetForm'])->name('password.reset');
+    // Route::get('/{any}', [SpaController::class, 'index'])->where('any', '.*');
+    
+    // Handle the reset password form submission
+    Route::post('/reset-password', [PasswordResetController::class, 'reset'])->name('password.update');
+});
+
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+    return redirect('/dashboard'); // Make sure this path is correct
+})->middleware(['auth:sanctum', 'signed'])->name('verification.verify');
+
+// Route::get('/email/verify/{id}/{hash}', [VerificationController::class, 'verify'])->middleware(['signed'])->name('verification.verify');
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/users/auth', [UserController::class, 'show']);
+    Route::post('/email/verification-notification', [VerificationController::class, 'resend'])->name('verification.send');
     
     Route::get('/user/profile/{id}', [UserController::class, 'getUserProfile']);
     Route::put('/user/update-profile', [UserController::class, 'updateUserProfile']);

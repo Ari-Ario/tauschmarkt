@@ -151,7 +151,7 @@ const toggleModal = () => {
                 </div>
             </router-link>
 
-            <router-link :to="{ name: 'register' }" customv-slot="{ navigate }" >
+            <router-link :to="{ name: 'login' }" customv-slot="{ navigate }" >
                 <div class="link btn red" @click="navigate" role="link">
                     <div class="link" style="color: white;">
                         Mit Google Anmelden
@@ -180,7 +180,9 @@ const toggleModal = () => {
     </div>
 
 </template>
+
 <style scoped>
+
 #header {
     position: fixed;
     top: 0;
@@ -328,7 +330,9 @@ const toggleModal = () => {
     transform: translate(50%, 50%);
 }
 @media only screen and (max-width: 1024px) {
-
+    #header {
+        max-width: 100vw;
+    }
     .menu {
         display: none;
         gap: 5px;

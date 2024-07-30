@@ -29,7 +29,7 @@ const fetchProduct = async () => {
         const response = await axios.get(`/api/product/${sellerId}`);
         categories.value = response.data.categories;
         products.value = response.data.products.data;
-        console.log(products.value)
+        // console.log(products.value)
         // console.log(categories.value)
 
     } catch (error) {
@@ -69,7 +69,7 @@ const editMode = ref(false);
 
 const openEditPopup = async (product, index) => {
 
-    console.log(product, index);
+    // console.log(product, index);
     id.value = product.id;
     name.value = product.name;
     price.value = product.price;
@@ -248,8 +248,11 @@ onMounted(() => {
         <p>{{ product.name }}</p>
         <p>Quantität: {{ product.quantity }}</p>
       </div>
+      <div class="product-info" v-else-if="!product.product_images.length" style="background-color: red; opacity: 0.7;">
+        <h3>Fügen Sie Bilder hinzu, damit der Product den Kunden sichtbar wird!</h3>
+      </div>
       <div class="product-info" v-else style="background-color: red; opacity: 0.7;">
-        <h2>Aktualisieren Sie den Produkt! (Quantität: {{ product.quantity }})</h2>
+        <h3>Aktualisieren Sie den Produkt! (Quantität: {{ product.quantity }})</h3>
       </div>
 
       <img :src="getProductImage(product)" alt="Product Image" class="product-image" />
@@ -318,7 +321,7 @@ onMounted(() => {
         </div>
 
         <button type="submit" style="margin-bottom: 10px;">Speichern</button>
-        <button type="button" @click="closeEditPopup()" style="background-color: #e0e0e0; color: #555;">Ablehnen</button>
+        <button type="button" @click="closeEditPopup()" style="background-color: #e0e0e0; color: #555;">Abbrechen</button>
       </form>
     </div>
   </div>
@@ -734,6 +737,24 @@ form button:hover {
     .product-list{
         width: 100%;
         height: fit-content;
+        position: relative;
+    }
+
+    /* Adjust the popup to be positioned relative to the product */
+    .popup {
+      position: fixed; /* Change to fixed for consistent positioning relative to the viewport */
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      max-width: fit-content;
+      align-items: center;
+      z-index: 10;
+      pointer-events: auto;
+      overflow: auto;
     }
 
     .product-card {

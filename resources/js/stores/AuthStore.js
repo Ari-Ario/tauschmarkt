@@ -18,17 +18,26 @@ export const useAuthStore = defineStore('AuthStore', {
   
   actions: {
 
-    async getAuthUser(){
-        try{
-          let response = await AuthService.getAuthUser();
-          this.user = response.data.data;
-          localStorage.setItem("user", JSON.stringify(this.user));
+    async getAuthUser() {
+      try {
+        let response = await AuthService.getAuthUser();
+        // console.log('getAuthUser response:', response);
 
+        if (response.data && response.data.data) {
+          this.user = response.data.data;
+          // console.log('User data:', this.user);
+          localStorage.setItem("user", JSON.stringify(this.user));
           return response.data.data;
-        }
-        catch(error){
+        } else {
+          console.warn('No user data found in response');
           this.user = null;
+          localStorage.removeItem("user");
         }
+      } catch (error) {
+        console.error('Error in getAuthUser:', error);
+        this.user = null;
+        localStorage.removeItem("user");
+      }
     },
 
     async logout(){

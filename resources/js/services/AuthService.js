@@ -29,6 +29,7 @@ export const authClient = axios.create({
 /*
   AUTH METHODS
 */
+
 export default {
   async login(payload) {
       await authClient.get("/sanctum/csrf-cookie");
@@ -63,7 +64,8 @@ export default {
     return authClient.post("/register", payload);
   },
 
-  sendVerification(payload) {
+  async sendVerification(payload) {
+    await authClient.get("/sanctum/csrf-cookie");
     return authClient.post("/email/verification-notification", payload);
   },
 

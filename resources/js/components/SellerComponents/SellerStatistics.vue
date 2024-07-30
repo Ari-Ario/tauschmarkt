@@ -16,7 +16,7 @@ const fetchProductReviews = async () => {
   try {
     const response = await axios.get(`/api/productreview/${sellerId}`);
     productReviews.value = response.data;
-    averageRating.value = productReviews.value.averageRating.toString().slice(0, 4)
+    averageRating.value = productReviews.value.averageRating
     // console.log(averageRating.value)
   } catch (error) {
     console.error('Failed to fetch product reviews:', error);
@@ -49,18 +49,18 @@ const twoDecimals= (value) => {
 <template>
   <div class="seller-statistics">
     <div class="stat">
-      <h4>Gesamte Verkäufe</h4>
+      <h5>Gesamte Verkäufe</h5>
       <p>{{ orderCount.orderCount }}</p>
     </div>
     <div class="stat">
-      <h4>Durchschnitliche Bewertung </h4>
+      <h5>Durchschnittliche bewertung</h5>
       <p> {{ averageRating }} </p>
       <div class="stars">
         <span v-for="star in 5" :key="star" class="star" :class="{ filled: star <= productReviews.averageRating }">&#9733;</span>
       </div>
     </div>
     <div class="stat">
-      <h4> Gesamte Bewertungen </h4>
+      <h5> Gesamte Bewertungen </h5>
       <p>{{  productReviews.allProducts }}</p>
     </div>
   </div>
@@ -75,7 +75,7 @@ const twoDecimals= (value) => {
 .stat {
   text-align: center;
   background-color: #f0f0f0;
-  padding: 10px;
+  padding: 12px;
   border: 1px solid rgba(0, 0, 0, 0.272);
   border-radius: 10px;
   width: 30%;

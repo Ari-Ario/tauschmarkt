@@ -240,6 +240,7 @@ const triggerFileInput = () => {
                     <option value="perKilogram">Pro Kilogram</option>
                     <option value="perGram">Pro Gram</option>
                     <option value="perUnit">Pro Stuck</option>
+                    <option value="perLiter">Pro Liter</option>
                   </select>
                 </div>
 
@@ -257,6 +258,11 @@ const triggerFileInput = () => {
                   <input type="number" name="qty" id="floating_qty" v-model.number="product.quantity" class="form-input" required />
                   <input type="hidden" :value="setMassUnit('Stuck')" />
                 </div>
+                <div class="form-group" v-else-if="priceUnit === 'perLiter'">
+                  <label for="unit-price">Quantität (in Liter)</label>
+                  <input type="number" name="qty" id="floating_qty" v-model.number="product.quantity" class="form-input" required />
+                  <input type="hidden" :value="setMassUnit('Liter')" />
+                </div>
 
                 <div class="form-group" v-else>
                   <label for="unit-price">Quantität (zahl der Einheiten)</label>
@@ -270,7 +276,7 @@ const triggerFileInput = () => {
                 </div>
                 <div class="form-group" style="display: flex; justify-content: space-between;">
                   <button type="submit">Speichern</button>
-                  <button type="button" @click="closeForm" style="background-color: #e0e0e0; color: #555;">Ablehnen</button>
+                  <button type="button" @click="closeForm" style="background-color: #e0e0e0; color: #555;">Abbrechen</button>
                 </div>
               </form>
             </div>

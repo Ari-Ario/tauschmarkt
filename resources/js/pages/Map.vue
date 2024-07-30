@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useRouter } from 'vue-router';
 import { GoogleMap, Marker, Circle } from 'vue3-google-map';
 import { location, distance, setLocation, setDistance } from '../locals';
+import Swal from 'sweetalert2';
 
 const store = useAuthStore();
 const router = useRouter();
@@ -52,6 +53,14 @@ const updateBackend = async () => {
   try {
     const response = await axios.put(`/api/user/update-location`, location.value);
     console.log('Location updated:', response.data);
+    Swal.fire({
+          toast: true,
+          icon: "success",
+          position: "top-end",
+          showConfirmButton: false,
+          title: "Ort wurde gespeichert!",
+          timer: 3000
+      })
   } catch (error) {
     console.error('Error updating profile:', error);
   }
@@ -71,6 +80,15 @@ const useCurrentLocation = async () => {
       updateCircle();
       await updateBackend();
       await loadEnterprises(location.value.latitude, location.value.longitude, radius.value, store.authUser.id);
+      closeDetails();
+      Swal.fire({
+          toast: true,
+          icon: "success",
+          position: "top-end",
+          showConfirmButton: false,
+          title: "Standort wurde gespeichert!",
+          timer: 3000
+      })
     });
   } else {
     alert('Geolocation is not supported by this browser.');

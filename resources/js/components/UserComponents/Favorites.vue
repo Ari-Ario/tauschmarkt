@@ -115,7 +115,7 @@ const getProfilePicture = (path) => {
         </div>
     </div>
     <div v-if="!favorites.length" class="container">
-        <h3>Sie haben noch keine Favorites hinzugefügt.</h3>
+        <h3>Sie haben noch keine Favoriten hinzugefügt.</h3>
         <div>
             <FooterUser />
         </div>

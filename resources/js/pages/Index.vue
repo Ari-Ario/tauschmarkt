@@ -23,6 +23,7 @@ const fetchProduct = async () => {
   try {
     const response = await axios.get(`/api/product/${enterpriseId}`);
     products.value = response.data.products.data;
+    // console.log(products.value)
     filterProductsByPrice(); // Initial filter
   } catch (error) {
     console.error('Failed to fetch Product:', error);
@@ -31,7 +32,12 @@ const fetchProduct = async () => {
 
 const filterProductsByPrice = () => {
   const [minPrice, maxPrice] = filterPrices.value.prices;
-  filteredProducts.value = products.value.filter(product => product.price >= minPrice && product.price <= maxPrice);
+  // Step 1: Filter out products with an empty product_images array
+  const nonEmptyImageProducts = products.value.filter(product => product.product_images.length > 0);
+
+  // Step 2: Filter the products by price range
+  filteredProducts.value = nonEmptyImageProducts.filter(product => product.price >= minPrice && product.price <= maxPrice);
+  // console.log(filteredProducts.value)
 };
 
 const openImagesPopup = (product) => {
@@ -358,6 +364,7 @@ const updateRating = (star) => {
   padding-right: 1rem;
   padding-left: 1rem;
   margin-top: 100px;
+  padding-bottom: 64px;
   margin-right: auto;
   margin-left: auto;
 }

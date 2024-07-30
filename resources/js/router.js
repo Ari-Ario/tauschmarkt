@@ -25,6 +25,27 @@ export const routes = [
     },
 
     {
+        path: '/verify-email',
+        name: 'verify-email',
+        component: () => import('./pages/Auth/VerifyEmail.vue'),
+        meta: { showLogo: true, allBlogs: false, getStarted: false, home: true },
+      },
+
+    {
+        path: '/reset-password',
+        name: 'reset-password',
+        component: () => import('./pages/Auth/ResetPassword.vue'),
+        props: route => ({ token: route.query.token, email: route.query.email })
+    },
+
+    { 
+        path: '/forgot-password', 
+        name: 'ForgotPassword',
+        component: () => import('./pages/Auth/ForgotPassword.vue'),
+    },
+
+
+    {
         path: "/",
         name:"home",
         component: () => import("./pages/Home.vue"),
@@ -49,7 +70,7 @@ export const routes = [
         path: "/dashboard",
         name:"dashboard",
         component: () => import("./pages/Dashboard.vue"),
-    
+        meta: { requiresAuth: true },
     },
 
     {

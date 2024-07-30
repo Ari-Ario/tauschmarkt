@@ -392,7 +392,7 @@ p {
 }
 
 .bg-camera, .profile-camera {
-  z-index: 1010;
+  z-index: 8;
   opacity: 1;
 }
 

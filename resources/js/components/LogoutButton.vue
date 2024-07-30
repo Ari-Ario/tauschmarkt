@@ -33,5 +33,6 @@
     text-decoration: none;
     margin-left: 30px;
     padding: 10px 20px;
+    cursor: pointer;
 }
 </style>

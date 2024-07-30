@@ -2,7 +2,6 @@
 import { useAuthStore } from '@/stores/AuthStore';
 import AuthService from "@/services/AuthService";
 import Header from '../../components/header/Header.vue';
-
 import {ref} from 'vue';
 import {useRouter} from 'vue-router';
 
@@ -21,7 +20,7 @@ const user = ref({
 function registerUser(){
     // console.log(user.value)
     AuthService.registerUser(user.value)
-        .then(() => router.push("/dashboard"))
+        .then(() => router.push("/verify-email"))
         .catch((error) => (console.log(error)));
 }
 

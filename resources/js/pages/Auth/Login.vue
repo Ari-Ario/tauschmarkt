@@ -60,45 +60,53 @@ const login = async() => {
 
             <!-- Email and password inputs -->
             <input type="email" v-model="user.email" placeholder="Email" required />
-            <input type="password" v-model="user.password" placeholder="Password" required />
+            <input type="password" v-model="user.password" placeholder="Passwort" required />
             <!-- Submit button -->
-            <button type="submit">Login</button>
-
+            <button type="submit">Anmelden</button>
+            <!-- Reset Password link -->
+            <router-link to="/forgot-password" class="reset-password-link">Passwort vergessen?</router-link>
         </form>
     </div>
 </template>
 
 <style scoped>
 .form-container {
-display: flex;
-justify-content: center;
-align-items: center;
-margin-top: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 60px;
 }
-
 
 .login-form {
-display: flex;
-flex-direction: column;
-gap: 20px;
-width: 300px;
-padding: 20px;
-border-radius: 5px;
-box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 300px;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
-
 
 .login-form input, .login-form button {
-padding: 10px;
-border-radius: 5px;
-border: 1px solid #ccc;
-font-size: 16px;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
 }
 
-
 .login-form button {
-background-color: #298E46;
-color: white;
-cursor: pointer;
+    background-color: #298E46;
+    color: white;
+    cursor: pointer;
+}
+
+.reset-password-link {
+    margin-top: 10px;
+    font-size: 14px;
+    font-weight: bold;
+    color: #298E46;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
 }
 </style>
