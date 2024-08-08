@@ -16,7 +16,7 @@ const fetchProductReviews = async () => {
   try {
     const response = await axios.get(`/api/productreview/${sellerId}`);
     productReviews.value = response.data;
-    averageRating.value = productReviews.value.averageRating
+    averageRating.value = twoDecimals(productReviews.value.averageRating)
     // console.log(averageRating.value)
   } catch (error) {
     console.error('Failed to fetch product reviews:', error);

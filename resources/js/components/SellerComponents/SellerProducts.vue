@@ -161,15 +161,17 @@ const updateProduct = async () => {
     // for (const value of formData.values()) { console.log(value) }
     try {
         const response = await authClient.post(`products/update/${id.value}`, formData);
-        console.log(response);
+        // console.log(response);
         dialogVisible.value = false;
         resetFormData();
+        fetchProduct();
         Swal.fire({
             toast: true,
             icon: 'success',
             position: 'top-end',
             showConfirmButton: false,
             title: 'Produkt aktualisiert!',
+            timer: 3000
         });
     } catch (err) {
         console.log(err);
@@ -178,7 +180,8 @@ const updateProduct = async () => {
             icon: 'error',
             position: 'top-end',
             showConfirmButton: false,
-            title: 'Produkt konnte nicht aktualiziert werden!'
+            title: 'Produkt konnte nicht aktualiziert werden!',
+            timer: 3000
     });
   }
 };
@@ -211,7 +214,8 @@ const deleteProduct = (product) => {
                     icon: 'success',
                     position: 'top-end',
                     showConfirmButton: false,
-                    title: 'Produkt wurde gelöscht'
+                    title: 'Produkt wurde gelöscht',
+                    timer: 3000
                 });
             } catch (err) {
                 console.log(err);
@@ -220,7 +224,8 @@ const deleteProduct = (product) => {
                     icon: 'error',
                     position: 'top-end',
                     showConfirmButton: false,
-                    title: 'Produkt konnte nicht gelöscht werden'
+                    title: 'Produkt konnte nicht gelöscht werden',
+                    timer: 3000
                 });
             }
         }

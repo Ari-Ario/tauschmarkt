@@ -1,23 +1,21 @@
-
 <script setup>
 import FooterUser from '../components/footer/FooterUser.vue';
 import FooterSeller from '../components/footer/FooterSeller.vue';
 import Header from '../components/header/Header.vue';
-
 import { useAuthStore } from '../stores/AuthStore';
-// import authClient from "@/services/AuthService";
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useRoute } from "vue-router";
-import authClient  from '../services/AuthService';
+import authClient from '../services/AuthService';
+import { loadStripe } from '@stripe/stripe-js';
+import Swal from 'sweetalert2';
 
-
-//const router = useRouter();
 const profileItems = ref([]);
 const isEditing = ref(false);
 const editingItem = ref('');
 const editingValue = ref('');
 const user = ref({});
+const StripeData = ref({});
 const locationInfo = ref({});
 
 const frontendKeys = {
@@ -53,17 +51,24 @@ const loadSeller = async () => {
           öffnungszeit: data.opening,
           Betriebsschluss: data.closing,
           Bankkonto: data.payment,
+          // stripe_account_id: data.stripe_account_id,
+          // stripe_payment_intent_id: data.stripe_payment_intent_id,
           // add more
         };
         locationInfo.value = {
           latitude: data.latitude,
           longitude: data.longitude,
         };
-        // console.log(data);
+        StripeData.value = {
+          connect: data.connect_id,
+          payment_intent: data.payment_intent_id
+        }
+        // console.log(StripeData.value)
     } catch (error) {
-        console.error("Error loading blogs:", error);
+        console.error("Error loading profile:", error);
     }
 };
+
 const loadUser = async () => {
     try {
         const response = await axios.get(`api/user/profile/${userId}`);
@@ -82,12 +87,12 @@ const loadUser = async () => {
           // add more
         };
     } catch (error) {
-        console.error("Error loading blogs:", error);
+        console.error("Error loading profile:", error);
     }
 };
 
 onMounted(() => {
-    if (store?.authUser?.is_seller){
+    if (store?.authUser?.is_seller) {
       loadSeller();
     } else {
       loadUser();
@@ -100,37 +105,59 @@ const editItem = (item, key) => {
   isEditing.value = true;
 };
 
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+
 const saveChanges = async () => {
-  if (editingItem.value !== null) {
-    // Find the backend key based on the frontend key
-    const backendKey = Object.keys(frontendKeys).find(
-      key => frontendKeys[key] === editingItem.value
-    );
+    if (editingItem.value !== null) {
+        const backendKey = Object.keys(frontendKeys).find(
+            key => frontendKeys[key] === editingItem.value
+        );
+        // console.log(StripeData.value.connect, StripeData.value.payment_intent)
+        if (backendKey) {
+            // Check if payment value has changed
+            if (backendKey === 'payment' && user.value[editingItem.value] === editingValue.value && StripeData.value.connect) {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Keine Änderungen festgestellt',
+                    text: 'Der Eingabewert ist derselbe wie der vorhandene Wert.',
+                });
+                cancelEdit();
+                return;
+            }
 
-    if (backendKey) {
-      // Update the user value
-      user.value[editingItem.value] = editingValue.value;
+            user.value[editingItem.value] = editingValue.value;
 
-      // Prepare payload with all the fields mapped to backend keys
-      const payload = Object.fromEntries(
-        Object.entries(user.value).map(([key, value]) => [
-          Object.keys(frontendKeys).find(k => frontendKeys[k] === key),
-          value,
-        ])
-      );
-      // console.log(payload);
-      
-      // Save changes to the server using Laravel Fortify's API
-      try {
-        const response = await axios.put(`/api/user/update-profile`, payload);
-        console.log('Profile updated:', response.data);
-      } catch (error) {
-        console.error('Error updating profile:', error);
-      }
+            const payload = Object.fromEntries(
+                Object.entries(user.value).map(([key, value]) => [
+                    Object.keys(frontendKeys).find(k => frontendKeys[k] === key),
+                    value,
+                ])
+            );
+
+            try {
+                const response = await axios.put(`/api/user/update-profile`, payload);
+                console.log('Profile updated:', response.data);
+
+                if (backendKey === 'payment') {
+                    const onboardResponse = await axios.get('/api/onboard-seller');
+                    window.location.href = onboardResponse.data.url;
+                }
+            } catch (error) {
+                console.error('Error updating profile:', error);
+            }
+        }
     }
-  }
-  cancelEdit();
+    cancelEdit();
 };
+
+async function onboardSeller() {
+    try {
+        const response = await axios.get('/api/onboard-seller');
+        window.location.href = response.data.url;
+    } catch (error) {
+        console.error('Error onboarding seller:', error.response ? error.response.data : error.message);
+    }
+}
 
 const cancelEdit = () => {
   isEditing.value = false;
@@ -138,23 +165,20 @@ const cancelEdit = () => {
   editingValue.value = '';
 };
 
-// Method to format time to HH:MM:SS
 const formatTime = (time) => {
   if (time.split(':').length === 2) {
     return `${time}:00`;
   }
   return time;
 };
-
 </script>
 
 <template>
-        <header>
-        <Header />
-      </header>
+  <header>
+    <Header />
+  </header>
   <div class="container">
     <div class="profile-page">
-
       <div class="account-details">
         <h3>Meine Profil</h3>
       </div>
@@ -162,36 +186,33 @@ const formatTime = (time) => {
       <div class="profile-section" v-for="(value, key) in user" v-if="user" :key="key">
         <div class="profile-item" @click="() => editItem(value, key)">
           <span>{{ key }}</span>
-          <span class="profile-value" >{{ value }}</span>
-
+          <span class="profile-value">{{ value }}</span>
         </div>
       </div>
 
       <div v-if="store?.authUser?.is_seller && !locationInfo.latitude && !locationInfo.longitude" class="profile-item" @click="() => editItem(value, key)">
-      <span>Betriebsort fehlt</span>
+        
         <router-link :to="{ name: 'map'}" class="link">
-        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="M480-480q33 0 56.5-23.5T560-560q0-33-23.5-56.5T480-640q-33 0-56.5 23.5T400-560q0 33 23.5 56.5T480-480Zm0 294q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z"/></svg>       
-      </router-link>
+          <span>Betriebsort fehlt</span>
+        </router-link>
+
+        <router-link :to="{ name: 'map'}" class="link">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46">
+            <path d="M480-480q33 0 56.5-23.5T560-560q0-33-23.5-56.5T480-640q-33 0-56.5 23.5T400-560q0 33 23.5 56.5T480-480Zm0 294q122-112 181-203.5T720-552q0-109-69.5-178.5T480-800q-101 0-170.5 69.5T240-552q0 71 59 162.5T480-186Zm0 106Q319-217 239.5-334.5T160-552q0-150 96.5-239T480-880q127 0 223.5 89T800-552q0 100-79.5 217.5T480-80Zm0-480Z"/>
+          </svg>
+        </router-link>
       </div>
 
-      <!-- <div v-if="store?.authUser?.is_seller && !user.payment" class="profile-item" @click="() => editItem(value, key)">
-      <span>Bankkonto fehlt</span>
-        <input id="payment" type="number" name="payment" v-model="user.payment" placeholder="Bankkonto: 4242424242424242" required />
-      </div> -->
-
-
-        <!-- <div v-else style="display: none;"></div> -->
-        <div v-if="store?.authUser?.is_seller">
-            <FooterSeller />
-        </div>
-        <div v-else>
-            <FooterUser />
-        </div>
+      <div v-if="store?.authUser?.is_seller">
+        <FooterSeller />
+      </div>
+      <div v-else>
+        <FooterUser />
+      </div>
 
       <div v-if="isEditing" class="edit-popup">
         <form @submit.prevent="saveChanges">
           <label :for="editingItem">{{ editingItem }}</label>
-          <!-- Change only this input to time-input if opening or closing -->
           <input
             v-if="editingItem === 'öffnungszeit' || editingItem === 'Betriebsschluss'"
             type="time"

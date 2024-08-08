@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
@@ -91,38 +92,63 @@ class OrderController extends Controller
 
     public function markAsCollected(Request $request)
     {
-        // Validate the incoming request
-        $request->validate([
-            'orderId' => 'required|exists:orders,id',
-        ]);
-
-        // Find the order by ID
-        $order = Order::findOrFail($request->orderId);
-
-        // Retrieve the seller's Stripe account ID
-        $seller = User::findOrFail($order->seller_id); // Assuming seller_id is a column in the orders table
-
-        if (!$seller || empty($seller->stripe_account_id || !$seller->payment)) {
-            return response()->json(['message' => 'Seller does not have a Stripe account linked.'], 400);
+        $orderId = $request->input('orderId');
+        $order = Order::find($orderId);
+    
+        if (!$order) {
+            return response()->json(['message' => 'Order not found'], 404);
         }
-
-        // Set your Stripe secret key
-        $stripe = new StripeClient(config('services.stripe.secret'));
-
+    
+        $seller = User::find($order->seller_id);
+    
+        if (!$seller) {
+            return response()->json(['message' => 'Seller not found'], 404);
+        }
+    
+        $stripeSecretKey = config('services.stripe.secret');
+        Log::info('Stripe API Key:', ['key' => $stripeSecretKey]);
+        \Stripe\Stripe::setApiKey($stripeSecretKey);
+    
         try {
-            $transfer = $stripe->transfers->create([
+            // Update the Stripe Connect Account to request transfers capability
+            $account = \Stripe\Account::update(
+                $seller->stripe_connect_id,
+                [
+                    'capabilities' => [
+                        'transfers' => ['requested' => true],
+                    ],
+                ]
+            );
+    
+            if ($account->capabilities->transfers !== 'active') {
+                return response()->json(['message' => 'The account does not have the transfers capability enabled.'], 400);
+            }
+    
+            // Create the transfer
+            $transfer = \Stripe\Transfer::create([
                 'amount' => $order->total_price * 100, // amount in cents
                 'currency' => 'chf',
-                'destination' => $seller->stripe_account_id,
+                'destination' => $seller->stripe_connect_id,
+                'source_type' => 'card',
                 'transfer_group' => 'ORDER_' . $order->id,
             ]);
     
             $order->pickup = now();
             $order->save();
-
+    
             return response()->json(['message' => 'Order marked as collected and payout successful.'], 200);
-
+    
+        } catch (\Stripe\Exception\ApiErrorException $e) {
+            Log::error('Stripe API error:', [
+                'message' => $e->getMessage(),
+                'code' => $e->getStripeCode(),
+                'httpStatus' => $e->getHttpStatus(),
+                'request' => $e->getRequestId(),
+                'error' => $e->getError()
+            ]);
+            return response()->json(['message' => 'Error processing payout: ' . $e->getMessage()], 400);
         } catch (\Exception $e) {
+            Log::error('General error:', ['message' => $e->getMessage()]);
             return response()->json(['message' => 'Error processing payout: ' . $e->getMessage()], 500);
         }
     }

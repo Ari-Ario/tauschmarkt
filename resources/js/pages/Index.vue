@@ -66,17 +66,30 @@ const props = defineProps({
 });
 
 // Using the cart store
-const { addToCart } = useCart();
+const { addToCart, getExistingProduct } = useCart();
 
 const addToCartHandler = (product) => {
-  if (product.quantity <= 2) {
+  
+  const existingProduct = getExistingProduct(product.id);
+
+  if (existingProduct && existingProduct.quantity >= product.quantity) {
+      Swal.fire({
+          toast: true,
+          icon: "error",
+          position: "top-end",
+          showConfirmButton: false,
+          title: "Ihr Wahl ist mehr als übrige Quantität: ",
+          timer: 3000
+      });
+      return;
+  } else if (product.quantity <= 2) {
     Swal.fire({
         toast: true,
         icon: "info",
         position: "top-end",
         showConfirmButton: false,
         title: "Beachten Sie übrige Quantität: ",
-        timer: 6000
+        timer: 3000
       });
   } else if ( product.quantity < 1 ) {
     return;
@@ -104,6 +117,7 @@ const addToCartHandler = (product) => {
         timer: 3000
       });
     }
+    // console.log(product)
     addToCart(product); // Add to the reactive store
   })
   .catch(error => {
@@ -135,6 +149,7 @@ const openReviewPopup = async (product) => {
 
 const closeReviewPopup = () => {
   reviewMode.value = false;
+  newRating.value = 0;
 };
 
 const calculateAverageRating = () => {
@@ -152,10 +167,10 @@ const submitComment = async (product) => {
         title: "Melden Sie sich an!",
         timer: 3000
       });
-      return
-    }; // Don't let comments or ratings of non-users
+      return;
+  }; // Don't let comments or ratings of non-users
 
-  if (!newComment.value.trim() || !newRating.value) {
+  if (!newComment.value.trim() && !newRating.value) {
       Swal.fire({
         toast: true,
         icon: "warning",
@@ -164,46 +179,67 @@ const submitComment = async (product) => {
         title: "entweder Sterne oder Komment is leer!",
         timer: 3000
       });
-      return
-    }; // Don't submit empty comments or ratings
+      return;
+  }; // Don't submit empty comments or ratings
 
   const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
   try {
-    await axios.post(`/api/product-review`, {
-      user_id: store.authUser.id,
-      product_id: product.id,
-      comment: newComment.value,
-      rating: newRating.value
-    });
-
-    // Fetch the updated reviews
-     newComment.value = "";
-     newRating.value = 0;
-    await openReviewPopup(product);
-    Swal.fire({
+    if (newComment.value.trim()) {
+      await axios.post(`/api/product-comment`, {
+        user_id: store.authUser.id,
+        product_id: product.id,
+        comment: newComment.value
+      });
+      await openReviewPopup(product);
+      Swal.fire({
         toast: true,
         icon: "success",
         position: "top-end",
         showConfirmButton: false,
-        title: "Ihre Kommnt wurde gepostet!",
+        title: "Ihr Komment wurde gepostet!",
         timer: 3000
-      })
-  } catch (error) {
-    console.error('Failed to submit comment:', error);
-    Swal.fire({
-          toast: true,
-          icon: 'error',
-          position: 'top-end',
-          showConfirmButton: false,
-          title: 'Komment wurde nicht gepostet!'
       });
+    }
+
+    if (newRating.value) {
+      await axios.post(`/api/product-rating`, {
+        user_id: store.authUser.id,
+        product_id: product.id,
+        rating: newRating.value
+      });
+      await openReviewPopup(product);
+      Swal.fire({
+        toast: true,
+        icon: "success",
+        position: "top-end",
+        showConfirmButton: false,
+        title: "Ihre Bewertung wurde gepostet!",
+        timer: 3000
+      });
+    }
+
+    // Fetch the updated reviews
+    newComment.value = "";
+
+  } catch (error) {
+    console.error('Failed to submit comment or rating:', error);
+    Swal.fire({
+      toast: true,
+      icon: 'error',
+      position: 'top-end',
+      showConfirmButton: false,
+      title: 'Komment oder Bewertung wurde nicht gepostet!'
+    });
   }
 };
 
-const deleteComment = async (review) => {
+
+const deleteComment = async (review, product) => {
   try {
     await axios.delete(`/api/product-review/${review.id}`);
     // Handle successful deletion, e.g., refresh comments list
+    await openReviewPopup(product);
+
     Swal.fire({
         toast: true,
         icon: "success",
@@ -213,7 +249,7 @@ const deleteComment = async (review) => {
         timer: 3000
       })
       // product.value.id = review.product_id;
-    await openReviewPopup(currentProduct);
+    // await openReviewPopup(currentProduct);
 
   } catch (error) {
       console.error('Failed to delete comment:', error);
@@ -315,7 +351,7 @@ const updateRating = (star) => {
                   </div>
                   <img :src="getProductImage(product)" alt="Product Image" class="product-image" />
                   <div class="review-header">
-                    <div class="stars">
+                    <div class="stars review" @click="submitComment(currentProduct)">
                       <span v-for="star in 5" :key="star" class="star star-rating" :class="{ filled: star <= newRating }" @click="updateRating(star)">
                         &#9733;
                       </span>
@@ -328,17 +364,17 @@ const updateRating = (star) => {
                     </label>
                   </div>
                   <div class="comments-list">
-                    <div v-for="review in reviews" :key="review.id" class="comment">
+                    <div v-for="review in reviews.filter(review => review.comment && review.comment.trim() !== '')" :key="review.id" class="comment">
                       <div class="comment-part">
                         <p><strong>{{ review.user.firstname }}:</strong> {{ review.comment }}</p>
-                        <p style="text-align: left;">Bewertung: {{ review.rating }} </p>
+                        <!-- <p style="text-align: left;">Bewertung: {{ review.rating }} </p> -->
                           <!-- <div class="stars">
                             <span v-for="star in 5" :key="star" class="star" :class="{ filled: star <= review.rating }" @click="updateRating(star)">
                               &#9733;
                             </span>
                           </div> -->
                       </div>
-                        <div class="bin" v-if="review.user_id && store.authUser" @click="deleteComment(review)">
+                        <div class="bin" v-if="review.user_id && store.authUser" @click="deleteComment(review, product)">
                           <svg v-if="review.user_id == store.authUser.id" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#EA3323"><path d="M280-120q-33 0-56.5-23.5T200-200v-520h-40v-80h200v-40h240v40h200v80h-40v520q0 33-23.5 56.5T680-120H280Zm400-600H280v520h400v-520ZM360-280h80v-360h-80v360Zm160 0h80v-360h-80v360ZM280-720v520-520Z"/></svg>                    </div>
                         </div> 
 

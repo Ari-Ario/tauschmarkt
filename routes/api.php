@@ -55,9 +55,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/email/verification-notification', [VerificationController::class, 'resend'])->name('verification.send');
     
     Route::get('/user/profile/{id}', [UserController::class, 'getUserProfile']);
-    Route::put('/user/update-profile', [UserController::class, 'updateUserProfile']);
     Route::put('/user/update-location', [UserController::class, 'updateUserLocation']);
-    
+    Route::put('/user/update-profile', [UserController::class, 'updateUserProfile']);
+    Route::get('onboard-seller', [UserController::class, 'onboardSeller']);
+    Route::get('stripe/onboard-result/{token}', [UserController::class, 'onBoardResult'])->name('stripe.onboard-result');
+    Route::get('/organization/dashboard', [UserController::class, 'dashboard'])->name('organization.dashboard');
+
     
     //////////////////////////Uploading Profile and Background Images /////////////////////
     Route::post('/bg-picture', [UserController::class, 'updateBackgroundImage']);
@@ -89,7 +92,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
 
     //Post a review 
-    Route::post('/product-review', [ProductReviewController::class, 'store']);
+    Route::post('/product-comment', [ProductReviewController::class, 'storeComment']);
+    Route::post('/product-rating', [ProductReviewController::class, 'storeRating']);
     Route::delete('/product-review/{productReview}', [ProductReviewController::class, 'destroy']);
     // Statistics
     Route::get('/productreview/{seller_id}', [ProductReviewController::class, 'getProductReviewsBySeller']);

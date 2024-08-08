@@ -130,14 +130,17 @@ const getProfilePicture = (path) => {
       </div>
     </div>
     <div class="backdrop" v-if="selectedOrder" @click="closeDetails"></div>
+
     <div class="order-details-popup" v-if="selectedOrder">
       <div class="details-header">
         <h2>{{ selectedOrder.firstname }} {{ selectedOrder.lastname }}</h2>
-        <button @click="closeDetails">Close</button>
+        <div @click="closeDetails" class="closingCross">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z"/></svg>
+        </div>
       </div>
       <div class="details-header">
         <img :src="getEnterprisePicture(selectedOrder.enterprise_image)" alt="Image" />
-        <p @click="generatePDF(selectedOrder.id )"><strong>PDF</strong> <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="m242-200 200-280-200-280h98l200 280-200 280h-98Zm238 0 200-280-200-280h98l200 280-200 280h-98Z"/></svg></p>
+        <p @click="generatePDF(selectedOrder.id )" class="pdf"><strong>PDF</strong> <svg class="pdfSVG" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#298E46"><path d="m242-200 200-280-200-280h98l200 280-200 280h-98Zm238 0 200-280-200-280h98l200 280-200 280h-98Z"/></svg></p>
       </div>
 
       <p><strong>Address:</strong> {{ selectedOrder.street }} {{ selectedOrder.house_number }}, {{ selectedOrder.zip_code }} {{ selectedOrder.city }}</p>
@@ -160,7 +163,7 @@ const getProfilePicture = (path) => {
           <p>{{ selectedOrder.firstname }}</p>
           <div class="order-code">{{ selectedOrder.orderCode }}</div>
         </div>
-        <p>Drücken Sie den Button zum Abholen. Verkäfer und Käufer beachten.</p>
+        <p>Drücken Sie den Button zum Abholen. Verkäfer und Käufer, beide beachten.</p>
         <button class="swipe-to-collect" @click="markAsCollected(selectedOrder)">
           <span class="swipe-icon">➔</span>
           Abholen
@@ -285,7 +288,15 @@ const getProfilePicture = (path) => {
   border-bottom: 1px solid #ddd;
   padding-bottom: 10px;
 }
-
+.pdf {
+  cursor: pointer;
+  color: #298E46;
+  text-align: justify;
+}
+.pdfSVG {
+  vertical-align: middle;
+  padding-bottom: 2px;
+}
 .details-header h2 {
   margin: 0;
   font-size: 1.5rem;
@@ -300,6 +311,9 @@ const getProfilePicture = (path) => {
   cursor: pointer;
 }
 
+.closingCross{
+  cursor: pointer;
+}
 .order-details-popup img {
   width: 100px;
   height: 100px;

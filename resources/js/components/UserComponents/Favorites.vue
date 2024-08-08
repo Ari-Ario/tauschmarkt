@@ -1,6 +1,6 @@
 <script setup>
 import FooterUser from '../footer/FooterUser.vue';
-// import FooterSeller from '../footer/FooterSeller.vue';
+import Header from '../header/Header.vue';
 import { useAuthStore } from '../../stores/AuthStore';
 import { authClient } from '../../services/AuthService';
 
@@ -70,6 +70,9 @@ const getProfilePicture = (path) => {
 </script>
 
 <template>
+    <header>
+        <Header />
+    </header>
 
     <div v-if="favorites" v-for="enterprise in favorites" :key="favorites.id" class="container">
         <div v-if="enterprise.is_seller" class="card">
@@ -128,6 +131,7 @@ const getProfilePicture = (path) => {
     flex-direction: column;
     /* justify-content: center; */
     align-items: center;
+    margin-top: 34px;
 }
 .card {
     margin: 20px;

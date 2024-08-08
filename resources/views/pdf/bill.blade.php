@@ -50,6 +50,9 @@
         .tauschmarkt {
             color: #004d40;
         }
+        .backToHome {
+            text-decoration: none;
+        }
 
         /* Responsive Styles */
         @media (max-width: 768px) {
@@ -129,6 +132,7 @@
         </div>
         <div class="footer">
             <p>Danke für Ihre Bestellung!</p>
+            <a class="backToHome" href="https://kleinhaendler.ch/dashboard">Zur Startseite</a>
         </div>
     </div>
 </body>

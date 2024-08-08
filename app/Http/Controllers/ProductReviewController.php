@@ -49,16 +49,15 @@ class ProductReviewController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function storeComment(Request $request)
     {
         // Validate the incoming request data
         $validator = Validator::make($request->all(), [
             'user_id' => 'required|exists:users,id',
             'product_id' => 'required|exists:products,id',
             'comment' => 'required|string|max:1000',
-            'rating' => 'required|integer|min:1|max:5',
         ]);
-
+    
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
@@ -66,30 +65,72 @@ class ProductReviewController extends Controller
                 'errors' => $validator->errors()
             ], 422);
         }
-
+    
         try {
-            // Create a new product review
+            // Create a new product comment
             $review = new ProductReview();
             $review->user_id = $request->input('user_id');
             $review->product_id = $request->input('product_id');
-            $review->comment = $request->input('comment');
-            $review->rating = $request->input('rating');
-            $review->save();
+            $review->rating = 3; // Set rating to null
 
+            $review->comment = $request->input('comment');
+            $review->save();
+    
             return response()->json([
                 'success' => true,
-                'message' => 'Review submitted successfully',
+                'message' => 'Comment submitted successfully',
                 'review' => $review
             ], 201);
-
+    
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'An error occurred while submitting the review',
+                'message' => 'An error occurred while submitting the comment',
                 'error' => $e->getMessage()
             ], 500);
         }
     }
+    
+    public function storeRating(Request $request)
+    {
+        // Validate the incoming request data
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|exists:users,id',
+            'product_id' => 'required|exists:products,id',
+            'rating' => 'required|integer|min:1|max:5',
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation errors',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+    
+        try {
+            // Create a new product rating
+            $review = new ProductReview();
+            $review->user_id = $request->input('user_id');
+            $review->product_id = $request->input('product_id');
+            $review->rating = $request->input('rating');
+            $review->save();
+    
+            return response()->json([
+                'success' => true,
+                'message' => 'Rating submitted successfully',
+                'review' => $review
+            ], 201);
+    
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while submitting the rating',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+    
 
     /**
      * Display the specified resource.

@@ -8,6 +8,15 @@ use Stripe\StripeClient;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Auth;
 
+use Stripe\Stripe;
+use Stripe\Account;
+use Stripe\AccountLink;
+use Stripe\PaymentIntent;
+use Stripe\PaymentMethod;
+use Illuminate\Support\Facades\Crypt;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+
 class UserController extends Controller
 {
 
@@ -49,63 +58,48 @@ class UserController extends Controller
             'closing' => $user->closing,
             'latitude' => $user->latitude,
             'longitude' => $user->longitude,
+            'connect_id' => $user->stripe_connect_id,
+            'payment_intent_id' => $user->stripe_payment_intent_id,
             'created_at' => optional($user->created_at)->format($dateFormat),
             // 'updated_at' => optional($user->updated_at)->format($dateFormat),
         ];
 
     }
         //////////////////////////////////////// Update user profile data //////////////////////////////
-
+        
         public function updateUserProfile(Request $request)
         {
             $user = Auth::user();
         
-            $request->validate([
-                'firstname' => 'required|string|max:255',
-                'lastname' => 'required|string|max:255',
-                'email' => 'nullable|email|max:255|unique:users,email,' . $user->id,
-                'street' => 'nullable|string|max:255',
-                'house_number' => 'nullable|string|max:255',
-                'zip_code' => 'nullable|string|max:20',
-                'city' => 'nullable|string|max:255',
-                'payment' => 'nullable|string', // Assuming 'payment' is the IBAN
-                'opening' => ['nullable', 'regex:/^(?:2[0-3]|[01][0-9]):[0-5][0-9](?::[0-5][0-9])?$/'], // HH:MM format
-                'closing' => ['nullable', 'regex:/^(?:2[0-3]|[01][0-9]):[0-5][0-9](?::[0-5][0-9])?$/'],
-            ]);
+            try {
+                $validatedData = $request->validate([
+                    'firstname' => 'required|string|max:255',
+                    'lastname' => 'required|string|max:255',
+                    'email' => 'nullable|email|max:255|unique:users,email,' . $user->id,
+                    'street' => 'nullable|string|max:255',
+                    'house_number' => 'nullable|string|max:255',
+                    'zip_code' => 'nullable|string|max:20',
+                    'city' => 'nullable|string|max:255',
+                    'payment' => 'nullable|string|regex:/^[A-Z]{2}[0-9]{2}[A-Z0-9]{1,30}$/',
+                    'opening' => ['nullable', 'regex:/^(?:2[0-3]|[01][0-9]):[0-5][0-9](?::[0-5][0-9])?$/'],
+                    'closing' => ['nullable', 'regex:/^(?:2[0-3]|[01][0-9]):[0-5][0-9](?::[0-5][0-9])?$/'],
+                ]);
         
-            // Convert HH:MM to HH:MM:SS format before updating
-            // if ($request->has('opening')) {
-            //     $request->merge(['opening' => $request->input('opening') . ':00']);
-            // }
-            // if ($request->has('closing')) {
-            //     $request->merge(['closing' => $request->input('closing') . ':00']);
-            // }
+                $user->update($validatedData);
         
-            // Update user profile
-            $user->update($request->only([
-                'firstname',
-                'lastname',
-                'email',
-                'street',
-                'house_number',
-                'zip_code',
-                'city',
-                'opening',
-                'closing',
-            ]));
+                if ($request->has('payment') && !empty($request->payment)) {
+                    Stripe::setApiKey(config('services.stripe.secret'));
         
-            // Check if IBAN (payment) is provided
-            if ($request->has('payment') && !empty($request->payment)) {
-                $stripe = new StripeClient('sk_test_51PRVFGCFV0u7TeyeT35q849Bj5Z20yEOr2EoFcRvJyW7ELi7BmxiDfzPhcggYibOAqCIoal1J0vuHX0iJ3RVVFnL00o4IPXSbH');
-        
-                try {
-                    if (!$user->stripe_account_id) {
-                        // Create a new Stripe account
-                        $account = $stripe->accounts->create([
-                            'type' => 'custom',
-                            'country' => 'CH', // Switzerland
+                    try {
+                        $account = \Stripe\Account::create([
+                            'type' => 'express',
+                            'country' => 'CH',
                             'email' => $user->email,
-                            'business_type' => 'individual', // Assuming individual, you can change to company if needed
+                            'capabilities' => [
+                                'transfers' => ['requested' => true],
+                                // 'legacy_payments' => ['requested' => true],
+                            ],
+                            'business_type' => 'individual',
                             'individual' => [
                                 'first_name' => $user->firstname,
                                 'last_name' => $user->lastname,
@@ -114,50 +108,109 @@ class UserController extends Controller
                                     'line1' => $user->street . ' ' . $user->house_number,
                                     'postal_code' => $user->zip_code,
                                     'city' => $user->city,
-                                    'country' => 'CH'
-                                ]
-                            ],
-                            'capabilities' => [
-                                'transfers' => ['requested' => true],
+                                    'country' => 'CH',
+                                ],
                             ],
                         ]);
         
-                        $user->stripe_account_id = $account->id;
-                        $user->save(); // Save the stripe_account_id immediately
-                    } else {
-                        // Retrieve existing Stripe account
-                        $account = $stripe->accounts->retrieve($user->stripe_account_id);
+                        $user->stripe_connect_id = $account->id;
+                        $user->save();
+        
+                        $accountLink = \Stripe\AccountLink::create([
+                            'account' => $account->id,
+                            'refresh_url' => route('stripe.onboard-result', ['token' => Crypt::encrypt($user->stripe_connect_id)]),
+                            'return_url' => route('stripe.onboard-result', ['token' => Crypt::encrypt($user->stripe_connect_id)]),
+                            'type' => 'account_onboarding',
+                        ]);
+        
+                        return response()->json([
+                            'message' => 'User updated successfully, please complete Stripe onboarding.',
+                            'onboarding_url' => $accountLink->url,
+                            'user' => $user,
+                        ]);
+                    } catch (\Stripe\Exception\ApiErrorException $e) {
+                        Log::error('Stripe API error:', [
+                            'message' => $e->getMessage(),
+                            'code' => $e->getStripeCode(),
+                            'httpStatus' => $e->getHttpStatus(),
+                            'request' => $e->getRequestId(),
+                            'error' => $e->getError()
+                        ]);
+                        return response()->json(['message' => 'Error creating Stripe account: ' . $e->getMessage()], 500);
+                    } catch (\Exception $e) {
+                        Log::error('General error:', ['message' => $e->getMessage()]);
+                        return response()->json(['message' => 'Error creating Stripe account: ' . $e->getMessage()], 500);
                     }
-        
-                    // Update account with IBAN
-                    $externalAccount = $stripe->accounts->createExternalAccount(
-                        $user->stripe_account_id,
-                        [
-                            'external_account' => [
-                                'object' => 'bank_account',
-                                'country' => 'CH', // Switzerland
-                                'currency' => 'chf', // Swiss Franc
-                                'account_holder_name' => $user->firstname . ' ' . $user->lastname,
-                                'account_holder_type' => 'individual',
-                                'account_number' => $request->payment,
-                            ],
-                        ]
-                    );
-        
-                    // Debugging output
-                    info('External account created:', ['external_account' => $externalAccount]);
-        
-                    // Save the Stripe account ID in the stripe_account_id field
-                    $user->save();
-                } catch (ApiErrorException $e) {
-                    return response()->json(['message' => 'Error linking Stripe account: ' . $e->getMessage()], 500);
                 }
+        
+                return response()->json([
+                    'message' => 'User updated successfully',
+                    'user' => $user,
+                ]);
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                Log::error('Validation error:', ['errors' => $e->errors()]);
+                return response()->json(['message' => 'Validation error', 'errors' => $e->errors()], 422);
+            } catch (\Exception $e) {
+                Log::error('General error:', ['message' => $e->getMessage()]);
+                return response()->json(['message' => 'Error updating user profile: ' . $e->getMessage()], 500);
+            }
+        }
+        
+        public function onboardSeller()
+        {
+            $user = Auth::user();
+            
+            // Ensure Stripe API key is set
+            \Stripe\Stripe::setApiKey(config('services.stripe.secret'));
+        
+            // Create the Stripe account if it doesn't exist
+            if (empty($user->stripe_connect_id)) {
+                $account = \Stripe\Account::create([
+                    'type'         => 'express',
+                    'email'        => $user->email,
+                    'country'      => 'US',
+                    'capabilities' => [
+                        'card_payments' => ['requested' => true],
+                        'transfers'     => ['requested' => true],
+                    ],
+                    'settings'     => [
+                        'payouts' => [
+                            'schedule' => [
+                                'interval' => 'manual',
+                            ],
+                        ],
+                    ],
+                ]);
+        
+                $user->stripe_connect_id = $account->id;
+                $user->save();
             }
         
-            return response()->json([
-                'message' => 'User updated successfully',
-                'user' => $user,
+            // Generate the onboarding link
+            $user->refresh();
+            $onBoardLink = \Stripe\AccountLink::create([
+                'account'     => $user->stripe_connect_id,
+                'refresh_url' => route('stripe.onboard-result', Crypt::encrypt($user->stripe_connect_id)),
+                'return_url'  => route('stripe.onboard-result', Crypt::encrypt($user->stripe_connect_id)),
+                'type'        => 'account_onboarding',
             ]);
+        
+            return response()->json(['url' => $onBoardLink->url]);
+        }
+
+        public function onboardResult($encodedToken)
+        {
+            try {
+                $decodedToken = Crypt::decrypt($encodedToken);
+                $user = User::where('stripe_connect_id', $decodedToken)->firstOrFail();
+                $user->stripe_on_boarding_completed_at = Carbon::now();
+                $user->save();
+        
+                return redirect('/dashboard');
+            } catch (\Exception $e) {
+                Log::error('Decryption error:', ['message' => $e->getMessage()]);
+                return response()->json(['message' => 'Error processing the request: ' . $e->getMessage()], 500);
+            }
         }
 
         public function updateUserLocation(Request $request)

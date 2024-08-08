@@ -5,6 +5,7 @@ import { useRouter } from 'vue-router';
 import { useCart } from '../store'; // Adjust the path as needed
 import Swal from 'sweetalert2';
 import { loadStripe } from '@stripe/stripe-js';
+import Header from '../components/header/Header.vue';
 
 const router = useRouter();
 
@@ -32,73 +33,103 @@ const formFilled = computed(() => {
 
 
 // Using the cart store
-const { cartItems, cartCount, addToCart, removeItemFromCart, removeFromCart, updateQuantity } = useCart();
+const { cartItems, cartCount, addToCart, removeItemFromCart, removeFromCart, updateQuantity, getExistingProduct } = useCart();
 const carts = cartItems;
 const total = computed(() => carts.value.reduce((sum, item) => sum + (item.price * item.quantity), 0));
 
 const itemId = (id) => carts.value.findIndex((item) => item.product_id === id);
 
 const addToCartHandler = (product) => {
-  const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-  console.log(product)
-  axios.post(`/api/cart/store/${product.id}`, product, {
-    quantity: product.quantity,
-    price: product.price,
-    seller_id: product.seller_id,
-  }, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-      'X-CSRF-TOKEN': csrfToken,
-    },
-  })
-  .then(response => {
-    const flash = response.data.flash;
-    if (flash && flash.success) {
-      Swal.fire({
-        toast: true,
-        icon: "success",
-        position: "top-end",
-        showConfirmButton: false,
-        title: flash.success,
-        timer: 3000
-      });
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+    //   console.log(product)
+    const existingProduct = getExistingProduct(product.id);
+
+     if (existingProduct && existingProduct.quantity == existingProduct.totalQuantity) {
+        // console.log(existingProduct)
+        Swal.fire({
+            toast: true,
+            icon: "info",
+            position: "top-end",
+            showConfirmButton: false,
+            title: "Ihr Wahl ist gleich der übrigen Quantität: ",
+            timer: 3000
+        });
+        existingProduct.quantity = existingProduct.totalQuantity;
+        return;
     }
-    addToCart(product); // Add to the reactive store
-  })
-  .catch(error => {
-    console.error('Error adding to cart:', error);
-  });
+    if (existingProduct && existingProduct.quantity > existingProduct.totalQuantity) {
+        // console.log(existingProduct)
+        Swal.fire({
+            toast: true,
+            icon: "error",
+            position: "top-end",
+            showConfirmButton: false,
+            title: "Ihr Wahl ist mehr als übrige Quantität: ",
+            timer: 3000
+        });
+        existingProduct.quantity = existingProduct.totalQuantity;
+        return;
+    }
+    axios.post(`/api/cart/store/${product.id}`, product, {
+        quantity: product.quantity,
+        price: product.price,
+        seller_id: product.seller_id,
+    }, {
+        headers: {
+        'Content-Type': 'multipart/form-data',
+        'X-CSRF-TOKEN': csrfToken,
+        },
+    })
+    .then(response => {
+        const flash = response.data.flash;
+        if (flash && flash.success) {
+        Swal.fire({
+            toast: true,
+            icon: "success",
+            position: "top-end",
+            showConfirmButton: false,
+            title: flash.success,
+            timer: 3000
+        });
+        }
+        addToCart(product); // Add to the reactive store
+    })
+    .catch(error => {
+        console.error('Error adding to cart:', error);
+    });
 };
 
 const removeFromCartHandler = (product) => {
-  const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-  axios.post(`/api/cart/remove/${product.id}`, product, {
-    quantity: product.quantity,
-    price: product.price,
-    seller_id: product.seller_id,
-  }, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-      'X-CSRF-TOKEN': csrfToken,
-    },
-  })
-  .then(response => {
-    const flash = response.data.flash;
-    if (flash) {
-      Swal.fire({
-        toast: true,
-        icon: "success",
-        position: "top-end",
-        showConfirmButton: false,
-        title: flash.success,
-        timer: 3000
-      });
-    }
-    removeItemFromCart(product);
-  })
-  .catch(error => {
-    console.error('Error adding to cart:', error);
-  });
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');    
+    const existingProduct = getExistingProduct(product.id);
+
+    axios.post(`/api/cart/remove/${product.id}`, product, {
+        quantity: product.quantity,
+        price: product.price,
+        seller_id: product.seller_id,
+    }, {
+        headers: {
+        'Content-Type': 'multipart/form-data',
+        'X-CSRF-TOKEN': csrfToken,
+        },
+    })
+    .then(response => {
+        const flash = response.data.flash;
+        if (flash) {
+        Swal.fire({
+            toast: true,
+            icon: "success",
+            position: "top-end",
+            showConfirmButton: false,
+            title: flash.success,
+            timer: 3000
+        });
+        }
+        removeItemFromCart(product);
+    })
+    .catch(error => {
+        console.error('Error adding to cart:', error);
+    });
 };
 
 const remove = (product) => {
@@ -180,6 +211,7 @@ async function submit() {
     })
     .then(response => {
         // console.log(response.data)
+        localStorage.removeItem('cart');
         if (response.data.url) {
             // router.push('/')
             window.location.href = response.data.url;
@@ -223,6 +255,8 @@ if (sessionId) {
 </script>
 
 <template>
+      <Header></Header>
+
         <section class="body">
             <div class="container px-5 py-24 mx-auto flex sm:flex-nowrap flex-wrap">
                 <div class="lg:w-2/3 md:w-1/2 rounded-lg">
@@ -260,7 +294,7 @@ if (sessionId) {
                                             <i class="bi bi-dash">-</i>
                                         </button>
                                         <input type="number" v-model="product.quantity" class="form-control qty w-25 mx-2"
-                                            placeholder="1" style="max-width: 40px;" required>
+                                            placeholder="1" style="max-width: 40px;" @change="addToCartHandler(product)" required>
                                         <button @click.prevent="addToCartHandler(product)"
                                             class="btn btn-outline-secondary text-primary" type="button">
                                             <i class="bi bi-plus">+</i>
@@ -268,7 +302,7 @@ if (sessionId) {
                                     </div>
                                 </td>
                                 <td class="font-weight-bold text-dark">
-                                    ${{ product.price }}
+                                    {{ product.price }}
                                 </td>
                                 <td>
                                     <!-- <button @click="remove(product)"

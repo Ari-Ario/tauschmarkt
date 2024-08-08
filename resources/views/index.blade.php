@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Kleinhaendler</title>
-
+    <script src="https://js.stripe.com/v3/"></script>
 
     @vite(['resources/js/app.js'])
 </head>
